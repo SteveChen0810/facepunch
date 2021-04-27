@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/widgets/dialogs.dart';
@@ -78,7 +79,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         await cameraController.initialize();
         await initDetectFace();
       }else{
-        showMessage("Allow FACE PUNCH to take pictures.");
+        showMessage(S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
       print(e);
@@ -127,7 +128,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
           content: Text(message),
           duration: Duration(seconds: 2),
           backgroundColor: Colors.red,
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -152,7 +153,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         return ;
       }
       if(faces==null || faces.isEmpty){
-        showMessage("There is not any faces.");
+        showMessage(S.of(context).thereIsNotAnyFaces);
         return null;
       }
       if(cameraController.value.isStreamingImages){
@@ -171,24 +172,17 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
   }
 
   Future<Position> _determinePosition() async {
-    bool serviceEnabled;
     LocationPermission permission;
-
-    // serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    // if (!serviceEnabled) {
-    //   showMessage("Location services are disabled.");
-    //   return null;
-    // }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
-      showMessage("Location permissions are permanently denied, we cannot request permissions.");
+      showMessage(S.of(context).locationPermissionDenied);
       return null;
     }
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
-        showMessage("Location permissions are denied (actual value: $permission).");
+        showMessage(S.of(context).locationPermissionDenied);
         return null;
       }
     }
@@ -201,7 +195,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       await cameraClose();
       Navigator.pop(context);
     }else{
-      showMessage("PIN Code is not correct.");
+      showMessage(S.of(context).pinCodeNotCorrect);
     }
   }
 
@@ -229,7 +223,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
               showMessage(punch);
             }
           }else{
-            showMessage("PIN Code is not correct.");
+            showMessage(S.of(context).pinCodeNotCorrect);
           }
         }else if(result is String){
           showMessage(result);
@@ -267,7 +261,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(isPunchIn?'Welcome':'Bye',style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+                      child: Text(isPunchIn?S.of(context).welcome:S.of(context).bye,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -334,7 +328,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
               left: 0,
               right: 0,
               child: RoundedLoadingButton(
-                child: Text(_photoPath.isEmpty?"TAKE A PICTURE":"TRY AGAIN",
+                child: Text(_photoPath.isEmpty?S.of(context).takePicture.toUpperCase():S.of(context).tryAgain,
                   style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),
                 ),
                 controller: _btnController,

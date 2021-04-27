@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/notification.dart';
 import '../models/app_const.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,7 @@ Future<bool> pinCodeCheckDialog(String pin, BuildContext context)async{
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
               contentPadding: EdgeInsets.all(0),
-              title: Text("Please Enter PIN Code.",style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+              title: Text(S.of(context).enterPinCode,style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -53,7 +54,7 @@ Future<bool> pinCodeCheckDialog(String pin, BuildContext context)async{
                     keyboardType: TextInputType.number,
                   ),
                   if(hasError)
-                    Text("PIN Code is not correct.",style: TextStyle(color: Colors.red),),
+                    Text(S.of(context).pinCodeNotCorrect,style: TextStyle(color: Colors.red),),
                   SizedBox(height: 20,),
                   ButtonTheme(
                     minWidth: MediaQuery.of(context).size.width*0.6,
@@ -64,7 +65,7 @@ Future<bool> pinCodeCheckDialog(String pin, BuildContext context)async{
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       color: Colors.black87,
-                      child: Text("CLOSE",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
+                      child: Text(S.of(context).close,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -95,7 +96,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
             child: AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
               contentPadding: EdgeInsets.all(0),
-              title: Text("Hour Revision Request",style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+              title: Text(S.of(context).hourRevisionRequest,style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
               content: Container(
                 padding: EdgeInsets.all(16),
                 child: Column(
@@ -107,7 +108,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Employee Name"),
+                        Text(S.of(context).employeeName),
                         SizedBox(width: 8,),
                         Flexible(
                             child: Text("${notification.revision.user.firstName} ${notification.revision.user.lastName}")
@@ -118,7 +119,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Incorrect Punch ${notification.revision.punch.punch} Time"),
+                        Text(S.of(context).incorrectPunchTime),
                         Text("${PunchDateUtils.getTimeString(DateTime.parse(notification.revision.oldValue))}"),
                       ],
                     ),
@@ -126,7 +127,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Correct Punch ${notification.revision.punch.punch} Time"),
+                        Text(S.of(context).correctPunchTime),
                         Text("${PunchDateUtils.getTimeString(DateTime.parse(notification.revision.newValue))}"),
                       ],
                     ),
@@ -141,7 +142,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
                             if(result!=null)showMessage(result);
                             Navigator.pop(_context);
                           },
-                          child: Text("Accept",style: TextStyle(color: Color(primaryColor)),),
+                          child: Text(S.of(context).accept,style: TextStyle(color: Color(primaryColor)),),
                           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         FlatButton(
@@ -151,7 +152,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
                             if(result!=null)showMessage(result);
                             Navigator.pop(_context);
                           },
-                          child: Text("Decline",style: TextStyle(color: Colors.red),),
+                          child: Text(S.of(context).decline,style: TextStyle(color: Colors.red),),
                           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                       ],
@@ -162,6 +163,44 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
             ),
           );
         }
+      ),
+    );
+  }catch(e){
+    print("[showRevisionNotificationDialog] $e");
+  }
+}
+
+showNotificationDialog(AppNotification notification, BuildContext context){
+  try{
+    showDialog(
+      context: context,
+      builder:(_)=> StatefulBuilder(
+          builder: (BuildContext _context,StateSetter setState){
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+              contentPadding: EdgeInsets.all(0),
+              title: Text(notification.type.replaceAll('_', ' ').toUpperCase(),style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+              content: Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(notification.body,style: TextStyle(fontSize: 16),),
+                  ],
+                ),
+              ),
+              actions: [
+                FlatButton(
+                  onPressed: ()async{
+                    Navigator.pop(_context);
+                  },
+                  child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ],
+            );
+          }
       ),
     );
   }catch(e){

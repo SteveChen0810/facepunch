@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/widgets/dialogs.dart';
 import '../../models/company_model.dart';
 import '../../models/user_model.dart';
@@ -88,7 +89,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         await cameraController.initialize();
         await initDetectFace();
       }else{
-        widget.showMessage("Allow FACE PUNCH to take pictures.");
+        widget.showMessage(S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
       print(e);
@@ -135,7 +136,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         return ;
       }
       if(faces==null || faces.isEmpty){
-        widget.showMessage("There is not any faces.");
+        widget.showMessage(S.of(context).thereIsNotAnyFaces);
         return null;
       }
       if(cameraController.value.isStreamingImages){
@@ -161,7 +162,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           if(mounted){setState(() {_pageIndex = 2; userName = "${user.firstName} ${user.lastName}";});}
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
         }else{
-          widget.showMessage("PIN Code is not correct.");
+          widget.showMessage(S.of(context).pinCodeNotCorrect);
         }
       }else{
         widget.showMessage(result);
@@ -248,7 +249,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           ),
           SizedBox(height: 10,),
           RoundedLoadingButton(
-            child: Text(_photoPath.isEmpty?"TAKE A PICTURE":"TRY AGAIN",
+            child: Text(_photoPath.isEmpty?S.of(context).takePicture.toUpperCase():S.of(context).tryAgain.toUpperCase(),
               style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),
             ),
             controller: _btnController,
@@ -303,13 +304,13 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   _initializeCamera();
                   setState(() {_pageIndex=1;});
                 }else{
-                  widget.showMessage("Choose your company");
+                  widget.showMessage(S.of(context).chooseYourCompany);
                 }
               },
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               color: Colors.black87,
-              child: Text("FACE SCAN LOGIN",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
+              child: Text(S.of(context).faceScanLogin,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
             ),
           )
         ],
@@ -321,7 +322,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Text("Welcome",style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),),
+        Text(S.of(context).welcome,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),),
         Text(userName,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -343,11 +344,11 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          Text("Employee Sign In",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          Text(S.of(context).employeeSignIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
           SizedBox(height: 8,),
           Column(
             children: [
-              Text("Select your Company",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
+              Text(S.of(context).selectYourCompany,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
               SizedBox(height: 4,),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
@@ -369,7 +370,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   }).toList(),
                   underline: SizedBox(),
                   style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500,color: Colors.black87),
-                  hint: Text("Choose Company"),
+                  hint: Text(S.of(context).chooseYourCompany),
                   isExpanded: true,
                   onChanged: (v) {
                     setState(() {
@@ -385,7 +386,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           Expanded(
               child: mainWidget()
           ),
-          SizedBox(height: 5,),
         ],
       ),
     );

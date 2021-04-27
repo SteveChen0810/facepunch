@@ -9,7 +9,7 @@ class CompanyModel extends ChangeNotifier{
   final LocalStorage storage = LocalStorage('companies');
   List<Company> companies = [];
   Company myCompany = Company(plan: 0);
-  CompanySettings myCompanySettings;
+  CompanySettings myCompanySettings = CompanySettings(receivePunchNotification: true, hasNFC: true,receiveRevisionNotification: true);
   List<User> users = [];
 
   Future<void> getCompanies()async{
@@ -264,7 +264,7 @@ class CompanyModel extends ChangeNotifier{
     return result;
   }
 
-  Future getCompanySettings()async{
+  Future<String> getCompanySettings()async{
     try{
       getCompanySettingsFromLocal();
       var res = await http.get(
@@ -279,9 +279,13 @@ class CompanyModel extends ChangeNotifier{
       if(res.statusCode==200){
         myCompanySettings = CompanySettings.fromJson(jsonDecode(res.body));
         saveCompanySettingsToLocal();
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
       }
     }catch(e){
       print("[CompanyModel.getCompanySettings] $e");
+      return e.toString();
     }
   }
 
@@ -336,6 +340,7 @@ class CompanyModel extends ChangeNotifier{
       return e.toString();
     }
   }
+
 }
 
 class Company {
@@ -424,6 +429,9 @@ class CompanySettings{
   String lastUpdated;
   String reportTime;
   bool hasNFC;
+  bool receivePunchNotification;
+  bool receiveRevisionNotification;
+
 
   CompanySettings({
     this.lowValue,
@@ -433,7 +441,9 @@ class CompanySettings{
     this.highColor,
     this.lastUpdated,
     this.reportTime,
-    this.hasNFC
+    this.hasNFC,
+    this.receivePunchNotification,
+    this.receiveRevisionNotification
   });
 
   CompanySettings.fromJson(Map<String, dynamic> json){
@@ -445,7 +455,9 @@ class CompanySettings{
       highColor = json['high_color'];
       lastUpdated = json['last_updated'];
       reportTime = json['report_time'];
-      hasNFC = json['has_nfc']!=null && json['has_nfc']=='1';
+      hasNFC = json['has_nfc']==null || json['has_nfc']=='1';
+      receivePunchNotification = json['receive_punch_notification']==null || json['receive_punch_notification']=='1';
+      receiveRevisionNotification = json['receive_revision_notification']==null || json['receive_revision_notification']=='1';
     }catch(e){
       print('[CompanySettings.fromJson]$e');
     }
@@ -453,14 +465,17 @@ class CompanySettings{
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['low_value'] = this.lowValue;
-    data['low_color'] = this.lowColor;
-    data['medium_color'] = this.mediumColor;
-    data['high_value'] = this.highValue;
-    data['high_color'] = this.highColor;
-    data['report_time'] = this.reportTime;
-    data['last_updated'] = this.lastUpdated;
-    data['has_nfc'] = this.hasNFC;
+    if(this.lowValue!=null)data['low_value'] = this.lowValue;
+    if(this.lowColor!=null)data['low_color'] = this.lowColor;
+    if(this.mediumColor!=null)data['medium_color'] = this.mediumColor;
+    if(this.highValue!=null)data['high_value'] = this.highValue;
+    if(this.highColor!=null)data['high_color'] = this.highColor;
+    if(this.reportTime!=null)data['report_time'] = this.reportTime;
+    if(this.lastUpdated!=null)data['last_updated'] = this.lastUpdated;
+    if(this.hasNFC!=null)data['has_nfc'] = this.hasNFC?'1':'0';
+    if(this.receivePunchNotification!=null)data['receive_punch_notification'] = this.receivePunchNotification?'1':'0';
+    if(this.receiveRevisionNotification!=null)data['receive_revision_notification'] = this.receiveRevisionNotification?'1':'0';
     return data;
   }
+
 }

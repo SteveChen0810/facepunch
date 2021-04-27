@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/revision_model.dart';
 import 'package:facepunch/models/user_model.dart';
@@ -104,7 +105,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                 child: Container(
                     padding: EdgeInsets.symmetric(vertical: 6),
                     width: MediaQuery.of(context).size.width,
-                    child: Text(p.punch=="Lunch"?"Lunch Break from ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))} to ${PunchDateUtils.getTimeString(DateTime.parse(p.updatedAt))}":"Punch ${p.punch} at ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",style: logStyle,)
+                    child: Text(p.punch=="Lunch"?"${S.of(context).lunchBreakFrom} ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))} ${S.of(context).to} ${PunchDateUtils.getTimeString(DateTime.parse(p.updatedAt))}":"${S.of(context).punch} ${p.punch} ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",style: logStyle,)
                 ),
               )
           );
@@ -112,7 +113,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
         if(punches.length>1){
           log.add(
               Text(
-                "Total ${user.getHoursOfDate(DateTime.parse(key)).toStringAsFixed(1)} Hours - ${user.getLunchBreakTime(DateTime.parse(key)).toStringAsFixed(1)} Hours for Lunch = ${(user.getHoursOfDate(DateTime.parse(key))- user.getLunchBreakTime(DateTime.parse(key))).toStringAsFixed(1)} Hours",
+                "${S.of(context).total} ${user.getHoursOfDate(DateTime.parse(key)).toStringAsFixed(1)} ${S.of(context).hours} - ${user.getLunchBreakTime(DateTime.parse(key)).toStringAsFixed(1)} ${S.of(context).hoursForLunch} = ${(user.getHoursOfDate(DateTime.parse(key))- user.getLunchBreakTime(DateTime.parse(key))).toStringAsFixed(1)} ${S.of(context).hours}",
                 style: TextStyle(color: Color(primaryColor),fontWeight: FontWeight.bold,fontSize: 16),
               )
           );
@@ -169,16 +170,16 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("Hour Revision Request", style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
+                            Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
                             Row(
                               children: [
-                                Text(punch.punch=="Lunch"?"Incorrect Lunch Break Time: ":"Incorrect Punch ${punch.punch} Time: "),
+                                Text(punch.punch=="Lunch"?"${S.of(context).incorrectLunchTime}: ":"${S.of(context).incorrectPunchTime}: "),
                                 Text("${PunchDateUtils.getTimeString(DateTime.parse(punch.punch=="Lunch"?punch.updatedAt:punch.createdAt))}",style: TextStyle(fontWeight: FontWeight.bold),),
                               ],
                             ),
                             Row(
                               children: [
-                                Text(punch.punch=="Lunch"?"Correct Lunch Break Time: ":"Correct Punch ${punch.punch} Time: "),
+                                Text(punch.punch=="Lunch"?"${S.of(context).correctLunchTime}: ":"${S.of(context).correctPunchTime}: "),
                                 Text("${PunchDateUtils.getTimeString(DateTime.parse(correctTime))}",style: TextStyle(fontWeight: FontWeight.bold),),
                                 FlatButton(
                                     onPressed: ()async{
@@ -211,7 +212,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                 color: Colors.black87,
-                                child: _isSending?SizedBox(height: 25,width: 25,child: CircularProgressIndicator()):Text("Submit",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
+                                child: _isSending?SizedBox(height: 25,width: 25,child: CircularProgressIndicator()):Text(S.of(context).submit,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
                               ),
                             ),
                           ],
@@ -335,7 +336,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfCurrentWeek())}H"),
-                            Text("Week ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now())}"),
+                            Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now())}"),
                           ],
                         ),
                       ),
@@ -352,9 +353,9 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text("${currentPunch.createdAt.substring(11,16)}"),
-                            Text("${currentPunch.punch} TIME"),
+                            Text("${currentPunch.punch} ${S.of(context).time}"),
                           ],
-                        ):Text("No Punch"),
+                        ):Text(S.of(context).noPunch),
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -370,7 +371,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfYear())}H"),
-                            Text("Total"),
+                            Text(S.of(context).total),
                           ],
                         ),
                       ),
@@ -431,7 +432,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     weekStartsOnSunday: true,
                     selectedDate: selectedDate,
                   ),
-                  Text("Total Hours: ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
                 ],
               ),
             ),
@@ -444,7 +445,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Logs"),
+                    Text(S.of(context).logs),
                     Expanded(
                         child: SmartRefresher(
                           enablePullDown: true,
@@ -460,7 +461,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                        child: Text("*To ask a revision, press the line with a mistake hour*",style: TextStyle(color: Colors.red),)
+                        child: Text("*${S.of(context).askRevision}*",style: TextStyle(color: Colors.red),)
                     ),
                   ],
                 ),

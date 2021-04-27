@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
@@ -91,7 +92,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                         Container(
                           alignment: Alignment.center,
                           height: 200,
-                          child: Text("The PDF has not been generated yet."),
+                          child: Text(S.of(context).pdfNotGenerated),
                         ):
                         SfPdfViewer.network(
                           pdfUrl(),
@@ -111,7 +112,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                           errorWidget: (_,__,___)=>Container(
                             alignment: Alignment.center,
                             height: 200,
-                            child: Text("The Harvest Report has not been generated yet."),
+                            child: Text(S.of(context).harvestReportNotGenerated),
                           ),
                           fit: BoxFit.cover,
                         ),

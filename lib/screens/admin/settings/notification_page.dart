@@ -1,5 +1,7 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/notification.dart';
+import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:facepunch/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +26,12 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Widget _notificationItem(AppNotification notification){
     try{
-      DateTime date = DateTime.parse(notification.revision.createdAt);
+      DateTime date = DateTime.now();
+      if(notification.revision!=null){
+        date = DateTime.parse(notification.revision.createdAt);
+      }else{
+        date = DateTime.parse(notification.date);
+      }
       return Card(
         child: ClipRRect(
           borderRadius: BorderRadius.circular(4),
@@ -33,7 +40,7 @@ class _NotificationPageState extends State<NotificationPage> {
             actionExtentRatio: 0.15,
             secondaryActions: <Widget>[
               IconSlideAction(
-                caption: 'Delete',
+                caption: S.of(context).delete,
                 color: Colors.red,
                 icon: Icons.delete,
                 onTap: (){
@@ -41,7 +48,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 },
               ),
             ],
-            child: ListTile(
+            child: notification.revision!=null?ListTile(
               title: Text(
                 "${notification.revision.user.firstName} ${notification.revision.user.lastName}",
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -53,6 +60,18 @@ class _NotificationPageState extends State<NotificationPage> {
               onTap: (){
                 if(!notification.seen)context.read<NotificationModel>().updateSeen(notification);
                 showRevisionNotificationDialog(notification, context, showMessage);
+              },
+            ):ListTile(
+              title: Text(
+                "${notification.body}",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              leading: Icon(Icons.notifications_on_rounded,color: notification.seen?Colors.grey:Colors.red,),
+              subtitle: Text("${PunchDateUtils.getDateString(date)} ${PunchDateUtils.getTimeString(date)}",style: TextStyle(fontSize: 12),),
+              visualDensity: VisualDensity.compact,
+              onTap: (){
+                if(!notification.seen)context.read<NotificationModel>().updateSeen(notification);
+                showNotificationDialog(notification,context,);
               },
             ),
           ),
@@ -71,7 +90,7 @@ class _NotificationPageState extends State<NotificationPage> {
           content: Text(message),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -79,10 +98,11 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     List<AppNotification> notifications  = context.watch<NotificationModel>().notifications;
+    print(context.watch<UserModel>().locale);
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("Notifications"),
+        title: Text(S.of(context).notifications),
         backgroundColor: Color(primaryColor),
       ),
       body: Container(

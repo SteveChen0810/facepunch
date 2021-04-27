@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:image_cropper/image_cropper.dart';
 import '../../models/company_model.dart';
@@ -70,9 +71,9 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         state = widget.employee.state;
         city = widget.employee.city;
         language = widget.employee.language;
-        _startDate = DateTime.parse(widget.employee.start);
-        _birthDay = DateTime.parse(widget.employee.birthday);
         lunchTime = widget.employee.lunchTime;
+        if(widget.employee.start!=null)_startDate = DateTime.parse(widget.employee.start);
+        if(widget.employee.birthday!=null)_birthDay = DateTime.parse(widget.employee.birthday);
       }catch(e){
        print("[CreateEditEmployee.initState] $e");
       }
@@ -88,7 +89,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
             CropAspectRatioPreset.square,
           ],
           androidUiSettings: AndroidUiSettings(
-              toolbarTitle: 'Photo Cropper',
+              toolbarTitle: S.of(context).photoCropper,
               toolbarColor: Color(primaryColor),
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.square,
@@ -96,7 +97,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
               lockAspectRatio: true
           ),
           iosUiSettings: IOSUiSettings(
-            title: 'Photo Cropper',
+            title: S.of(context).photoCropper,
             minimumAspectRatio: 1.0,
             hidesNavigationBar: true,
             aspectRatioLockEnabled: true,
@@ -175,7 +176,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
           content: Text(message),
           backgroundColor: message.toLowerCase().contains("success")?Colors.green:Colors.red,
           duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -184,19 +185,19 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
     _fNameError=null;_lNameError=null;_emailError=null;_passwordError=null;_addressError=null;
     _postalError=null;_codeError=null;_functionError=null;_salaryError=null;_startDateError=null;_birthDayError=null;
     if(_fName.text.isEmpty){
-      _fNameError = "First Name is required.";
+      _fNameError = S.of(context).firstNameIsRequired;
       return false;
     }
     if(_lName.text.isEmpty){
-      _lNameError = "Last Name is required.";
+      _lNameError = S.of(context).lastNameIsRequired;
       return false;
     }
     if(_email.text.isNotEmpty && (!_email.text.contains(".") || !_email.text.contains("@"))){
-      _emailError = "Email is invalid.";
+      _emailError = S.of(context).emailIsInvalid;
       return false;
     }
     if(_password.text.isEmpty){
-      _passwordError = "Password is required.";
+      _passwordError = S.of(context).passwordIsRequired;
       return false;
     }
     return true;
@@ -210,7 +211,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         avatar: widget.employee?.avatar,
         firstName: _fName.text,
         lastName: _lName.text,
-        email: _email.text.isNotEmpty?_email.text:'${'${_fName.text}${_lName.text}'.toLowerCase()}@${context.read<CompanyModel>().myCompany.name.replaceAll(' ', '').toLowerCase()}.com',
+        email: _email.text.isNotEmpty?_email.text:'${_fName.text}${_lName.text}@${context.read<CompanyModel>().myCompany.name}.com'.toLowerCase().replaceAll(' ', ''),
         pin: _password.text,
         address1: _address1.text,
         address2: _address2.text,
@@ -236,7 +237,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       }
       String result = await context.read<CompanyModel>().createEditEmployee(user,base64Image);
       if(result==null){
-        showMessage("Success!");
+        showMessage(S.of(context).success);
         Future.delayed(Duration(seconds: 1)).whenComplete((){
           Navigator.pop(context);
         });
@@ -254,7 +255,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.employee==null?"Create Employee":"Edit Employee",style: TextStyle(color: Colors.black87,fontSize: 25,fontWeight: FontWeight.bold),),
+        title: Text(widget.employee==null?S.of(context).createNewEmployee:S.of(context).editEmployee,style: TextStyle(color: Colors.black87,fontSize: 25,fontWeight: FontWeight.bold),),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,color: Colors.black87,size: 35,),
           onPressed: ()=>Navigator.pop(context),
@@ -307,7 +308,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                                             ListTile(
                                               dense: true,
                                               leading: Icon(Icons.camera_alt_outlined),
-                                              title: Text('Camera'),
+                                              title: Text(S.of(context).camera),
                                               onTap: (){
                                                 Navigator.pop(c);
                                                 _pickUserPhoto(ImageSource.camera);
@@ -316,7 +317,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                                             ListTile(
                                               dense: true,
                                               leading: Icon(Icons.photo_library),
-                                              title: Text('Gallery'),
+                                              title: Text(S.of(context).gallery),
                                               onTap: (){
                                                 Navigator.pop(c);
                                                 _pickUserPhoto(ImageSource.gallery);
@@ -342,7 +343,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     suffixIcon: Icon(Icons.person,color: Colors.black87,),
                     isDense: true,
-                    labelText: "First Name",
+                    labelText: S.of(context).firstName,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
@@ -366,7 +367,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     suffixIcon: Icon(Icons.person,color: Colors.black87,),
                     isDense: true,
-                    labelText: "Last Name",
+                    labelText: S.of(context).lastName,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
@@ -390,7 +391,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     suffixIcon: Icon(Icons.mail,color: Colors.black87,),
                     isDense: true,
-                    labelText: "E-mail Address",
+                    labelText: S.of(context).email,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
@@ -410,7 +411,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     suffixIcon: Icon(Icons.lock,color: Colors.black87,),
                     isDense: true,
-                    labelText: "Password (PIN)",
+                    labelText: S.of(context).passwordPin,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
@@ -425,7 +426,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 20,bottom: 5),
-                child: Text("Address",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.grey),),
+                child: Text(S.of(context).address,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.grey),),
               ),
               TextField(
                 decoration: InputDecoration(
@@ -433,7 +434,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     enabledBorder: UnderlineInputBorder(),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
-                    labelText: "Street Address",
+                    labelText: S.of(context).streetAddress,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _addressError
@@ -451,7 +452,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     enabledBorder: UnderlineInputBorder(),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
-                    labelText: "Apt, Suite, Building, (optional)",
+                    labelText: S.of(context).aptSuiteBuilding,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                 ),
@@ -486,7 +487,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                   isDense: true,
-                  labelText: "Postal Code",
+                  labelText: S.of(context).postalCode,
                   labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                   errorText: _postalError
@@ -507,7 +508,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                   isDense: true,
-                  labelText: "Phone Number (optional)",
+                  labelText: S.of(context).phoneNumber,
                   labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -524,7 +525,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                   isDense: true,
-                  labelText: "Employee#",
+                  labelText: "${S.of(context).employee}#",
                   labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                   errorText: _codeError
@@ -542,7 +543,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     enabledBorder: UnderlineInputBorder(),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
-                    labelText: "Employee Function",
+                    labelText: S.of(context).employeeFunction,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _functionError
@@ -560,7 +561,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     enabledBorder: UnderlineInputBorder(),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
-                    labelText: "Start Date",
+                    labelText: S.of(context).startDate,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _startDateError
@@ -580,7 +581,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     enabledBorder: UnderlineInputBorder(),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
-                    labelText: "Salary",
+                    labelText: S.of(context).salary,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     suffixIcon: Text("\$/h",style: TextStyle(fontSize: 18),),
@@ -600,7 +601,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     enabledBorder: UnderlineInputBorder(),
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
-                    labelText: "Date of Birth",
+                    labelText: S.of(context).birthday,
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _birthDayError
@@ -669,7 +670,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 }).toList(),
                 underline: Container(color: Colors.black87,width: double.infinity,height: 1,),
                 style: TextStyle(fontSize: 20, color: Colors.black87),
-                hint: Text("Choose Language"),
+                hint: Text(S.of(context).chooseLanguage),
                 isExpanded: true,
                 onChanged: (v) {
                   setState(() { language = v; });
@@ -680,7 +681,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
               Row(
                 children: [
                   Checkbox(
-                      value: lunchTime!=0,
+                      value: lunchTime>0,
                       onChanged: (v){
                         setState(() {
                           if(v){
@@ -692,7 +693,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                       },
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  Text("Has Lunch Break for 30 minutes")
+                  Text(S.of(context).hasLunchBreak)
                 ],
               ),
               ButtonTheme(
@@ -708,7 +709,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   )
                   :Padding(
                     padding: const EdgeInsets.all(4.0),
-                    child: Text("SAVE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                    child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
                   onPressed: ()async{
                     FocusScope.of(context).requestFocus(FocusNode());

@@ -1,3 +1,5 @@
+import 'package:facepunch/lang/l10n.dart';
+
 import '../../../models/app_const.dart';
 import '../../../models/user_model.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +41,7 @@ class _EmailVerifyState extends State<EmailVerifyWidget> {
             widget.next();
           }
         }else{
-          widget.showMessage("The number must be 6 digits.");
+          widget.showMessage(S.of(context).theNumberMustBe6Digits);
         }
       }
     }catch(e){
@@ -77,12 +79,12 @@ class _EmailVerifyState extends State<EmailVerifyWidget> {
             children: [
               SizedBox(height: 20,),
               Text(
-                "Thank you for registering with us",
+                S.of(context).thankYouForRegisteringWithUs,
                 style: TextStyle(color: Colors.black87,fontSize: 20,fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20,),
               Text(
-                "Please enter the 6 digits confirmation number send to you by email",
+                S.of(context).pleaseEnterThe6DigitsConfirmationNumberSentToYouByEmail,
                 style: TextStyle(color: Colors.black87,fontSize: 20,fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
@@ -128,7 +130,7 @@ class _EmailVerifyState extends State<EmailVerifyWidget> {
                 child: CircularProgressIndicator(backgroundColor: Colors.white,)
             ):Padding(
               padding: const EdgeInsets.all(4.0),
-              child: Text("Next",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+              child: Text(S.of(context).next,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
             ),
             onPressed: verifyEmailWithNumber,
             color: Colors.black87,
@@ -138,7 +140,7 @@ class _EmailVerifyState extends State<EmailVerifyWidget> {
         SizedBox(height: 20,),
         InkWell(
           onTap: sendVerifyAgain,
-          child: Text("Didn’t get a verification code?", style: TextStyle(color: Colors.red,decoration: TextDecoration.underline),),
+          child: Text(S.of(context).didNotGetAVerificationCode, style: TextStyle(color: Colors.red,decoration: TextDecoration.underline),),
         )
       ],
     );

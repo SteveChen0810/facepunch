@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../../../models/user_model.dart';
 import '../../../models/app_const.dart';
@@ -47,15 +48,13 @@ class _CompanyPlanState extends State<CompanyPlanWidget> {
 
   Future<void> initStoreInfo() async {
     final bool isAvailable = await _connection.isAvailable();
-    if (!isAvailable) {
-      setState(() {
-        _products = [];
-      });
+    if (!isAvailable && mounted) {
+      setState(() {_products = [];});
       return;
     }
 
     ProductDetailsResponse productDetailResponse = await _connection.queryProductDetails(subscriptionPlans.toSet());
-    if (productDetailResponse.error != null) {
+    if (productDetailResponse.error != null && mounted) {
       setState(() {
         widget.showMessage(productDetailResponse.error.message);
         _products = productDetailResponse.productDetails;
@@ -63,10 +62,8 @@ class _CompanyPlanState extends State<CompanyPlanWidget> {
       return;
     }
 
-    if (productDetailResponse.productDetails.isEmpty) {
-      setState(() {
-        _products = productDetailResponse.productDetails;
-      });
+    if (productDetailResponse.productDetails.isEmpty && mounted) {
+      setState(() {_products = productDetailResponse.productDetails;});
       return;
     }
 
@@ -78,9 +75,7 @@ class _CompanyPlanState extends State<CompanyPlanWidget> {
     for (PurchaseDetails purchase in purchaseResponse.pastPurchases) {
       verifiedPurchases.add(purchase);
     }
-    setState(() {
-      _products = productDetailResponse.productDetails;
-    });
+    if(mounted)setState(() {_products = productDetailResponse.productDetails;});
   }
 
   void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
@@ -149,7 +144,7 @@ class _CompanyPlanState extends State<CompanyPlanWidget> {
           ),
           SizedBox(height: 10,),
           Text(
-            "Please enter your Employee Range",
+            S.of(context).pleaseEnterYourEmployeeRange,
             style: TextStyle(color: Colors.black87,fontSize: 20,fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -162,9 +157,9 @@ class _CompanyPlanState extends State<CompanyPlanWidget> {
                 });
                 context.read<CompanyModel>().setPlanMyCompany(0);
               },
-            title: Text("${companyPlans[0].minRange} ~ ${companyPlans[0].maxRange} Employees",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+            title: Text("${companyPlans[0].minRange} ~ ${companyPlans[0].maxRange} ${S.of(context).employees}",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
             controlAffinity: ListTileControlAffinity.leading,
-            secondary: Text("Free",style: TextStyle(color: Color(primaryColor,),fontSize: 18,fontWeight: FontWeight.bold),),
+            secondary: Text(S.of(context).employees,style: TextStyle(color: Color(primaryColor,),fontSize: 18,fontWeight: FontWeight.bold),),
             contentPadding: EdgeInsets.symmetric(horizontal: 30),
           ),
           companyPlanWidgets(myCompany),
@@ -180,7 +175,7 @@ class _CompanyPlanState extends State<CompanyPlanWidget> {
                   child: CircularProgressIndicator(backgroundColor: Colors.white,)
               ):Padding(
                 padding: const EdgeInsets.all(4.0),
-                child: Text("Next",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                child: Text(S.of(context).next,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
               ),
               onPressed: ()async{
                 if(!_isLoading){

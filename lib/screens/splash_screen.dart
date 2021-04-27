@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/screens/home_page.dart';
 
 import '../models/company_model.dart';
@@ -72,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 left: 0,
                 right: 0,
                 child: Center(
-                    child: Text("Timesheet system for Employee",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)
+                    child: Text(S.of(context).timeSheetSystemForEmployee,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)
                 ),
               )
             ],

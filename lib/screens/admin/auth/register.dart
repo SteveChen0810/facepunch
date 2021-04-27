@@ -1,3 +1,5 @@
+import 'package:facepunch/lang/l10n.dart';
+
 import '../../../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,23 +24,23 @@ class _RegisterWidgetState extends State<RegisterWidget> {
   bool registerValidator(){
     _emailError = null; _passwordError = null; _fNameError=null;_lNameError=null;
     if(_fName.text.isEmpty){
-      _fNameError = "First Name is required.";
+      _fNameError = S.of(context).firstNameIsRequired;
       return false;
     }
     if(_lName.text.isEmpty){
-      _lNameError = "Last Name is required.";
+      _lNameError = S.of(context).lastNameIsRequired;
       return false;
     }
     if(_email.text.isEmpty){
-      _emailError = "Your email is required.";
+      _emailError = S.of(context).yourEmailIsRequired;
       return false;
     }
     if(!_email.text.contains("@") || !_email.text.contains(".")){
-      _emailError = "Email is invalid.";
+      _emailError = S.of(context).emailIsInvalid;
       return false;
     }
     if(_password.text.isEmpty){
-      _passwordError = "Password is required.";
+      _passwordError = S.of(context).passwordIsRequired;
       return false;
     }
     return true;
@@ -77,15 +79,15 @@ class _RegisterWidgetState extends State<RegisterWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Text("Sign up",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),)),
+            Center(child: Text(S.of(context).signUp,style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),)),
             SizedBox(height: 20,),
-            Text("First name",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+            Text(S.of(context).firstName,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
             TextField(
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: "Enter your first name",
+                  hintText: S.of(context).enterYourFirstName,
                   suffixIcon: Icon(Icons.person,color: Colors.black87,),
                   isDense: true,
                   suffixIconConstraints: BoxConstraints(maxHeight: 20),
@@ -102,13 +104,13 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               },
             ),
             SizedBox(height: 12,),
-            Text("Last name",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+            Text(S.of(context).lastName,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
             TextField(
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: "Enter your last name",
+                  hintText: S.of(context).enterYourLastName,
                   suffixIcon: Icon(Icons.person,color: Colors.black87,),
                   isDense: true,
                   suffixIconConstraints: BoxConstraints(maxHeight: 20),
@@ -125,13 +127,13 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               },
             ),
             SizedBox(height: 12,),
-            Text("E-mail",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+            Text(S.of(context).email,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
             TextField(
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: "Enter your mail",
+                  hintText: S.of(context).enterYourEmailAddress,
                   isDense: true,
                   suffixIconConstraints: BoxConstraints(maxHeight: 20),
                   suffixIcon: Icon(Icons.email,color: Colors.black87,),
@@ -143,13 +145,13 @@ class _RegisterWidgetState extends State<RegisterWidget> {
               controller: _email,
             ),
             SizedBox(height: 12,),
-            Text("Password",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+            Text(S.of(context).password,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
             TextField(
               decoration: InputDecoration(
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: "Enter your password",
+                  hintText: S.of(context).enterYourPassword,
                   isDense: true,
                   suffixIconConstraints: BoxConstraints(maxHeight: 20),
                   suffixIcon: Icon(Icons.lock,color: Colors.black87,),
@@ -176,7 +178,7 @@ class _RegisterWidgetState extends State<RegisterWidget> {
                       child: CircularProgressIndicator(backgroundColor: Colors.white,)
                   ):Padding(
                     padding: const EdgeInsets.all(4.0),
-                    child: Text("REGISTER",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                    child: Text(S.of(context).register,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
                   onPressed: registerWithEmail,
                   color: Colors.black87,

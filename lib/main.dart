@@ -1,5 +1,7 @@
 import 'package:facepunch/models/harvest_model.dart';
-// import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'lang/l10n.dart';
 import 'models/app_const.dart';
 import 'models/company_model.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +21,7 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
   );
-  // InAppPurchaseConnection.enablePendingPurchases();
+  InAppPurchaseConnection.enablePendingPurchases();
   runApp(
       MultiProvider(
           providers:[
@@ -39,7 +41,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'FACE PUNCH',
+      title: 'Facepunch',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         splashColor: Color(primaryColor),
@@ -47,6 +49,13 @@ class MyApp extends StatelessWidget {
         primaryColor: Color(primaryColor),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      locale: Locale(context.watch<UserModel>().locale),
+      localizationsDelegates: [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
       home: SplashScreen(),
     );
   }

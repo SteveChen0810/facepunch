@@ -1,3 +1,5 @@
+import 'package:facepunch/lang/l10n.dart';
+
 import '../../../models/app_const.dart';
 import '../../../models/company_model.dart';
 import '../../../widgets/address_picker/country_state_city_picker.dart';
@@ -29,27 +31,27 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
   bool validator(){
     _nameError = null; _addressError = null; _postalCodeError = null;
     if(_name.text.isEmpty){
-      setState(() {_nameError = "Company name is required.";});
+      setState(() {_nameError = S.of(context).companyNameIsRequired;});
       return false;
     }
     if(_address1.text.isEmpty){
-      setState(() {_addressError = "Company address is required.";});
+      setState(() {_addressError = S.of(context).companyAddressIsRequired;});
       return false;
     }
     if(country==null){
-      widget.showMessage("Country is required.");
+      widget.showMessage(S.of(context).countryIsRequired);
       return false;
     }
     if(state==null){
-      widget.showMessage("State is required.");
+      widget.showMessage(S.of(context).stateIsRequired);
       return false;
     }
     if(city==null){
-      widget.showMessage("City is required.");
+      widget.showMessage(S.of(context).cityIsRequired);
       return false;
     }
     if(_postalCode.text.isEmpty){
-      setState(() {_postalCodeError = "Postal Code is required.";});
+      setState(() {_postalCodeError = S.of(context).postalCodeIsRequired;});
       return false;
     }
     return true;
@@ -70,7 +72,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
             ),
             SizedBox(height: 10,),
             Text(
-              "Please enter your Company information",
+              S.of(context).pleaseEnterYourCompanyInformation,
               style: TextStyle(color: Colors.black87,fontSize: 20,fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -80,7 +82,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
                   border: UnderlineInputBorder(),
                   enabledBorder: UnderlineInputBorder(),
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: "Company Name",
+                  hintText: S.of(context).companyName,
                   isDense: true,
                   errorText: _nameError,
                 alignLabelWithHint: true,
@@ -97,7 +99,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                hintText: "Street Address",
+                hintText: S.of(context).streetAddress,
                 isDense: true,
                 errorText: _addressError,
                 alignLabelWithHint: true,
@@ -111,7 +113,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                hintText: "Apt, Suite, Building (optional)",
+                hintText: S.of(context).aptSuiteBuilding,
                 errorText: null,
                 isDense: true,
               ),
@@ -139,7 +141,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                hintText: "Postal Code",
+                hintText: S.of(context).postalCode,
                 errorText: _postalCodeError,
                 isDense: true,
               ),
@@ -155,7 +157,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                hintText: "Phone Number (optional)",
+                hintText: S.of(context).phoneNumber,
                 isDense: true,
               ),
               controller: _phone,
@@ -167,7 +169,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
                 border: UnderlineInputBorder(),
                 enabledBorder: UnderlineInputBorder(),
                 focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                hintText: "Website (optional)",
+                hintText: S.of(context).website,
                 isDense: true,
               ),
               controller: _website,
@@ -183,7 +185,7 @@ class _CompanyAddressState extends State<CompanyAddressWidget> {
               child: RaisedButton(
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
-                  child: Text("Next",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                  child: Text(S.of(context).next,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                 ),
                 onPressed: (){
                   FocusScope.of(context).requestFocus(FocusNode());

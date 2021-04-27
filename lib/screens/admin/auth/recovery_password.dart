@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 
 import '../../../models/user_model.dart';
@@ -49,7 +50,7 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("FACE PUNCH",style: TextStyle(color: Colors.black87,fontSize: 30,fontWeight: FontWeight.bold),),
+        title: Text(S.of(context).facePunch,style: TextStyle(color: Colors.black87,fontSize: 30,fontWeight: FontWeight.bold),),
         backgroundColor: Color(primaryColor),
         elevation: 0,
       ),
@@ -77,12 +78,12 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
                   children: [
                     SizedBox(height: 20,),
                     Text(
-                      "Enter your email address.",
+                      S.of(context).enterYourEmailAddress,
                       style: TextStyle(color: Colors.black87,fontSize: 20),
                     ),
                     SizedBox(height: 20,),
                     Text(
-                      "We will send new password to your email.",
+                      S.of(context).weWillSendNewPasswordToYourEmail,
                       style: TextStyle(color: Colors.black87,fontSize: 20),
                       textAlign: TextAlign.center,
                     ),
@@ -118,7 +119,7 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
                       child: CircularProgressIndicator(backgroundColor: Colors.white,)
                   ):Padding(
                     padding: const EdgeInsets.all(4.0),
-                    child: Text("DONE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                    child: Text(S.of(context).done.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
                   onPressed: recoveryPassword,
                   color: Colors.red,

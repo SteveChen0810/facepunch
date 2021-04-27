@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -164,7 +165,7 @@ class _SelectStateState extends State<SelectState> {
                   }).toList(),
                   underline: Container(color: Colors.black,width: double.infinity,height: 1,),
                   onChanged: (value) => _onSelectedCountry(value),
-                  hint: Text("Country"),
+                  hint: Text(S.of(context).country),
                   value: _selectedCountry,
                 ),
               ),
@@ -178,7 +179,7 @@ class _SelectStateState extends State<SelectState> {
                     );
                   }).toList(),
                   underline: Container(color: Colors.black,width: double.infinity,height: 1,),
-                  hint: Text("State"),
+                  hint: Text(S.of(context).state),
                   onChanged: (value) => _onSelectedState(value),
                   value: _selectedState,
                 ),
@@ -193,7 +194,7 @@ class _SelectStateState extends State<SelectState> {
               child: Text(dropDownStringItem),
             );
           }).toList(),
-          hint: Text("City"),
+          hint: Text(S.of(context).city),
           underline: Container(color: Colors.black,width: double.infinity,height: 1,),
           onChanged: (value) => _onSelectedCity(value),
           value: _selectedCity,

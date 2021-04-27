@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/widgets/dialogs.dart';
 import 'face_punch.dart';
 import '../../../models/app_const.dart';
@@ -23,7 +24,7 @@ class _StartFacePunchState extends State<StartFacePunch> {
     if(result){
       Navigator.push(context, MaterialPageRoute(builder: (context)=>FacePunchScreen(company: selectedCompany,)));
     }else{
-      widget.showMessage("PIN Code is not correct.");
+      widget.showMessage(S.of(context).pinCodeNotCorrect);
     }
   }
 
@@ -39,7 +40,7 @@ class _StartFacePunchState extends State<StartFacePunch> {
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          Text("Face Punch",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          Text(S.of(context).facePunch,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
           SizedBox(height: 8,),
           Column(
             children: [
@@ -97,13 +98,13 @@ class _StartFacePunchState extends State<StartFacePunch> {
                 if(selectedCompany!=null){
                   checkCompanyDialog(context);
                 }else{
-                  widget.showMessage("Please select your company.");
+                  widget.showMessage(S.of(context).selectCompany);
                 }
               },
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               color: Colors.black87,
-              child: Text("START FACE PUNCH",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
+              child: Text(S.of(context).startFacePunch.toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
             ),
           ),
         ],

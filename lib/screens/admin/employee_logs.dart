@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -146,7 +147,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                 ),
                 secondaryActions: <Widget>[
                   IconSlideAction(
-                    caption: 'Edit',
+                    caption: S.of(context).edit,
                     color: Colors.orange,
                     iconWidget: Icon(Icons.edit,color: Colors.white,size: 20,),
                     foregroundColor: Colors.white,
@@ -161,7 +162,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                     },
                   ),
                   IconSlideAction(
-                    caption: 'Delete',
+                    caption: S.of(context).delete,
                     color: Colors.red,
                     foregroundColor: Colors.white,
                     iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
@@ -245,17 +246,17 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("Edit Employee Punch", style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
+                              Text(S.of(context).editEmployeePunch, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
                               Text("${PunchDateUtils.getDateString(DateTime.parse(punch.createdAt))}", style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 14),),
                               Row(
                                 children: [
-                                  Text(punch.punch=="Lunch"?"Incorrect Lunch Time: ":"Incorrect Punch ${punch.punch} Time: "),
+                                  Text(punch.punch=="Lunch"?"${S.of(context).incorrectLunchTime}: ":"${S.of(context).incorrectPunchTime}: "),
                                   Text("${PunchDateUtils.getTimeString(DateTime.parse(punch.punch=="Lunch"?punch.updatedAt:punch.createdAt))}",style: TextStyle(fontWeight: FontWeight.bold),),
                                 ],
                               ),
                               Row(
                                 children: [
-                                  Text(punch.punch=="Lunch"?"Correct Lunch Time: ":"Correct Punch ${punch.punch} Time: "),
+                                  Text(punch.punch=="Lunch"?"${S.of(context).correctLunchTime}: ":"${S.of(context).correctPunchTime}: "),
                                   Text("${PunchDateUtils.getTimeString(DateTime.parse(correctTime))}",style: TextStyle(fontWeight: FontWeight.bold),),
                                   FlatButton(
                                       onPressed: ()async{
@@ -339,7 +340,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           content: Text(message),
           duration: Duration(seconds: 2),
           backgroundColor: Colors.red,
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -357,7 +358,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           },
           child: Icon(Icons.navigate_before,size: 40,),
         ),
-        title: Text("Daily Logs",style: TextStyle(color: Colors.black87,fontSize: 28,fontWeight: FontWeight.bold),),
+        title: Text(S.of(context).dailyLogs,style: TextStyle(color: Colors.black87,fontSize: 28,fontWeight: FontWeight.bold),),
         backgroundColor: Color(primaryColor),
       ),
       body: WillPopScope(
@@ -398,7 +399,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                 padding: EdgeInsets.all(8),
                 child: Row(
                   children: [
-                    Text("Total Hours:\n ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
+                    Text("${S.of(context).totalHours}:\n ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
                     SizedBox(width: 100,),
                     FlatButton(
                       onPressed: (){},
@@ -407,7 +408,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                         child: Column(
                           children: [
                             Image.asset("assets/images/ic_document.png",width: 30,height: 30,),
-                            Text("TimeSheet",style: TextStyle(fontSize: 10),)
+                            Text(S.of(context).timeSheet,style: TextStyle(fontSize: 10),)
                           ],
                         ),
                     )
@@ -466,7 +467,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                             width: 55,
                             height: 25,
                             alignment: Alignment.center,
-                            child: Text("IN",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),),
+                            child: Text(S.of(context).iN,style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),),
                           ),
                           Container(
                             decoration: BoxDecoration(
@@ -476,7 +477,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                             width: 55,
                             height: 25,
                             alignment: Alignment.center,
-                            child: Text("OUT",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),),
+                            child: Text(S.of(context).out,style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),),
                           ),
                         ],
                       ),

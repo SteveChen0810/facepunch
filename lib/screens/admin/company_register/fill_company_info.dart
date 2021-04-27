@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:facepunch/lang/l10n.dart';
 import '../../admin/admin_home.dart';
 import '../../../models/app_const.dart';
 import '../../../models/user_model.dart';
@@ -39,7 +40,7 @@ class _FillCompanyInfoState extends State<FillCompanyInfo> {
             content: Text(message),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
-            action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+            action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -103,7 +104,7 @@ class _FillCompanyInfoState extends State<FillCompanyInfo> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text("Registration",style: TextStyle(color: Colors.black87, fontSize: 30, fontWeight: FontWeight.bold),),
+                  Text(S.of(context).registration,style: TextStyle(color: Colors.black87, fontSize: 30, fontWeight: FontWeight.bold),),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(

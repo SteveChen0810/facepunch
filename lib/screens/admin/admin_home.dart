@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/models/notification.dart';
 import 'package:facepunch/screens/admin/employee_logs.dart';
@@ -49,7 +50,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
     await context.read<HarvestModel>().getTasksFromLocal();
     await context.read<HarvestModel>().getFields();
     await context.read<HarvestModel>().getContainers();
-    await context.read<CompanyModel>().getCompanySettings();
+    String message = await context.read<CompanyModel>().getCompanySettings();
+    if(message!=null){
+      await context.read<UserModel>().logOut();
+      await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+    }
   }
 
   Widget userItem(User user, double width){
@@ -67,7 +72,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Edit Employee",style: TextStyle(color: Colors.black87),),
+                    Text(S.of(context).editEmployee,style: TextStyle(color: Colors.black87),),
                     Icon(Icons.edit,color: Colors.black87,),
                   ],
                 ),
@@ -83,7 +88,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Delete Employee",style: TextStyle(color: Colors.red),),
+                    Text(S.of(context).deleteEmployee,style: TextStyle(color: Colors.red),),
                     Icon(Icons.delete,color: Colors.red,),
                   ],
                 ),
@@ -142,7 +147,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-            title: Text("Are you sure you want to delete this field?",textAlign: TextAlign.center,),
+            title: Text(S.of(context).deleteEmployeeConfirm,textAlign: TextAlign.center,),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
                 child: Column(
@@ -158,7 +163,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             child: CircularProgressIndicator(backgroundColor: Colors.white,),
                           ):Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("Delete",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -173,7 +178,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
                           ),
                           onPressed: ()async{
                             Navigator.pop(_context);
@@ -199,7 +204,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
           content: Text(message),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -212,12 +217,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
-      showMessage("Location permissions are permanently denied, we cannot request permissions.");
+      showMessage(S.of(context).locationPermissionDenied);
     }
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
-        showMessage("Location permissions are denied (actual value: $permission).");
+        showMessage(S.of(context).locationPermissionDenied);
         return null;
       }
     }
@@ -253,6 +258,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
     ).catchError(print);
     if(newNotification.revision!=null){
       showRevisionNotificationDialog(newNotification,context,showMessage);
+    }else{
+      showNotificationDialog(newNotification,context,);
     }
   }
 
@@ -261,11 +268,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
     final width = MediaQuery.of(context).size.width;
     List<User> inUsers = context.watch<CompanyModel>().users.where((u) => (u.lastPunch!=null && u.lastPunch.punch=="In")).toList();
     List<User> outUsers = context.watch<CompanyModel>().users.where((u) => (u.lastPunch==null || u.lastPunch.punch=="Out")).toList();
-    List<AppNotification> notifications  = context.watch<NotificationModel>().notifications.where((n) =>!n.seen).toList();
+    List<AppNotification> notifications  = context.watch<NotificationModel>().notifications.where((n) =>(n.seen!=null && !n.seen)).toList();
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("IN/OUT",style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 30),),
+        title: Text(S.of(context).inOut,style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 30),),
         elevation: 0,
         backgroundColor: Color(primaryColor),
         actions: [
@@ -285,7 +292,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
           return false;
         },
         child: Container(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.only(left: 8,right: 8,bottom: 16),
           child: Column(
             children: [
               Expanded(
@@ -314,7 +321,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                     [
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Text("Employee Log In",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                                        child: Text(S.of(context).employeeLogIn,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
                                       )
                                     ]
                                   ),
@@ -323,7 +330,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   SliverList(
                                     delegate: SliverChildListDelegate(
                                         [
-                                          Center(child: Text("Empty")),
+                                          Center(child: Text(S.of(context).empty)),
                                         ]
                                     ),
                                   ),
@@ -341,7 +348,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                       [
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Text("Employee Log Out",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                                          child: Text(S.of(context).employeeLogOut,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
                                         )
                                       ]
                                   ),
@@ -350,7 +357,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   SliverList(
                                     delegate: SliverChildListDelegate(
                                         [
-                                          Center(child: Text("Empty")),
+                                          Center(child: Text(S.of(context).empty)),
                                         ]
                                     ),
                                   ),
@@ -415,7 +422,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
                 child: RaisedButton(
                   onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateEditEmployee())),
-                  child: Text("Create New Employee",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.white),),
+                  child: Text(S.of(context).createNewEmployee,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.white),),
                   padding: EdgeInsets.all(10),
                   color: Colors.black87,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

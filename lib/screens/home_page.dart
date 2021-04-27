@@ -217,7 +217,7 @@ class _HomePageState extends State<HomePage>{
               if(!isShowKeyBoard)
                 Column(
                   children: [
-                    Text("Welcome to FACE PUNCH",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                    Text("Welcome to Facepunch",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
                     SizedBox(height: 4,),
                     Text("THE BEST EMPLOYEE CLOCKING SYSTEM",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
                     SizedBox(height: 4,),
@@ -258,7 +258,7 @@ class _HomePageState extends State<HomePage>{
               height: bottomBarHeight+50,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex==SIGN_UP?Colors.white:Color(0xFFbfbfbf),
+                  color: _pageIndex==SIGN_UP?Color(primaryColor):Colors.white.withOpacity(0.8),
                   boxShadow: [shadow]
               ),
               clipBehavior: Clip.hardEdge,
@@ -285,7 +285,7 @@ class _HomePageState extends State<HomePage>{
                   height: bottomBarHeight,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                      color: _pageIndex == EMPLOYEE_SIGN_IN?Colors.white:Color(0xFFbfbfbf),
+                      color: _pageIndex == EMPLOYEE_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
                       boxShadow: [shadow]
                   ),
                   padding: EdgeInsets.all(4.0),
@@ -310,16 +310,9 @@ class _HomePageState extends State<HomePage>{
                   height: bottomBarHeight,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                      color: Color(primaryColor),
+                      color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white.withOpacity(0.8),
                       boxShadow: [
                         shadow,
-                        if(_pageIndex == FACE_PUNCH)
-                          BoxShadow(
-                            color: Colors.white,
-                            spreadRadius: 1,
-                            blurRadius: 1,
-                            offset: Offset(0, -1),
-                          ),
                       ]
                   ),
                   padding: EdgeInsets.all(4.0),
@@ -344,7 +337,7 @@ class _HomePageState extends State<HomePage>{
                   height: bottomBarHeight,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                      color: _pageIndex == ADMIN_SIGN_IN?Colors.white:Color(0xFFbfbfbf),
+                      color: _pageIndex == ADMIN_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
                       boxShadow: [shadow]
                   ),
                   padding: EdgeInsets.all(4.0),

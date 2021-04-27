@@ -11,6 +11,7 @@ class UserModel with ChangeNotifier{
   User user;
   final LocalStorage storage = LocalStorage('face_punch_user');
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String locale = 'en';
 
   Future<User> getUserFromLocal()async{
     try{
@@ -19,6 +20,7 @@ class UserModel with ChangeNotifier{
         var json = await storage.getItem('user');
         if(json!=null){
           user = User.fromJson(json);
+          if(user.language=='Spanish')locale = 'es';
           GlobalData.token = user.token;
         }
       }
@@ -34,6 +36,7 @@ class UserModel with ChangeNotifier{
       bool storageReady = await storage.ready;
       if(storageReady)
         await storage.setItem('user', user.toJson());
+      if(user.language=='Spanish')locale = 'es';
       notifyListeners();
     }catch(e){
       print("[UserModel.saveUserToLocal] $e");

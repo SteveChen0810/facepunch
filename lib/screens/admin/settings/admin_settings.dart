@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/models/user_model.dart';
@@ -38,7 +39,8 @@ class _AdminSettingState extends State<AdminSetting> {
 
   bool isProfileUpdating = false;
   bool isCompanyUpdating = false;
-  bool isNotificationUpdating = false;
+  bool isRevisionNotificationUpdating = false;
+  bool isPunchNotificationUpdating = false;
 
   final InAppPurchaseConnection _connection = InAppPurchaseConnection.instance;
   StreamSubscription<List<PurchaseDetails>> _subscription;
@@ -151,23 +153,23 @@ class _AdminSettingState extends State<AdminSetting> {
   bool profileValidator(){
     _emailError = null; _passwordError = null; _fNameError=null;_lNameError=null;
     if(_fName.text.isEmpty){
-      _fNameError = "First Name is required.";
+      _fNameError = S.of(context).firstNameIsRequired;
       return false;
     }
     if(_lName.text.isEmpty){
-      _lNameError = "Last Name is required.";
+      _lNameError = S.of(context).lastNameIsRequired;
       return false;
     }
     if(_email.text.isEmpty){
-      _emailError = "Your email is required.";
+      _emailError = S.of(context).yourEmailIsRequired;
       return false;
     }
     if(!_email.text.contains("@") || !_email.text.contains(".")){
-      _emailError = "Email is invalid.";
+      _emailError = S.of(context).emailIsInvalid;
       return false;
     }
     if(_oldPassword.text.isEmpty && _newPassword.text.isNotEmpty){
-      _passwordError = "Password is required.";
+      _passwordError = S.of(context).passwordIsRequired;
       return false;
     }
     return true;
@@ -175,27 +177,27 @@ class _AdminSettingState extends State<AdminSetting> {
   bool companyValidator(){
     _nameError = null; _addressError = null; _postalCodeError = null;
     if(_name.text.isEmpty){
-      setState(() {_nameError = "Company name is required.";});
+      setState(() {_nameError = S.of(context).companyNameIsRequired;});
       return false;
     }
     if(_address1.text.isEmpty){
-      setState(() {_addressError = "Company address is required.";});
+      setState(() {_addressError = S.of(context).companyAddressIsRequired;});
       return false;
     }
     if(country==null){
-      showMessage("Country is required.");
+      showMessage(S.of(context).countryIsRequired);
       return false;
     }
     if(state==null){
-      showMessage("State is required.");
+      showMessage(S.of(context).stateIsRequired);
       return false;
     }
     if(city==null){
-      showMessage("City is required.");
+      showMessage(S.of(context).cityIsRequired);
       return false;
     }
     if(_postalCode.text.isEmpty){
-      setState(() {_postalCodeError = "Postal Code is required.";});
+      setState(() {_postalCodeError = S.of(context).postalCodeIsRequired;});
       return false;
     }
     return true;
@@ -266,7 +268,7 @@ class _AdminSettingState extends State<AdminSetting> {
           content: Text(message),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -274,6 +276,8 @@ class _AdminSettingState extends State<AdminSetting> {
   @override
   Widget build(BuildContext context) {
     User user = context.watch<UserModel>().user;
+    CompanySettings companySettings = context.watch<CompanyModel>().myCompanySettings;
+
     if(user==null)return Container();
     return Scaffold(
       key: _scaffoldKey,
@@ -282,14 +286,14 @@ class _AdminSettingState extends State<AdminSetting> {
         leading: GestureDetector(
           child: Icon(Icons.navigate_before),
           onTap: (){
-            if(!(isCompanyUpdating || isProfileUpdating || isNotificationUpdating)) Navigator.pop(context);
+            if(!(isCompanyUpdating || isProfileUpdating || isRevisionNotificationUpdating || isPunchNotificationUpdating)) Navigator.pop(context);
           },
         ),
         backgroundColor: Color(primaryColor),
       ),
       body: WillPopScope(
         onWillPop: ()async{
-          return !(isCompanyUpdating || isProfileUpdating || isNotificationUpdating);
+          return !(isCompanyUpdating || isProfileUpdating || isRevisionNotificationUpdating || isPunchNotificationUpdating);
         },
         child: Container(
           padding: EdgeInsets.all(8),
@@ -305,7 +309,7 @@ class _AdminSettingState extends State<AdminSetting> {
                         children: [
                           Icon(Icons.info,color: Colors.black87,size: 35,),
                           SizedBox(width: 20,),
-                          Text("About App",style: TextStyle(color: Colors.black87,fontSize: 18,fontWeight: FontWeight.bold),)
+                          Text(S.of(context).aboutApp,style: TextStyle(color: Colors.black87,fontSize: 18,fontWeight: FontWeight.bold),)
                         ],
                       ),
                     ),
@@ -317,14 +321,14 @@ class _AdminSettingState extends State<AdminSetting> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Profile",style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
+                        Text(S.of(context).profile,style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
                         SizedBox(height: 8,),
                         TextField(
                           decoration: InputDecoration(
                               border: UnderlineInputBorder(),
                               enabledBorder: UnderlineInputBorder(),
                               focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: "First name",
+                              labelText: S.of(context).firstName,
                               labelStyle: TextStyle(color: Colors.grey),
                               suffixIcon: Icon(Icons.person_outline,color: Colors.black87,size: 30,),
                               suffixIconConstraints: BoxConstraints(minHeight: 25,maxHeight: 25),
@@ -346,7 +350,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               border: UnderlineInputBorder(),
                               enabledBorder: UnderlineInputBorder(),
                               focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: "Last name",
+                              labelText: S.of(context).lastName,
                               labelStyle: TextStyle(color: Colors.grey),
                               suffixIcon: Icon(Icons.person_outline,color: Colors.black87,size: 30,),
                               suffixIconConstraints: BoxConstraints(minHeight: 25,maxHeight: 25),
@@ -368,7 +372,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               border: UnderlineInputBorder(),
                               enabledBorder: UnderlineInputBorder(),
                               focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: "Email",
+                              labelText: S.of(context).email,
                               labelStyle: TextStyle(color: Colors.grey),
                               suffixIcon: Icon(Icons.email_outlined,color: Colors.black87,size: 30,),
                               suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
@@ -384,7 +388,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               border: UnderlineInputBorder(),
                               enabledBorder: UnderlineInputBorder(),
                               focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: "Old password",
+                              labelText: S.of(context).oldPassword,
                               labelStyle: TextStyle(color: Colors.grey),
                               suffixIcon: Icon(Icons.lock_outline,color: Colors.black87,size: 30,),
                               suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
@@ -404,7 +408,7 @@ class _AdminSettingState extends State<AdminSetting> {
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                            labelText: "New password",
+                            labelText: S.of(context).newPassword,
                             labelStyle: TextStyle(color: Colors.grey),
                             suffixIcon: Icon(Icons.lock_outline,color: Colors.black87,size: 30,),
                             suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
@@ -428,7 +432,7 @@ class _AdminSettingState extends State<AdminSetting> {
                                   height: 20,
                                   width: 20,
                                   child: CircularProgressIndicator(backgroundColor: Colors.white,)
-                              ):Text("Save",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                              ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                               onPressed: updateUser,
                               color: Colors.red,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -445,14 +449,14 @@ class _AdminSettingState extends State<AdminSetting> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Company",style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
+                        Text(S.of(context).company,style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
                         SizedBox(height: 8,),
                         TextField(
                           decoration: InputDecoration(
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                            labelText: "Company Name",
+                            labelText: S.of(context).companyName,
                             labelStyle: TextStyle(color: Colors.grey),
                             isDense: true,
                             errorText: _nameError,
@@ -470,7 +474,7 @@ class _AdminSettingState extends State<AdminSetting> {
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: "Street Address",
+                            labelText: S.of(context).streetAddress,
                             labelStyle: TextStyle(color: Colors.grey),
                             isDense: true,
                             errorText: _addressError,
@@ -487,7 +491,7 @@ class _AdminSettingState extends State<AdminSetting> {
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: "Apt, Suite, Building (optional)",
+                            labelText: S.of(context).aptSuiteBuilding,
                             labelStyle: TextStyle(color: Colors.grey),
                             errorText: null,
                             isDense: true,
@@ -522,7 +526,7 @@ class _AdminSettingState extends State<AdminSetting> {
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: "Postal Code",
+                            labelText: S.of(context).postalCode,
                             labelStyle: TextStyle(color: Colors.grey),
                             errorText: _postalCodeError,
                             isDense: true,
@@ -539,7 +543,7 @@ class _AdminSettingState extends State<AdminSetting> {
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: "Phone Number (optional)",
+                            labelText: S.of(context).phoneNumber,
                             labelStyle: TextStyle(color: Colors.grey),
                             isDense: true,
                           ),
@@ -552,7 +556,7 @@ class _AdminSettingState extends State<AdminSetting> {
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: "Website (optional)",
+                            labelText: S.of(context).website,
                             labelStyle: TextStyle(color: Colors.grey),
                             isDense: true,
                           ),
@@ -561,15 +565,15 @@ class _AdminSettingState extends State<AdminSetting> {
                           textInputAction: TextInputAction.done,
                         ),
                         SizedBox(height: 20,),
-                        Text("Company Plan",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                        Text(S.of(context).companyPlan,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
                         CheckboxListTile(
                           value: plan==0,
                           onChanged: (v){
                             setState(() { plan = 0; selectedProduct=null;});
                           },
-                          title: Text("${companyPlans[0].minRange} ~ ${companyPlans[0].maxRange} Employees ",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                          title: Text("${companyPlans[0].minRange} ~ ${companyPlans[0].maxRange} ${S.of(context).employees} ",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
                           controlAffinity: ListTileControlAffinity.leading,
-                          secondary: Text("Free",style: TextStyle(color: Color(primaryColor,),fontSize: 18,fontWeight: FontWeight.bold),),
+                          secondary: Text(S.of(context).free,style: TextStyle(color: Color(primaryColor,),fontSize: 18,fontWeight: FontWeight.bold),),
                           contentPadding: EdgeInsets.symmetric(horizontal: 30),
                         ),
                         companyPlanWidgets(),
@@ -582,7 +586,7 @@ class _AdminSettingState extends State<AdminSetting> {
                                   height: 20,
                                   width: 20,
                                   child: CircularProgressIndicator(backgroundColor: Colors.white,)
-                              ):Text("Save",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                              ):Text(S.of(context).save,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                               onPressed: (){
                                 if(profileValidator()){
                                   if(myCompany.plan!=plan){
@@ -610,28 +614,57 @@ class _AdminSettingState extends State<AdminSetting> {
                   ),
                 ),
                 Card(
-                  child: SwitchListTile(
-                    value: user.firebaseToken!=null && user.firebaseToken !="disabled",
-                    onChanged: isNotificationUpdating?null:(v)async{
-                      setState(() {isNotificationUpdating = true;});
-                      String result = await context.read<UserModel>().notificationSetting();
-                      if(result!=null)showMessage(result);
-                      setState(() {isNotificationUpdating = false;});
-                    },
-                    dense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                    title: Row(
-                      children: [
-                        Text("Receive Revision Notification",style: TextStyle(color: Colors.black87,fontSize: 16,),),
-                        SizedBox(width: 10,),
-                        if(isNotificationUpdating)
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(),
-                          )
-                      ],
-                    ),
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        value: companySettings.receiveRevisionNotification,
+                        onChanged: isRevisionNotificationUpdating?null:(v)async{
+                          setState(() {isRevisionNotificationUpdating = true;});
+                          companySettings.receiveRevisionNotification = v;
+                          String result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                          if(result!=null)showMessage(result);
+                          setState(() {isRevisionNotificationUpdating = false;});
+                        },
+                        dense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                        title: Row(
+                          children: [
+                            Text(S.of(context).receiveRevisionNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
+                            SizedBox(width: 10,),
+                            if(isRevisionNotificationUpdating)
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(),
+                              )
+                          ],
+                        ),
+                      ),
+                      SwitchListTile(
+                        value: companySettings.receivePunchNotification,
+                        onChanged: isPunchNotificationUpdating?null:(v)async{
+                          setState(() {isPunchNotificationUpdating = true;});
+                          companySettings.receivePunchNotification = v;
+                          String result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                          if(result!=null)showMessage(result);
+                          setState(() {isPunchNotificationUpdating = false;});
+                        },
+                        dense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                        title: Row(
+                          children: [
+                            Text(S.of(context).receivePunchNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
+                            SizedBox(width: 10,),
+                            if(isPunchNotificationUpdating)
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(),
+                              )
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 20,)

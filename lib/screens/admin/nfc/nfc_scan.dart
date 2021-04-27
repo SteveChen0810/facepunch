@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/screens/admin/nfc/nfc_settings.dart';
@@ -44,12 +45,12 @@ class _NFCScanPageState extends State<NFCScanPage>{
   showHarvestTaskDialog({HTask task}){
     List<HContainer> containers = context.read<HarvestModel>().containers;
     if(containers.isEmpty){
-      showMessage("There are not any containers. please add containers.");
+      showMessage(S.of(context).addContainers);
       return null;
     }
     List<Field> fields = context.read<HarvestModel>().fields;
     if(fields.isEmpty){
-      showMessage("There are not any fields. please add fields.");
+      showMessage(S.of(context).addFields);
       return null;
     }
     HContainer selectedContainer;
@@ -66,14 +67,14 @@ class _NFCScanPageState extends State<NFCScanPage>{
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-            title: Text(task==null?'Create New Task':"Update Task",textAlign: TextAlign.center,),
+            title: Text(task==null?S.of(context).createNewTask:S.of(context).updateTask,textAlign: TextAlign.center,),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Field"),
+                    Text(S.of(context).field),
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black54),
@@ -100,7 +101,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                       ),
                     ),
                     SizedBox(height: 8,),
-                    Text("Container"),
+                    Text(S.of(context).container),
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black54),
@@ -133,7 +134,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("SAVE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -154,7 +155,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           onPressed: ()async{
                             Navigator.pop(_context);
@@ -179,7 +180,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-            title: Text("Are you sure you want to delete this Task?",textAlign: TextAlign.center,),
+            title: Text(S.of(context).deleteTaskConfirm,textAlign: TextAlign.center,),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
                 child: Column(
@@ -191,7 +192,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("Delete",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -204,7 +205,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
                           ),
                           onPressed: ()async{
                             Navigator.pop(_context);
@@ -230,7 +231,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
           content: Text(message),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -295,7 +296,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Harvest Tracking'),
+        title: Text(S.of(context).harvestTracking),
         backgroundColor: Color(primaryColor),
         actions: [
           FlatButton(
@@ -378,7 +379,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text("Edit Container", style: TextStyle(color: Colors.black87),),
+                                            Text(S.of(context).editContainer, style: TextStyle(color: Colors.black87),),
                                             Icon(Icons.edit, color: Colors.black87,),
                                           ],
                                         ),
@@ -395,7 +396,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text("Delete Container", style: TextStyle(color: Colors.red),),
+                                            Text(S.of(context).delete, style: TextStyle(color: Colors.red),),
                                             Icon(Icons.delete, color: Colors.red,),
                                           ],
                                         ),
@@ -481,19 +482,19 @@ class _NFCScanPageState extends State<NFCScanPage>{
                     children: [
                       Expanded(
                         flex: 1,
-                          child: Text('Employee',style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).employee,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                       ),
                       Expanded(
                           flex: 1,
-                          child: Text('Field',style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).field,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                       ),
                       Expanded(
                           flex: 1,
-                          child: Text('Container',style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).container,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                       ),
                       Expanded(
                           flex: 1,
-                          child: Text('Quantity',style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).quantity,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                       ),
                     ],
                   ),

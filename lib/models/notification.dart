@@ -80,7 +80,7 @@ class NotificationModel with ChangeNotifier {
         for(var json in jsonDecode(res.body)){
          Revision revision = Revision.fromJson(json);
          AppNotification notification = AppNotification(
-           title: "FACE PUNCH",
+           title: "Facepunch",
            body: "Hour Revision Request",
            date: DateTime.now().toString(),
            revision: revision,
@@ -200,11 +200,11 @@ class AppNotification {
       body = notification['body'];
       title = notification['title'];
       type = notification['notify_type'];
+      seen = false;
+      date = DateTime.now().toString();
       if(notification['revision']!=null){
         revision = Revision.fromJson(jsonDecode(notification['revision']));
       }
-      seen = false;
-      date = DateTime.now().toString();
     } catch (e) {
       print("AppNotification.fromJsonFirebase--$e");
     }
@@ -231,7 +231,7 @@ class AppNotification {
     'body': body,
     'title': title,
     'notify_type': type,
-    'revision': revision.toJson(),
+    'revision': revision?.toJson(),
     'seen': seen,
     'date': date,
   };

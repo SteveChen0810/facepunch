@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/models/harvest_model.dart';
@@ -51,7 +52,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-          title: Text(field==null?'Create New Field':"Update Field",textAlign: TextAlign.center,),
+          title: Text(field==null?S.of(context).createNewField:S.of(context).updateField,textAlign: TextAlign.center,),
           content:StatefulBuilder(
             builder: (_,setState)=>Container(
               child: Column(
@@ -64,7 +65,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       _fieldName.value = _fieldName.value.copyWith(text: firstToUpper(v));
                     },
                     decoration: InputDecoration(
-                      labelText: 'Field Name',
+                      labelText: S.of(context).fieldName,
                       labelStyle: TextStyle(color: Colors.black54),
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -79,7 +80,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       _fieldCrop.value = _fieldCrop.value.copyWith(text: firstToUpper(v));
                     },
                     decoration: InputDecoration(
-                      labelText: 'Field Crop',
+                      labelText: S.of(context).fieldCrop,
                       labelStyle: TextStyle(color: Colors.black54),
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -94,7 +95,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       _fieldCropVariety.value = _fieldCropVariety.value.copyWith(text: firstToUpper(v));
                     },
                     decoration: InputDecoration(
-                      labelText: 'Field Crop Variety',
+                      labelText: S.of(context).fieldCropVariety,
                       labelStyle: TextStyle(color: Colors.black54),
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
@@ -113,7 +114,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           child: CircularProgressIndicator(backgroundColor: Colors.white,),
                         ):Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: Text("SAVE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                         ),
                         color: Color(primaryColor),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -121,15 +122,15 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           try{
                             _fieldVarietyError = null; _fieldCropError = null; _fieldNameError = null;
                             if(_fieldName.text.isEmpty){
-                              setState((){_fieldNameError='Name is required.';});
+                              setState((){_fieldNameError=S.of(context).fieldNameIsRequired;});
                               return;
                             }
                             if(_fieldCrop.text.isEmpty){
-                              setState((){_fieldCropError='Crop is required.';});
+                              setState((){_fieldCropError=S.of(context).cropIsRequired;});
                               return;
                             }
                             if(_fieldCropVariety.text.isEmpty){
-                              setState((){_fieldVarietyError='Field Name is required.';});
+                              setState((){_fieldVarietyError=S.of(context).varietyIsRequired;});
                               return;
                             }
                             setState((){isSavingField=true;});
@@ -155,7 +156,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       RaisedButton(
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                         ),
                         onPressed: ()async{
                           Navigator.pop(_context);
@@ -181,7 +182,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-            title: Text("Are you sure you want to delete this field?",textAlign: TextAlign.center,),
+            title: Text(S.of(context).deleteFieldConfirm,textAlign: TextAlign.center,),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
                 child: Column(
@@ -198,7 +199,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             child: CircularProgressIndicator(backgroundColor: Colors.white,),
                           ):Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("Delete",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -213,7 +214,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
                           ),
                           onPressed: ()async{
                             Navigator.pop(_context);
@@ -239,7 +240,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
           content: Text(message),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
+          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
         )
     );
   }
@@ -253,7 +254,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-            title: Text(container==null?'Create New Container':"Update Container",textAlign: TextAlign.center,),
+            title: Text(container==null?S.of(context).createNewContainer:S.of(context).updateContainer,textAlign: TextAlign.center,),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
                 child: Column(
@@ -266,7 +267,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         _containerName.value = _containerName.value.copyWith(text: firstToUpper(v));
                       },
                       decoration: InputDecoration(
-                          labelText: 'Container Name',
+                          labelText: S.of(context).containerName,
                           labelStyle: TextStyle(color: Colors.black54),
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
@@ -285,7 +286,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             child: CircularProgressIndicator(backgroundColor: Colors.white,),
                           ):Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("SAVE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -293,7 +294,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             try{
                               _containerNameError = null;
                               if(_containerName.text.isEmpty){
-                                setState((){_containerNameError='Name is required.';});
+                                setState((){_containerNameError=S.of(context).nameIsRequired;});
                                 return;
                               }
                               setState((){isSavingContainer=true;});
@@ -317,7 +318,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           onPressed: ()async{
                             Navigator.pop(_context);
@@ -343,7 +344,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
       barrierDismissible: false,
       builder: (_context){
         return AlertDialog(
-            title: Text("Are you sure you want to delete this Container?",textAlign: TextAlign.center,),
+            title: Text(S.of(context).deleteContainerConfirm,textAlign: TextAlign.center,),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
                 child: Column(
@@ -360,7 +361,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             child: CircularProgressIndicator(backgroundColor: Colors.white,),
                           ):Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("Delete",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -375,7 +376,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text("CLOSE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
                           ),
                           onPressed: ()async{
                             Navigator.pop(_context);
@@ -399,7 +400,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
     await showDialog(
       context: context,
       child: AlertDialog(
-        title: Text('Choose Color'),
+        title: Text(S.of(context).chooseColor),
         content: SingleChildScrollView(
           child: ColorPicker(
             pickerColor: pickedColor,
@@ -409,7 +410,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
         ),
         actions: <Widget>[
           FlatButton(
-            child: Text('OK'),
+            child: Text(S.of(context).ok),
             onPressed: () {
               color = pickedColor;
               Navigator.of(context).pop();
@@ -435,23 +436,23 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
 
   bool validator(){
     if(_lowValue.text.isEmpty){
-      showMessage('Low Value is empty.');
+      showMessage(S.of(context).lowValueIsEmpty);
       return false;
     }
     if(double.tryParse(_lowValue.text)==null){
-      showMessage('Low Value should be number');
+      showMessage(S.of(context).lowValueShouldBeNumber);
       return false;
     }
     if(_highValue.text.isEmpty){
-      showMessage('High Value is empty.');
+      showMessage(S.of(context).highValueIsEmpty);
       return false;
     }
     if(double.tryParse(_highValue.text)==null){
-      showMessage('High Value should be number.');
+      showMessage(S.of(context).highValueShouldBeNumber);
       return false;
     }
     if(double.tryParse(_highValue.text)<double.tryParse(_lowValue.text)){
-      showMessage('High Value should be bigger than Low Value.');
+      showMessage(S.of(context).highValueShouldBeBigger);
       return false;
     }
     return true;
@@ -471,7 +472,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('NFC Settings'),
+        title: Text(S.of(context).nfcSettings),
         backgroundColor: Color(primaryColor),
       ),
       body: Container(
@@ -480,7 +481,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Fields',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+              Text(S.of(context).fields,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
               Center(
                 child: Wrap(
                   alignment: WrapAlignment.center,
@@ -501,7 +502,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("Edit Field",style: TextStyle(color: Colors.black87),),
+                                      Text(S.of(context).editField,style: TextStyle(color: Colors.black87),),
                                       Icon(Icons.edit,color: Colors.black87,),
                                     ],
                                   ),
@@ -518,7 +519,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("Delete Field",style: TextStyle(color: Colors.red),),
+                                      Text(S.of(context).delete,style: TextStyle(color: Colors.red),),
                                       Icon(Icons.delete,color: Colors.red,),
                                     ],
                                   ),
@@ -595,7 +596,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                 ),
               ),
               SizedBox(height: 8,),
-              Text('Containers',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+              Text(S.of(context).containers,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
               Center(
                 child: Wrap(
                   alignment: WrapAlignment.center,
@@ -616,7 +617,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("Edit Container",style: TextStyle(color: Colors.black87),),
+                                      Text(S.of(context).editContainer,style: TextStyle(color: Colors.black87),),
                                       Icon(Icons.edit,color: Colors.black87,),
                                     ],
                                   ),
@@ -633,7 +634,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("Delete Container",style: TextStyle(color: Colors.red),),
+                                      Text(S.of(context).delete,style: TextStyle(color: Colors.red),),
                                       Icon(Icons.delete,color: Colors.red,),
                                     ],
                                   ),
@@ -708,7 +709,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                 ),
               ),
               SizedBox(height: 8,),
-              Text('Container/Hour',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+              Text(S.of(context).containerHour,style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 30,vertical: 4),
                 padding: EdgeInsets.zero,
@@ -737,7 +738,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             decoration: BoxDecoration(
                                 color: highColor,
                             ),
-                            child: Text('High (Default: 3+)'),
+                            child: Text(S.of(context).highDefault),
                             alignment: Alignment.center,
                           ),
                         )
@@ -792,7 +793,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             decoration: BoxDecoration(
                               color: mediumColor,
                             ),
-                            child: Text('Medium (Default: 2.5+)'),
+                            child: Text(S.of(context).mediumDefault),
                             alignment: Alignment.center,
                           ),
                         )
@@ -837,7 +838,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             decoration: BoxDecoration(
                               color: lowColor,
                             ),
-                            child: Text('Low (Default: 2.5-)'),
+                            child: Text(S.of(context).lowDefault),
                             alignment: Alignment.center,
                           ),
                         )
@@ -872,7 +873,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                   children: [
                     Row(
                       children: [
-                        Text('Report Time:\n${_reportTime==null?'':_reportTime.format(context)}',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+                        Text('${S.of(context).reportTime}:\n${_reportTime==null?'':_reportTime.format(context)}',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
                         SizedBox(width: 8,),
                         InkWell(
                           child: Padding(
@@ -884,7 +885,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         )
                       ],
                     ),
-                    Text('Last Updated: ${_lastUpdated==null?'':_lastUpdated.toString().split(' ')[0]}',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+                    Text('${S.of(context).lastUpdated}: ${_lastUpdated==null?'':_lastUpdated.toString().split(' ')[0]}',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
                   ],
                 ),
               ),
@@ -903,7 +904,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                     )
                         :Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: Text("SAVE",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                      child: Text(S.of(context).save,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                     ),
                     onPressed: ()async{
                       try{

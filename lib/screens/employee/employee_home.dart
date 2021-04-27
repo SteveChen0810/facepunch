@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/screens/employee/employee_document.dart';
 import 'package:facepunch/screens/employee/employee_setting.dart';
 import 'package:facepunch/screens/employee/employee_timesheet.dart';
@@ -45,17 +46,17 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
           BottomNavigationBarItem(
               icon: Image.asset("assets/images/ic_calendar.png",height: 30,),
               activeIcon: Image.asset("assets/images/ic_calendar.png",height: 40,color: Color(primaryColor),),
-              label: "Calender"
+              label: S.of(context).calender
           ),
           BottomNavigationBarItem(
               icon: Image.asset("assets/images/ic_document.png",height: 30,),
               activeIcon: Image.asset("assets/images/ic_document.png",height: 40,color: Color(primaryColor),),
-              label: "Document"
+              label: S.of(context).document
           ),
           BottomNavigationBarItem(
               icon: Image.asset("assets/images/ic_setting.png",height: 30,),
               activeIcon: Image.asset("assets/images/ic_setting.png",height: 40,color: Color(primaryColor),),
-              label: "Setting"
+              label: S.of(context).setting
           ),
         ],
         showSelectedLabels: false,
