@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -20,14 +19,6 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
   DateTime selectedDate;
   String pdfError = "";
 
-  String pdfUrl(){
-    final user = context.watch<UserModel>().user;
-    DateTime pdfDate = selectedDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
-    final pdfLink = "${user.firstName} ${user.lastName} (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";
-    print(pdfLink);
-    return Uri.encodeFull('https://facepunch.app/punch-pdfs/${user.companyId}/$pdfLink');
-  }
-
   String harvestReportImage(){
     final user = context.watch<UserModel>().user;
     final imageUrl = 'harvest-reports/${user.companyId}/Harvest_Report_${DateTime.now().toString().split(' ')[0]}.png';
@@ -37,6 +28,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    final user = context.watch<UserModel>().user;
     return Container(
       child: Column(
         children: [
@@ -94,12 +86,15 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                           height: 200,
                           child: Text(S.of(context).pdfNotGenerated),
                         ):
-                        SfPdfViewer.network(
-                          pdfUrl(),
-                          key: Key(pdfUrl()),
-                          onDocumentLoadFailed: (v){
-                              if(mounted)setState(() {pdfError = v.description;});
-                          },
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: SfPdfViewer.network(
+                            user.pdfUrl(selectedDate),
+                            key: Key(user.pdfUrl(selectedDate)),
+                            onDocumentLoadFailed: (v){
+                                if(mounted)setState(() {pdfError = v.description;});
+                            },
+                          ),
                         ),
                         CachedNetworkImage(
                           imageUrl: harvestReportImage(),

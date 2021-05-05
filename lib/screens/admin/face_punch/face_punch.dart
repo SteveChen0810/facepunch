@@ -72,8 +72,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         );
         cameraController = CameraController(
           description,
-          Platform.isIOS? ResolutionPreset.medium
-              : ResolutionPreset.high,
+          Platform.isIOS? ResolutionPreset.low: ResolutionPreset.high,
           enableAudio: false,
         );
         await cameraController.initialize();
@@ -180,6 +179,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       return null;
     }
     if (permission == LocationPermission.denied) {
+      await showLocationPermissionDialog(context);
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
         showMessage(S.of(context).locationPermissionDenied);

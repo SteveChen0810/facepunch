@@ -341,6 +341,37 @@ class CompanyModel extends ChangeNotifier{
     }
   }
 
+  Future<String> punchByAdmin({int userId,String action,double longitude,double latitude, String punchTime})async{
+    try{
+      var res = await http.post(
+          AppConst.punchByAdmin,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: jsonEncode({
+            'user_id':userId,
+            'action':action,
+            'longitude':longitude,
+            'latitude':latitude,
+            'punch_time':punchTime,
+          })
+      );
+      print("[CompanyModel.punchByAdmin] ${res.body}");
+      if(res.statusCode==200){
+        final punch = Punch.fromJson(jsonDecode(res.body));
+        users.firstWhere((u) => u.id==userId).lastPunch = punch;
+        notifyListeners();
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[CompanyModel.punchByAdmin] $e");
+      return e.toString();
+    }
+  }
 }
 
 class Company {

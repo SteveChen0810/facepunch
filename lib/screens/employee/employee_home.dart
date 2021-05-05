@@ -36,6 +36,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             EmployeeSetting()
           ],
           controller: _pageController,
+          physics: NeverScrollableScrollPhysics(),
           onPageChanged: (i){
             setState(() {index = i; });
           },

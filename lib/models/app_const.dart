@@ -25,6 +25,7 @@ class AppConst{
   static final String getEmployeePunches = baseUrl+"get-employee-punches";
   static final String editPunch = baseUrl+"edit-punch";
   static final String deletePunch = baseUrl+"delete-punch";
+  static final String punchByAdmin= baseUrl+"punch-by-admin";
 
   static final String sendTimeRevisionRequest = baseUrl+"send-time-revision";
   static final String getRevisionRequest = baseUrl+"get-time-revisions";

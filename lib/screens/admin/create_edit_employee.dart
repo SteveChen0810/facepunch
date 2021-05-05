@@ -81,7 +81,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   }
 
   _pickUserPhoto(ImageSource source)async{
-    PickedFile image = await _picker.getImage(source: source,maxHeight: 500,maxWidth: 500);
+    PickedFile image = await _picker.getImage(source: source,maxHeight: 800,maxWidth: 800);
     if(image!=null){
       File _cropFile = await ImageCropper.cropImage(
           sourcePath: image.path,
@@ -295,6 +295,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                               padding: EdgeInsets.all(4),
                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               onPressed: (){
+                                FocusScope.of(context).requestFocus(FocusNode());
                                 showModalBottomSheet(
                                     context: context,
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(8))),
@@ -659,7 +660,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
               ),
               SizedBox(height: 4,),
               DropdownButton<String>(
-                items: ['English','Spanish'].map((String value) {
+                items: ['English','Spanish','French'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Padding(

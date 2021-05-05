@@ -1395,8 +1395,30 @@ class S {
       args: [],
     );
   }
-
-
+  String get  punchIn{
+    return Intl.message(
+      'Punch In',
+      name: 'punchIn',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  punchOut{
+    return Intl.message(
+      'Punch Out',
+      name: 'punchOut',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  pin{
+    return Intl.message(
+      'Pin',
+      name: 'pin',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -1406,13 +1428,16 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
       Locale.fromSubtags(languageCode: 'es'),
+      Locale.fromSubtags(languageCode: 'fr'),
     ];
   }
 
   @override
   bool isSupported(Locale locale) => _isSupported(locale);
+
   @override
   Future<S> load(Locale locale) => S.load(locale);
+
   @override
   bool shouldReload(AppLocalizationDelegate old) => false;
 

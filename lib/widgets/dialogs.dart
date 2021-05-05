@@ -207,3 +207,36 @@ showNotificationDialog(AppNotification notification, BuildContext context){
     print("[showRevisionNotificationDialog] $e");
   }
 }
+
+Future<bool> showLocationPermissionDialog(BuildContext context)async{
+  bool allow = true;
+  await showDialog(
+    context: context,
+    builder:(_)=> AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      contentPadding: EdgeInsets.all(0),
+      content: Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('This app collects location data to enable EmployeePunch even when the app is closed or not in use.',style: TextStyle(fontSize: 18),textAlign: TextAlign.center,),
+            SizedBox(height: 8,),
+            Text('This app tracks locations data of this phone when your employees punch with their face on this phone.',style: TextStyle(fontSize: 14),textAlign: TextAlign.center,),
+          ],
+        ),
+      ),
+      actions: [
+        FlatButton(
+          onPressed: ()async{
+            Navigator.pop(context);
+          },
+          child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+      ],
+    ),
+  );
+  return allow;
+}

@@ -20,7 +20,11 @@ class UserModel with ChangeNotifier{
         var json = await storage.getItem('user');
         if(json!=null){
           user = User.fromJson(json);
-          if(user.language=='Spanish')locale = 'es';
+          if(user.language=='Spanish'){
+            locale = 'es';
+          }else if(user.language=='French'){
+            locale = 'fr';
+          }
           GlobalData.token = user.token;
         }
       }
@@ -36,7 +40,13 @@ class UserModel with ChangeNotifier{
       bool storageReady = await storage.ready;
       if(storageReady)
         await storage.setItem('user', user.toJson());
-      if(user.language=='Spanish')locale = 'es';
+      if(user.language=='Spanish'){
+        locale = 'es';
+      }else if(user.language=='French'){
+        locale = 'fr';
+      }else{
+        locale = 'en';
+      }
       notifyListeners();
     }catch(e){
       print("[UserModel.saveUserToLocal] $e");
@@ -696,6 +706,17 @@ class User {
       print("[User.deletePunch] $e");
       return e.toString();
     }
+  }
+
+  bool isPunchIn(){
+    return lastPunch!=null && lastPunch.punch=='In';
+  }
+
+  String pdfUrl(DateTime startDate){
+    DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
+    final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";
+    print(pdfLink);
+    return Uri.encodeFull('https://facepunch.app/punch-pdfs/$companyId/$pdfLink');
   }
 }
 

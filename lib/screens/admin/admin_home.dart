@@ -32,6 +32,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   Position currentPosition;
+  int loadingUser = 0;
 
   void _onRefresh() async{
     await context.read<CompanyModel>().getCompanyUsers();
@@ -66,6 +67,23 @@ class _AdminHomePageState extends State<AdminHomePage> {
       popoverBuild: (_context){
         return CupertinoPopoverMenuList(
           children: <Widget>[
+            CupertinoPopoverMenuItem(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(user.isPunchIn()?S.of(context).punchOut:S.of(context).punchIn,style: TextStyle(color: Colors.black87),),
+                    Icon(user.isPunchIn()?Icons.logout:Icons.login,color: Colors.black87,),
+                  ],
+                ),
+              ),
+              onTap: (){
+                Navigator.of(_context).pop();
+                _manualPunch(user);
+                return true;
+              },
+            ),
             CupertinoPopoverMenuItem(
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
@@ -131,7 +149,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
                       padding: EdgeInsets.only(bottom: 3),
                       child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch.createdAt))}",style: TextStyle(color: Colors.white,),)
                   )
-              )
+              ),
+              if(user.id==loadingUser)
+                Center(child: CircularProgressIndicator()),
             ],
           ),
         ),
@@ -220,6 +240,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       showMessage(S.of(context).locationPermissionDenied);
     }
     if (permission == LocationPermission.denied) {
+      await showLocationPermissionDialog(context);
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
         showMessage(S.of(context).locationPermissionDenied);
@@ -263,11 +284,37 @@ class _AdminHomePageState extends State<AdminHomePage> {
     }
   }
 
+  _manualPunch(User user)async{
+    try{
+      final TimeOfDay picked = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+        helpText: 'Confirm Punch Time'
+      );
+      if(picked==null)return;
+      DateTime now = DateTime.now();
+      setState(() {loadingUser=user.id;});
+      String result = await context.read<CompanyModel>().punchByAdmin(
+          userId: user.id,
+          action: user.isPunchIn()?'Out':'In',
+          latitude: currentPosition.latitude,
+        longitude: currentPosition.longitude,
+        punchTime: DateTime(now.year,now.month,now.day,picked.hour,picked.minute,0,0).toString()
+      );
+      setState(() {loadingUser=0;});
+      if(result!=null)showMessage(result);
+    }catch(e){
+      print('[_manualPunch]$e');
+      setState(() {loadingUser=0;});
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    List<User> inUsers = context.watch<CompanyModel>().users.where((u) => (u.lastPunch!=null && u.lastPunch.punch=="In")).toList();
-    List<User> outUsers = context.watch<CompanyModel>().users.where((u) => (u.lastPunch==null || u.lastPunch.punch=="Out")).toList();
+    List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
+    List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
     List<AppNotification> notifications  = context.watch<NotificationModel>().notifications.where((n) =>(n.seen!=null && !n.seen)).toList();
     return Scaffold(
       key: _scaffoldKey,

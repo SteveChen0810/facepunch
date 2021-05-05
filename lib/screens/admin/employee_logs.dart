@@ -1,4 +1,5 @@
 import 'package:facepunch/lang/l10n.dart';
+import 'package:facepunch/screens/admin/pdf_full_screen.dart';
 import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -146,6 +147,16 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                     child: Text(p.punch=="Lunch"?"Lunch Break from ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))} to ${PunchDateUtils.getTimeString(DateTime.parse(p.updatedAt))}":"Punch ${p.punch} at ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",style: logStyle,)
                 ),
                 secondaryActions: <Widget>[
+                  if(p.latitude !=null && p.longitude!=null)
+                  IconSlideAction(
+                    caption: S.of(context).pin,
+                    color: Colors.green,
+                    iconWidget: Icon(Icons.pin_drop,color: Colors.white,size: 20,),
+                    foregroundColor: Colors.white,
+                    onTap: (){
+                      goToPosition(LatLng(p.latitude, p.longitude));
+                    },
+                  ),
                   IconSlideAction(
                     caption: S.of(context).edit,
                     color: Colors.orange,
@@ -402,7 +413,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                     Text("${S.of(context).totalHours}:\n ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
                     SizedBox(width: 100,),
                     FlatButton(
-                      onPressed: (){},
+                      onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>PDFFullScreen(url: user.pdfUrl(startOfWeek),))),
                       shape: CircleBorder(),
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         child: Column(
