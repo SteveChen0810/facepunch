@@ -146,7 +146,7 @@ class HarvestModel extends ChangeNotifier{
         for(var json in jsonDecode(res.body)){
           containers.add(HContainer.fromJson(json));
         }
-        saveFieldsToLocal();
+        saveContainersToLocal();
       }
     }catch(e){
 
@@ -238,6 +238,35 @@ class HarvestModel extends ChangeNotifier{
     }
   }
 
+
+  Future getHarvestTasks()async{
+    await getTasksFromLocal();
+    await getTasksFromServer();
+  }
+
+  Future getTasksFromServer()async{
+    try{
+      var res = await http.get(
+        AppConst.getAllTasks,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+      );
+      print('[getTasksFromServer] ${res.body}');
+      if(res.statusCode==200){
+        tasks.clear();
+        for(var json in jsonDecode(res.body)){
+          tasks.add(HTask.fromJson(json));
+        }
+        saveTasksToLocal();
+      }
+    }catch(e){
+
+    }
+  }
+
   Future<void> getTasksFromLocal()async{
     try {
       final ready = await storage.ready;
@@ -270,9 +299,23 @@ class HarvestModel extends ChangeNotifier{
 
   Future<String> deleteTask(HTask task)async{
     try{
-      tasks.remove(task);
-      await saveTasksToLocal();
-      return null;
+      var res = await http.post(
+        AppConst.deleteTask,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode(task.toJson()),
+      );
+      print('[deleteTask]${res.body}');
+      if(res.statusCode==200){
+        tasks.remove(task);
+        await saveTasksToLocal();
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
     }catch(e){
       print('[deleteTask] $e');
       return e.toString();
@@ -281,12 +324,27 @@ class HarvestModel extends ChangeNotifier{
 
   Future<String> createOrUpdateTask(HTask task)async{
     try{
-      if(task.id==null){
-        task.id = DateTime.now().millisecondsSinceEpoch;
-        tasks.add(task);
+      var res = await http.post(
+        AppConst.createOrUpdateTask,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode(task.toJson()),
+      );
+      print('[createOrUpdateTask]${res.body}');
+      if(res.statusCode==200){
+        final newTask = HTask.fromJson(jsonDecode(res.body));
+        tasks.removeWhere((t) => t.id==newTask.id);
+        newTask.container = task.container;
+        newTask.field = task.field;
+        tasks.add(newTask);
+        await saveTasksToLocal();
         notifyListeners();
+      }else{
+        return jsonDecode(res.body)['message'];
       }
-      await saveTasksToLocal();
       return null;
     }catch(e){
       print('[HarvestModel.createOrUpdateContainer] $e');
@@ -321,7 +379,6 @@ class HarvestModel extends ChangeNotifier{
 
   Future addHarvest({HTask task,String date,String nfc})async{
     try{
-      List<Harvest> harvests = [];
       var res = await http.post(
         AppConst.addHarvest,
         headers: {
@@ -347,6 +404,63 @@ class HarvestModel extends ChangeNotifier{
       print('[HarvestModel.getHarvestsOfDate] $e');
     }
     return null;
+  }
+
+  Future getEmployeeHarvestStats({String date, int field})async{
+    try{
+      var res = await http.post(
+        AppConst.getEmployeeHarvestStats,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({
+          'date':date,
+          'field':field,
+        }),
+      );
+      print('[getEmployeeHarvestStats]${res.body}');
+      if(res.statusCode==200){
+        List<HarvestEmployeeStats> eStats = [];
+        final json = jsonDecode(res.body);
+        for(var stats in json){
+          eStats.add(HarvestEmployeeStats.fromJson(stats));
+        }
+        return eStats;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[getEmployeeHarvestStats]$e');
+      return e.toString();
+    }
+  }
+
+  Future getCompanyHarvestStats({String date, int field})async{
+    try{
+      var res = await http.post(
+        AppConst.getCompanyHarvestStats,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({
+          'date':date,
+          'field':field,
+        }),
+      );
+      print('[getCompanyHarvestStats]${res.body}');
+      if(res.statusCode==200){
+        return HarvestCompanyStats.fromJson(jsonDecode(res.body));
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[getEmployeeHarvestStats]$e');
+      return e.toString();
+    }
   }
 }
 
@@ -398,10 +512,17 @@ class Harvest{
 
 class HTask{
   int id;
+  int companyId;
+  int containerId;
+  int fieldId;
   Field field;
   HContainer container;
+
   HTask({
     this.id,
+    this.companyId,
+    this.containerId,
+    this.fieldId,
     this.field,
     this.container,
   });
@@ -409,8 +530,11 @@ class HTask{
   HTask.fromJson(Map<String, dynamic> json) {
     try{
       id = json['id'];
-      field = Field.fromJson(json['field']);
-      container = HContainer.fromJson(json['container']);
+      companyId = json['company_id'];
+      containerId = json['container_id'];
+      fieldId = json['field_id'];
+      if(json['field']!=null)field = Field.fromJson(json['field']);
+      if(json['container']!=null)container = HContainer.fromJson(json['container']);
     }catch(e){
       print("[Field.fromJson] $e");
     }
@@ -419,8 +543,11 @@ class HTask{
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
-    data['field'] = this.field.toJson();
-    data['container'] = this.container.toJson();
+    data['company_id'] = this.companyId;
+    data['container_id'] = this.containerId;
+    data['field_id'] = this.fieldId;
+    data['field'] = this.field?.toJson();
+    data['container'] = this.container?.toJson();
     return data;
   }
 
@@ -502,4 +629,45 @@ class Field{
     data['updated_at'] = this.updatedAt;
     return data;
   }
+}
+
+class HarvestEmployeeStats{
+  int userId;
+  String employeeName;
+  double time;
+  double quantity;
+
+  HarvestEmployeeStats.fromJson(Map<String, dynamic> json){
+    try{
+      userId = json['id'];
+      employeeName = json['name'];
+      time = double.tryParse(json['time'].toString())??0.0;
+      quantity = double.tryParse(json['quantity'].toString())??0.0;
+    }catch(e){
+      print('[HarvestEmployeeStats.fromJson]$e');
+    }
+  }
+}
+
+class HarvestCompanyStats{
+  double harvestTimeOfDate;
+  double harvestTimeOfYear;
+  double quantityOfDate;
+  double quantityOfYear;
+  List containersOfDate;
+  List containersOfYear;
+
+  HarvestCompanyStats.fromJson(Map<String, dynamic> json){
+    try{
+      harvestTimeOfDate = double.tryParse(json['date']['time'].toString())??0.0;
+      harvestTimeOfYear = double.tryParse(json['year']['time'].toString())??0.0;
+      quantityOfDate = double.tryParse(json['date']['quantity'].toString())??0.0;
+      quantityOfYear = double.tryParse(json['year']['quantity'].toString())??0.0;
+      containersOfDate = json['date']['containers'];
+      containersOfYear = json['year']['containers'];
+    }catch(e){
+      print('[HarvestCompanyStats.fromJson]$e');
+    }
+  }
+
 }

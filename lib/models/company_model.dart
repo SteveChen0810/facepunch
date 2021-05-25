@@ -7,36 +7,23 @@ import 'package:localstorage/localstorage.dart';
 
 class CompanyModel extends ChangeNotifier{
   final LocalStorage storage = LocalStorage('companies');
-  List<Company> companies = [];
   Company myCompany = Company(plan: 0);
   CompanySettings myCompanySettings = CompanySettings(receivePunchNotification: true, hasNFC: true,receiveRevisionNotification: true);
   List<User> users = [];
 
-  Future<void> getCompanies()async{
-    await getCompanyFromLocal();
-    if(companies.isEmpty){
-      await getCompanyFromServer();
-    }else{
-      getCompanyFromServer();
-    }
-  }
-
   getCompanyFromServer()async{
     try{
       var res = await http.get(
-          AppConst.getAllCompanies,
+          AppConst.getMyCompany,
           headers: {
             'Accept':'application/json',
             'Content-Type':'application/x-www-form-urlencoded',
-          }
+            'Authorization':'Bearer '+GlobalData.token
+          },
       );
       print("[CompanyModel.getCompanyFromServer] ${res.body}");
       if(res.statusCode==200){
-        companies.clear();
-        final json = jsonDecode(res.body);
-        for(var c in json){
-          companies.add(Company.fromJson(c));
-        }
+        myCompany = Company.fromJson(jsonDecode(res.body));
         saveCompanyToLocal();
       }
     }catch(e){
@@ -49,7 +36,7 @@ class CompanyModel extends ChangeNotifier{
     try{
       bool storageReady = await storage.ready;
       if(storageReady)
-        await storage.setItem('companies', companies.map((c) => c.toJson()).toList());
+        await storage.setItem('my_company',myCompany.toJson());
     }catch(e){
       print("[CompanyModel.saveCompanyToLocal] $e");
     }
@@ -59,23 +46,14 @@ class CompanyModel extends ChangeNotifier{
     try{
       bool storageReady = await storage.ready;
       if(storageReady){
-        var json = await storage.getItem('companies');
+        var json = await storage.getItem('my_company');
         if(json!=null){
-          companies.clear();
-          for(var c in json){
-            companies.add(Company.fromJson(c));
-          }
+          myCompany = Company.fromJson(json);
         }
       }
     }catch(e){
       print("[CompanyModel.getCompanyFromLocal] $e");
     }
-    notifyListeners();
-  }
-
-  addCompany(Company company){
-    companies.add(company);
-    saveCompanyToLocal();
     notifyListeners();
   }
 
@@ -166,9 +144,13 @@ class CompanyModel extends ChangeNotifier{
     return result;
   }
 
-  getMyCompany(int companyId){
-    myCompany = companies.firstWhere((c) =>c.id==companyId,orElse: ()=>null);
-    notifyListeners();
+  Future getMyCompany(int companyId)async{
+    await getCompanyFromLocal();
+    if(myCompany==null || myCompany.id!=companyId){
+      await getCompanyFromServer();
+    }else{
+      getCompanyFromServer();
+    }
   }
 
   Future<String> getCompanyUsers()async{

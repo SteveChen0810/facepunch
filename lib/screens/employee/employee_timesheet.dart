@@ -6,7 +6,6 @@ import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/screens/home_page.dart';
 import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -335,8 +334,8 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfCurrentWeek())}H"),
-                            Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now())}"),
+                            Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfLastWeek())}H"),
+                            Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now().subtract(Duration(days: 7)))}"),
                           ],
                         ),
                       ),
@@ -389,7 +388,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("${user.firstName} ${user.lastName}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,color: Colors.white),),
-                          Text("${user.function}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.white),),
+                          Text("${user.function??''}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.white),),
                         ],
                       ),
                       IconButton(
@@ -459,10 +458,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           ),
                         )
                     ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                        child: Text("*${S.of(context).askRevision}*",style: TextStyle(color: Colors.red),)
-                    ),
+                    Center(child: Text("*${S.of(context).askRevision}*",style: TextStyle(color: Colors.red),)),
                   ],
                 ),
               ),
@@ -472,6 +468,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
       ),
     );
   }
+
 }
 
 class TopBackgroundClipper extends CustomClipper<Rect> {

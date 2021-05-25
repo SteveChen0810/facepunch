@@ -36,7 +36,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   TextEditingController _function = TextEditingController();
   TextEditingController _salary = TextEditingController();
   TextEditingController _nfc = TextEditingController();
-  TextEditingController _whatsApp = TextEditingController();
 
 
   String _fNameError,_lNameError,_emailError,_passwordError,_addressError,
@@ -66,7 +65,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         _function = TextEditingController(text: widget.employee.function);
         _salary = TextEditingController(text: widget.employee.salary);
         _nfc = TextEditingController(text: widget.employee.nfc);
-        _whatsApp = TextEditingController(text: widget.employee.whatsApp);
         country = widget.employee.country;
         state = widget.employee.state;
         city = widget.employee.city;
@@ -226,7 +224,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         salary: _salary.text,
         birthday: _startDate!=null?_birthDay.toString().split(" ").first:null,
         nfc: _nfc.text,
-        whatsApp: _whatsApp.text,
         language: language,
         lunchTime: lunchTime,
         role: "employee",
@@ -642,21 +639,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 },
                 maxLines: 1,
                 controller: _nfc,
-              ),
-              SizedBox(height: 4,),
-              TextField(
-                decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  isDense: true,
-                  labelText: "WhatsApp",
-                  labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
-                  contentPadding: EdgeInsets.zero,
-                ),
-                enabled: !isLoading,
-                maxLines: 1,
-                controller: _whatsApp,
               ),
               SizedBox(height: 4,),
               DropdownButton<String>(

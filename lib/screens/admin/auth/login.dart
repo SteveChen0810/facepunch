@@ -51,8 +51,8 @@ class _AdminSignInState extends State<AdminSignIn> {
             password:_password.text,
             isRememberMe: isRememberMe
           );
+          await widget.onLogin(result);
           setState(() {isLoading = false;});
-          widget.onLogin(result);
         }else{
           setState(() {});
         }

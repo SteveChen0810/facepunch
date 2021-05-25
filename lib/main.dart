@@ -1,6 +1,5 @@
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'lang/l10n.dart';
 import 'models/app_const.dart';
 import 'models/company_model.dart';
@@ -21,7 +20,6 @@ Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
   );
-  InAppPurchaseConnection.enablePendingPurchases();
   runApp(
       MultiProvider(
           providers:[

@@ -1,10 +1,9 @@
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/screens/employee/employee_document.dart';
-import 'package:facepunch/screens/employee/employee_setting.dart';
 import 'package:facepunch/screens/employee/employee_timesheet.dart';
-
 import '../../models/app_const.dart';
 import 'package:flutter/material.dart';
+
 class EmployeeHomePage extends StatefulWidget {
 
   @override
@@ -33,7 +32,6 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
           children: [
             EmployeeTimeSheet(),
             EmployeeDocument(),
-            EmployeeSetting()
           ],
           controller: _pageController,
           physics: NeverScrollableScrollPhysics(),
@@ -53,11 +51,6 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
               icon: Image.asset("assets/images/ic_document.png",height: 30,),
               activeIcon: Image.asset("assets/images/ic_document.png",height: 40,color: Color(primaryColor),),
               label: S.of(context).document
-          ),
-          BottomNavigationBarItem(
-              icon: Image.asset("assets/images/ic_setting.png",height: 30,),
-              activeIcon: Image.asset("assets/images/ic_setting.png",height: 40,color: Color(primaryColor),),
-              label: S.of(context).setting
           ),
         ],
         showSelectedLabels: false,

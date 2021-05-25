@@ -56,7 +56,8 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                   contentPadding: EdgeInsets.zero,
                   dayPickerRowHeight: 30,
                   monthPickerPortraitWidth: width,
-                  maxDayPickerRowCount: 6,
+                  maxDayPickerRowCount: 7,
+                  scrollPhysics: NeverScrollableScrollPhysics()
                 ),
                 datePickerStyles: DatePickerRangeStyles(
                   selectedPeriodLastDecoration: BoxDecoration(

@@ -38,7 +38,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
 
   @override
   void dispose() {
-    FlutterNfcReader.stop();
+    FlutterNfcReader.stop().catchError(print);
     super.dispose();
   }
 
@@ -55,6 +55,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     }
     HContainer selectedContainer;
     Field selectedField;
+    bool isUpdating = false;
     if(task==null){
       selectedContainer = containers[0];
       selectedField = fields[0];
@@ -89,7 +90,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                             child: Text('${value.name}, ${value.crop} , ${value.cropVariety}',style: TextStyle(fontSize: 18),),
                           );
                         }).toList(),
-                        value: selectedField,
+                        value: fields.firstWhere((f) => f.id == selectedField.id,orElse: ()=>null),
                         isExpanded: true,
                         isDense: true,
                         underline: SizedBox(),
@@ -119,7 +120,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         isExpanded: true,
                         isDense: true,
                         underline: SizedBox(),
-                        value: selectedContainer,
+                        value: containers.firstWhere((c) =>c.id == selectedContainer.id,orElse: ()=>null),
                         onChanged: (c) {
                           setState((){
                             selectedContainer = c;
@@ -134,31 +135,37 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: isUpdating
+                                ?SizedBox( height: 14,width: 14,child: CircularProgressIndicator(backgroundColor: Colors.white,))
+                                :Text(S.of(context).save.toUpperCase(),style: TextStyle(color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           onPressed: ()async{
-                            if(task!=null){
-                              task.field = selectedField;
-                              task.container = selectedContainer;
-                            }else{
-                              task = HTask(field: selectedField,container: selectedContainer);
+                            if(!isUpdating){
+                              if(task!=null){
+                                task.field = selectedField;
+                                task.container = selectedContainer;
+                              }else{
+                                task = HTask(field: selectedField,container: selectedContainer, containerId: selectedContainer.id,fieldId: selectedField.id);
+                              }
+                              setState((){isUpdating = true;});
+                              String result = await context.read<HarvestModel>().createOrUpdateTask(task);
+                              setState((){isUpdating = false;});
+                              if(result!=null){
+                                showMessage(result);
+                              }
+                              Navigator.pop(_context);
                             }
-                            String result = await context.read<HarvestModel>().createOrUpdateTask(task);
-                            if(result!=null){
-                              showMessage(result);
-                            }
-                            Navigator.pop(_context);
                           },
                         ),
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(color: Colors.white),),
                           ),
                           onPressed: ()async{
-                            Navigator.pop(_context);
+                            if(!isUpdating)Navigator.pop(_context);
                           },
                           color: Colors.red,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -175,6 +182,8 @@ class _NFCScanPageState extends State<NFCScanPage>{
   }
 
   confirmDeleteTaskDialog(HTask task){
+    bool isDeleting = false;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -192,23 +201,31 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            child: isDeleting?SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(),
+                            ):Text(S.of(context).delete,style: TextStyle(color: Colors.white),),
                           ),
                           color: Color(primaryColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           onPressed: ()async{
-                            String result = await context.read<HarvestModel>().deleteTask(task);
-                            Navigator.pop(_context);
-                            if(result!=null)showMessage(result);
+                            if(!isDeleting){
+                              setState((){isDeleting = true;});
+                              String result = await context.read<HarvestModel>().deleteTask(task);
+                              setState((){isDeleting = true;});
+                              Navigator.pop(_context);
+                              if(result!=null)showMessage(result);
+                            }
                           },
                         ),
                         RaisedButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
+                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(color: Colors.white),),
                           ),
                           onPressed: ()async{
-                            Navigator.pop(_context);
+                            if(!isDeleting)Navigator.pop(_context);
                           },
                           color: Colors.red,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -284,7 +301,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
         }
       }
     }).catchError((e){
-      showMessage(e.toString());
+      showMessage(e.message);
     });
   }
 
@@ -298,6 +315,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
       appBar: AppBar(
         title: Text(S.of(context).harvestTracking),
         backgroundColor: Color(primaryColor),
+        centerTitle: true,
         actions: [
           FlatButton(
             onPressed: ()=>Navigator.push(context,MaterialPageRoute(builder: (context)=>NFCSettingPage())),

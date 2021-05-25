@@ -1,14 +1,12 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/screens/employee/employee_login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'admin/admin_home.dart';
 import 'admin/auth/login.dart';
-import 'admin/auth/register.dart';
-import 'admin/company_register/fill_company_info.dart';
 import 'admin/face_punch/start_face_punch.dart';
 import 'employee/employee_home.dart';
 
@@ -18,147 +16,30 @@ class HomePage extends StatefulWidget{
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>{
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin<HomePage>{
 
-  static const SIGN_UP =0;
-  static const EMPLOYEE_SIGN_IN =1;
-  static const FACE_PUNCH =2;
-  static const ADMIN_SIGN_IN =3;
+  static const EMPLOYEE_SIGN_IN =0;
+  static const FACE_PUNCH =1;
+  static const ADMIN_SIGN_IN =2;
 
-  PageController _pageController = PageController(initialPage: FACE_PUNCH,keepPage: false);
+  TabController _tabController;
   int _pageIndex = FACE_PUNCH;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
+    _tabController = TabController(length: 3, vsync: this, initialIndex: FACE_PUNCH);
     super.initState();
   }
 
-  List<Widget> buildBottomBar(){
-    double width = MediaQuery.of(context).size.width/3-4;
-    double borderRadius = 16.0;
-    double iconSize = 18.0;
-    TextStyle _style = TextStyle(fontWeight: FontWeight.bold,fontSize: 16);
-    final shadow = BoxShadow(
-      color: Colors.black.withOpacity(0.1),
-      spreadRadius: 2,
-      blurRadius: 2,
-      offset: Offset(0, 2),
-    );
-    Widget signUp = Container(
-      width: width,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-          color: Color(0xFFbfbfbf),
-          boxShadow: [shadow]
-      ),
-      clipBehavior: Clip.hardEdge,
-      padding: EdgeInsets.all(4.0),
-      margin: EdgeInsets.all(2),
-      child: InkWell(
-        onTap: (){
-          setState(() {
-            _pageIndex = SIGN_UP;
-          });
-          _pageController.jumpToPage(SIGN_UP);
-        },
-        child: Column(
-          children: [
-            Icon(Icons.keyboard_arrow_up,size: iconSize),
-            Text("SignUp",style: _style,textAlign: TextAlign.center,)
-          ],
-        ),
-      ),
-    );
-    Widget facePunch = Container(
-      width: width,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-        color: Color(primaryColor),
-        boxShadow: [shadow]
-      ),
-      padding: EdgeInsets.all(4.0),
-      margin: EdgeInsets.all(2),
-      child: InkWell(
-        onTap: (){
-          setState(() {
-            _pageIndex = FACE_PUNCH;
-          });
-          _pageController.jumpToPage(FACE_PUNCH);
-        },
-        child: Column(
-          children: [
-            Icon(Icons.keyboard_arrow_up,size: iconSize,),
-            Text("Face\nPunch",style: _style,textAlign: TextAlign.center,)
-          ],
-        ),
-      ),
-    );
-    Widget employeeSignIn = Container(
-      width: width,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-          color: Color(0xFFbfbfbf),
-          boxShadow: [shadow]
-      ),
-      padding: EdgeInsets.all(4.0),
-      margin: EdgeInsets.all(2),
-      child: InkWell(
-        onTap: (){
-          setState(() {
-            _pageIndex = EMPLOYEE_SIGN_IN;
-          });
-          _pageController.jumpToPage(EMPLOYEE_SIGN_IN);
-        },
-        child: Column(
-          children: [
-            Icon(Icons.keyboard_arrow_up,size: iconSize,),
-            Text("Employee\nSignIn",style: _style,textAlign: TextAlign.center,)
-          ],
-        ),
-      ),
-    );
-    Widget adminSignIn = Container(
-      width: width,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-          color: Color(0xFFbfbfbf),
-          boxShadow: [shadow]
-      ),
-      padding: EdgeInsets.all(4.0),
-      margin: EdgeInsets.all(2),
-      child: InkWell(
-        onTap: (){
-          setState(() {
-            _pageIndex = ADMIN_SIGN_IN;
-          });
-          _pageController.jumpToPage(ADMIN_SIGN_IN);
-        },
-        child: Column(
-          children: [
-            Icon(Icons.keyboard_arrow_up,size: iconSize,),
-            Text("Admin\nSignIn",style: _style,textAlign: TextAlign.center,)
-          ],
-        ),
-      ),
-    );
-    List<Widget> tabs = [signUp,employeeSignIn,facePunch,adminSignIn];
-    tabs.removeAt(_pageIndex);
-    return tabs;
-  }
-
-  onLogin(String result){
+  onLogin(String result)async{
     if(result==null){
       User user = context.read<UserModel>().user;
-      if(user.companyId==null){
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>FillCompanyInfo()));
+      if(user.role=="admin"){
+        await context.read<CompanyModel>().getMyCompany(user.companyId);
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
       }else{
-        context.read<CompanyModel>().getMyCompany(user.companyId);
-        if(user.role=="admin"){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
-        }else{
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
-        }
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
       }
     }else{
       _showMessage(result);
@@ -180,19 +61,55 @@ class _HomePageState extends State<HomePage>{
   Widget build(BuildContext context) {
     bool isShowKeyBoard = MediaQuery.of(context).viewInsets.bottom != 0;
     double imageSize = isShowKeyBoard?50:120;
-    double bottomBarHeight = 70;
     double width = MediaQuery.of(context).size.width;
     double borderRadius = 16.0;
-    double iconSize = 18.0;
-    TextStyle _style = TextStyle(fontWeight: FontWeight.bold,fontSize: 16);
+    double iconSize = 16.0;
+    TextStyle _style = TextStyle(fontWeight: FontWeight.w500, fontSize: 16);
     final shadow = BoxShadow(
       color: Colors.black.withOpacity(0.3),
       spreadRadius: 1,
       blurRadius: 1,
       offset: Offset(0, 0),
     );
+    String lang = context.watch<UserModel>().locale;
     return Scaffold(
       key: _scaffoldKey,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (_)=><PopupMenuItem<String>>[
+              PopupMenuItem<String>(
+                  child: Text('English'),
+                  value: 'en'
+              ),
+              PopupMenuItem<String>(
+                  child: Text('Spanish'),
+                  value: 'es'
+              ),
+              PopupMenuItem<String>(
+                  child: Text('French'),
+                  value: 'fr'
+              ),
+            ],
+            padding: EdgeInsets.zero,
+            onSelected: (l){
+              context.read<UserModel>().changeAppLanguage(l);
+            },
+            child: Container(
+              child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(8),
+              margin: EdgeInsets.only(right: 8),
+            ),
+          ),
+        ],
+      ),
       body: WillPopScope(
         onWillPop: ()async{
           return false;
@@ -228,19 +145,15 @@ class _HomePageState extends State<HomePage>{
                   borderRadius: BorderRadius.vertical(top:  Radius.circular(20)),
                   color: Colors.white
                 ),
-                height: MediaQuery.of(context).size.height*0.6-bottomBarHeight,
-                child: PageView(
+                height: MediaQuery.of(context).size.height*0.6-kBottomNavigationBarHeight,
+                child: TabBarView(
                   children: [
-                    RegisterWidget(onLogin: onLogin,),
                     EmployeeLogin(showMessage: _showMessage,),
                     StartFacePunch(showMessage: _showMessage,),
                     AdminSignIn(onLogin: onLogin,),
                   ],
-                  controller: _pageController,
-                  clipBehavior: Clip.hardEdge,
+                  controller: _tabController,
                   physics: NeverScrollableScrollPhysics(),
-                  allowImplicitScrolling: true,
-                  pageSnapping: true,
                 ),
               ),
             ],
@@ -248,121 +161,66 @@ class _HomePageState extends State<HomePage>{
         ),
       ),
       bottomNavigationBar: Container(
-        height: bottomBarHeight+50,
+        height: kBottomNavigationBarHeight+10,
         color: Colors.white,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
+        alignment: Alignment.topCenter,
+        child: TabBar(
+          controller: _tabController,
+          onTap: (i){
+            setState(() { _pageIndex = i;});
+          },
+          indicatorPadding: EdgeInsets.zero,
+          labelPadding: EdgeInsets.zero,
+          tabs: [
             Container(
-              width: width,
-              height: bottomBarHeight+50,
+              width: width/3-4,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex==SIGN_UP?Color(primaryColor):Colors.white.withOpacity(0.8),
+                  color: _pageIndex == EMPLOYEE_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
                   boxShadow: [shadow]
               ),
-              clipBehavior: Clip.hardEdge,
-              margin: EdgeInsets.all(2),
-              child: InkWell(
-                onTap: (){
-                  setState(() {
-                    _pageIndex = SIGN_UP;
-                  });
-                  _pageController.jumpToPage(SIGN_UP);
-                },
-                child: Column(
-                  children: [
-                    Icon(Icons.keyboard_arrow_up,size: iconSize),
-                    Text("Sign Up",style: _style,textAlign: TextAlign.center,)
-                  ],
-                ),
+              child: Column(
+                children: [
+                  Icon(Icons.keyboard_arrow_up,size: iconSize,),
+                  Text(S.of(context).employeeSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
+                ],
               ),
             ),
-            Row(
-              children: [
-                Container(
-                  width: width/3-4,
-                  height: bottomBarHeight,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                      color: _pageIndex == EMPLOYEE_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
-                      boxShadow: [shadow]
-                  ),
-                  padding: EdgeInsets.all(4.0),
-                  margin: EdgeInsets.all(2),
-                  child: InkWell(
-                    onTap: (){
-                      setState(() {
-                        _pageIndex = EMPLOYEE_SIGN_IN;
-                      });
-                      _pageController.jumpToPage(EMPLOYEE_SIGN_IN);
-                    },
-                    child: Column(
-                      children: [
-                        Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                        Text("Employee\nSign In",style: _style,textAlign: TextAlign.center,)
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: width/3-4,
-                  height: bottomBarHeight,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                      color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white.withOpacity(0.8),
-                      boxShadow: [
-                        shadow,
-                      ]
-                  ),
-                  padding: EdgeInsets.all(4.0),
-                  margin: EdgeInsets.all(2),
-                  child: InkWell(
-                    onTap: (){
-                      setState(() {
-                        _pageIndex = FACE_PUNCH;
-                      });
-                      _pageController.jumpToPage(FACE_PUNCH);
-                    },
-                    child: Column(
-                      children: [
-                        Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                        Text("Face\nPunch",style: _style,textAlign: TextAlign.center,)
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  width: width/3-4,
-                  height: bottomBarHeight,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                      color: _pageIndex == ADMIN_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
-                      boxShadow: [shadow]
-                  ),
-                  padding: EdgeInsets.all(4.0),
-                  margin: EdgeInsets.all(2),
-                  child: InkWell(
-                    onTap: (){
-                      setState(() {
-                        _pageIndex = ADMIN_SIGN_IN;
-                      });
-                      _pageController.jumpToPage(ADMIN_SIGN_IN);
-                    },
-                    child: Column(
-                      children: [
-                        Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                        Text("Admin\nSign In",style: _style,textAlign: TextAlign.center,)
-                      ],
-                    ),
-                  ),
-                )
-              ],
+            Container(
+              width: width/3-4,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                  color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white.withOpacity(0.8),
+                  boxShadow: [
+                    shadow,
+                  ]
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.keyboard_arrow_up, size: iconSize,),
+                  Text("Face\nPunch", style: _style, textAlign: TextAlign.center,)
+                ],
+              ),
+            ),
+            Container(
+              width: width/3-4,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                  color: _pageIndex == ADMIN_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
+                  boxShadow: [shadow]
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.keyboard_arrow_up,size: iconSize,),
+                  Text(S.of(context).adminSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
+                ],
+              ),
             )
           ],
         ),
       ),
       backgroundColor: Color(primaryColor),
+      extendBodyBehindAppBar: true,
     );
   }
 }

@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/widgets/dialogs.dart';
-import '../../models/company_model.dart';
+import 'package:flutter/cupertino.dart';
 import '../../models/user_model.dart';
 import '../../screens/employee/employee_home.dart';
 import '../../models/app_const.dart';
@@ -42,7 +41,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   String _photoPath="";
   bool _isCameraAllowed = false;
   int _pageIndex = 0;
-  Company selectedCompany;
   String userName = "";
 
   @override
@@ -50,7 +48,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
     super.initState();
     cameraPermission();
   }
-
 
   @override
   void dispose() {
@@ -154,16 +151,13 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   Future<bool> loginWithFace(String path)async{
     try{
       String base64Image = base64Encode(File(path).readAsBytesSync());
-      String result = await context.read<UserModel>().loginWithFace(selectedCompany.id, base64Image);
+      String result = await context.read<UserModel>().loginWithFace(base64Image);
       if(result==null){
         final user = context.read<UserModel>().user;
-        bool check = await pinCodeCheckDialog(user.pin, context);
-        if(check){
-          if(mounted){setState(() {_pageIndex = 2; userName = "${user.firstName} ${user.lastName}";});}
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
-        }else{
-          widget.showMessage(S.of(context).pinCodeNotCorrect);
-        }
+        if(mounted){setState(() {_pageIndex = 2; userName = "${user.firstName} ${user.lastName}";});}
+        Future.delayed(Duration(seconds: 2)).whenComplete((){
+          if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
+        });
       }else{
         widget.showMessage(result);
       }
@@ -191,7 +185,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   }
 
   Widget loginWithFaceWidget(){
-    final size = MediaQuery.of(context).size.width*0.6;
+    final size = MediaQuery.of(context).size.width*0.7;
     try{
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -204,45 +198,45 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   width: size,
                   height: size,
                   padding: EdgeInsets.all(8),
-                  child: _photoPath.isEmpty?(cameraController==null || !cameraController.value.isInitialized)?Center(child: CircularProgressIndicator(),):
-                  ClipRect(
-                    child: Transform.scale(
-                        scale: 1/cameraController.value.aspectRatio,
-                        child: Center(
-                            child: AspectRatio(
-                                aspectRatio: cameraController.value.aspectRatio,
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    CameraPreview(cameraController),
-                                    Platform.isIOS?faceRect():
-                                    Transform(
-                                      alignment: Alignment.center,
-                                      transform: Matrix4.rotationY(math.pi),
-                                      child: faceRect(),
-                                    )
-                                  ],
-                                )
-                            )
-                        )
-                    ),
-                  ):
-                  Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.rotationY(math.pi),
-                    child: Image.file(
-                      File(_photoPath),
-                      fit: BoxFit.cover,
+                  child: _photoPath.isEmpty
+                    ?(cameraController==null || !cameraController.value.isInitialized)
+                    ?Center(child: CircularProgressIndicator(),)
+                    :ClipRect(
+                      child: Transform.scale(
+                          scale: 1/cameraController.value.aspectRatio,
+                          child: Center(
+                              child: AspectRatio(
+                                  aspectRatio: cameraController.value.aspectRatio,
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      CameraPreview(cameraController),
+                                      Platform.isIOS?faceRect():
+                                      Transform(
+                                        alignment: Alignment.center,
+                                        transform: Matrix4.rotationY(math.pi),
+                                        child: faceRect(),
+                                      )
+                                    ],
+                                  )
+                              )
+                          )
+                      ),
+                    )
+                    :Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.rotationY(math.pi),
+                      child: Image.file(
+                        File(_photoPath),
+                        fit: BoxFit.cover,
                     ),
                   )
                 ),
-                AspectRatio(
-                  aspectRatio: 1.0,
-                  child: Image.asset(
-                    "assets/images/overlay.png",
-                    width: size,
-                    fit: BoxFit.fill,
-                  ),
+                Image.asset(
+                  "assets/images/overlay.png",
+                  width: size,
+                  height: size,
+                  fit: BoxFit.fill,
                 ),
               ],
             ),
@@ -281,7 +275,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
 
   Widget mainWidget(){
     if(_pageIndex==0){
-      final size = MediaQuery.of(context).size.width*0.6;
+      final size = MediaQuery.of(context).size.width*0.7;
       return Column(
         children: [
           Expanded(
@@ -300,12 +294,8 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
             splashColor: Color(primaryColor),
             child: RaisedButton(
               onPressed: (){
-                if(selectedCompany!=null){
-                  _initializeCamera();
-                  setState(() {_pageIndex=1;});
-                }else{
-                  widget.showMessage(S.of(context).chooseYourCompany);
-                }
+                _initializeCamera();
+                setState(() {_pageIndex=1;});
               },
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -335,53 +325,12 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    List<Company> companies = context.watch<CompanyModel>().companies;
-    if(selectedCompany!=null){
-      selectedCompany = companies.firstWhere((c) => c.id==selectedCompany.id,orElse: ()=>null);
-    }
     return Container(
       width: width,
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
           Text(S.of(context).employeeSignIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-          SizedBox(height: 8,),
-          Column(
-            children: [
-              Text(S.of(context).selectYourCompany,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
-              SizedBox(height: 4,),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.black87)
-                ),
-                height: 40,
-                child: DropdownButton<Company>(
-                  items: companies.map((Company value) {
-                    return DropdownMenuItem<Company>(
-                      value: value,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2,horizontal: 8),
-                        child: Text(value.name),
-                      ),
-                    );
-                  }).toList(),
-                  underline: SizedBox(),
-                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500,color: Colors.black87),
-                  hint: Text(S.of(context).chooseYourCompany),
-                  isExpanded: true,
-                  onChanged: (v) {
-                    setState(() {
-                      selectedCompany = v;
-                    });
-                  },
-                  value: selectedCompany,
-                ),
-              )
-            ],
-          ),
           SizedBox(height: 10,),
           Expanded(
               child: mainWidget()

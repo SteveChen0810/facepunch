@@ -171,7 +171,7 @@ class PunchDateUtils {
   }
 
   static String inputDateString(DateTime date){
-    return DateFormat('d,M,y').format(date);
+    return DateFormat('dd/MM/y').format(date);
   }
 
   static String getTimeString(DateTime date){

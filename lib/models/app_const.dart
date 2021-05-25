@@ -12,7 +12,7 @@ class AppConst{
   static final String recoverPassword = baseUrl+"recover-password";
   static final String notificationSetting = baseUrl+"notification-setting";
 
-  static final String getAllCompanies = baseUrl+"get-all-company";
+  static final String getMyCompany = baseUrl+"get-my-company";
   static final String getCompanySettings = baseUrl+"get-company-settings";
   static final String updateCompanySettings = baseUrl+"update-company-settings";
   static final String createCompany = baseUrl+"create-company";
@@ -43,6 +43,13 @@ class AppConst{
 
   static final String getHarvestsOfDate = baseUrl+"get-harvests-of-date";
   static final String addHarvest = baseUrl+"add-harvest";
+
+  static final String createOrUpdateTask = baseUrl+"create-update-task";
+  static final String getAllTasks = baseUrl+"get-tasks";
+  static final String deleteTask = baseUrl+"delete-task";
+
+  static final String getEmployeeHarvestStats = baseUrl+"get-employee-harvest-stats";
+  static final String getCompanyHarvestStats = baseUrl+"get-company-harvest-stats";
 
 
 }

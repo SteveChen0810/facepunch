@@ -241,7 +241,7 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> loginWithFace(int companyId, String photo)async{
+  Future<String> loginWithFace(String photo)async{
     String result = 'Oops, Unknown Errors!';
     try{
       String deviceToken = await _firebaseMessaging.getToken();
@@ -253,7 +253,6 @@ class UserModel with ChangeNotifier{
             'Content-Type':'application/x-www-form-urlencoded',
           },
           body: {
-            'company_id':companyId.toString(),
             'photo':photo,
             'firebase_token': deviceToken??''
           }
@@ -273,33 +272,7 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<dynamic> findFace(companyId, String photo)async{
-    String result = 'Oops, Unknown Errors!';
-    try{
-      var res = await http.post(
-          AppConst.loginWithFace,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-          },
-          body: {
-            'company_id':companyId.toString(),
-            'photo':photo,
-          }
-      );
-      print("[UserModel.punchWithFace] ${res.body}");
-      if(res.statusCode==200){
-        return User.fromJson(jsonDecode(res.body));
-      }else{
-        result = jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      print("[UserModel.punchWithFace] $e");
-    }
-    return result;
-  }
-
-  Future<dynamic> savePunch({User employee, double longitude, double latitude})async{
+  Future<dynamic> punchWithFace({String photo,double longitude, double latitude})async{
     String result = 'Oops, Unknown Errors!';
     try{
       var res = await http.post(
@@ -307,24 +280,21 @@ class UserModel with ChangeNotifier{
           headers: {
             'Accept':'application/json',
             'Content-Type':'application/json',
-            'Authorization':'Bearer '+employee.token
           },
-          body: jsonEncode(
-              {
-                'longitude':longitude,
-                'latitude':latitude
-              }
-          )
+          body: jsonEncode({
+            'photo':photo,
+            'longitude':longitude,
+            'latitude':latitude
+          })
       );
-      print("[UserModel.savePunch] ${res.body}");
+      print("[UserModel.punchWithFace] ${res.body}");
       if(res.statusCode==200){
-        Punch punch = Punch.fromJson(jsonDecode(res.body));
-        return punch;
+        return jsonDecode(res.body);
       }else{
-        return jsonDecode(res.body)['message'];
+        result = jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[UserModel.savePunch] $e");
+      print("[UserModel.punchWithFace] $e");
     }
     return result;
   }
@@ -336,7 +306,7 @@ class UserModel with ChangeNotifier{
           headers: {
             'Accept':'application/json',
             'Content-Type':'application/json',
-            'Authorization':'Bearer '+user.token
+            'Authorization':'Bearer ${user.token}'
           }
       );
       print("[UserModel.getUserPunches] ${res.body}");
@@ -410,6 +380,12 @@ class UserModel with ChangeNotifier{
       return e.toString();
     }
   }
+
+  changeAppLanguage(String lang){
+    locale = lang;
+    notifyListeners();
+  }
+
 }
 
 class User {
@@ -440,7 +416,6 @@ class User {
   String employeeCode;
   int lunchTime=0;
   String nfc;
-  String whatsApp;
   String token;
   String createdAt;
   String updatedAt;
@@ -475,7 +450,6 @@ class User {
     this.employeeCode,
     this.token,
     this.nfc,
-    this.whatsApp,
     this.punches,
     this.lastPunch,
     this.lunchTime,
@@ -522,7 +496,6 @@ class User {
       }
       lunchTime = json['lunch_time'];
       nfc = json['nfc'];
-      whatsApp = json['whatsapp'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -560,7 +533,6 @@ class User {
     data['token'] = this.token;
     data['lunch_time'] = this.lunchTime;
     data['nfc'] = this.nfc;
-    data['whatsapp'] = this.whatsApp;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
@@ -660,6 +632,11 @@ class User {
   double getTotalHoursOfCurrentWeek(){
     DateTime startOfWeek = PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     return getTotalHoursOfWeek(startOfWeek);
+  }
+
+  double getTotalHoursOfLastWeek(){
+    DateTime startOfWeek = PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
+    return getTotalHoursOfWeek(startOfWeek.subtract(Duration(days: 7)));
   }
 
   Future<String> editPunch(int punchId,String value)async{

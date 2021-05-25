@@ -20,6 +20,7 @@ import '../../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'nfc/harvest_report.dart';
 import 'nfc/nfc_scan.dart';
 
 class AdminHomePage extends StatefulWidget {
@@ -48,7 +49,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   _fetchCompanyData()async{
-    await context.read<HarvestModel>().getTasksFromLocal();
+    await context.read<HarvestModel>().getHarvestTasks();
     await context.read<HarvestModel>().getFields();
     await context.read<HarvestModel>().getContainers();
     String message = await context.read<CompanyModel>().getCompanySettings();
@@ -430,7 +431,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                 shape: CircleBorder(),
                                 child: Stack(
                                   children: [
-                                    Icon(Icons.notifications,color: Color(primaryColor),size: 40,),
+                                    Icon(Icons.notifications,color: Color(primaryColor),size: 35,),
                                     Container(
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
@@ -448,9 +449,14 @@ class _AdminHomePageState extends State<AdminHomePage> {
                               child: Image.asset('assets/images/nfc.png',color: Color(primaryColor),height: 40,),
                             ),
                             FlatButton(
+                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
+                              shape: CircleBorder(),
+                              child: Icon(Icons.description_outlined,color: Color(primaryColor),size: 35,),
+                            ),
+                            FlatButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting())),
                                 shape: CircleBorder(),
-                                child: Icon(Icons.settings,color: Color(primaryColor),size: 40,),
+                                child: Icon(Icons.settings,color: Color(primaryColor),size: 35,),
                             )
                           ],
                         )

@@ -1419,6 +1419,30 @@ class S {
       args: [],
     );
   }
+  String get  harvestReport{
+    return Intl.message(
+      'Harvest Report',
+      name: 'harvestReport',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  totalOfTheDay{
+    return Intl.message(
+      'Total of the day',
+      name: 'totalOfTheDay',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  totalOfTheSeason{
+    return Intl.message(
+      'Total of the season',
+      name: 'totalOfTheSeason',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

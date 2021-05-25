@@ -1,13 +1,11 @@
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/screens/home_page.dart';
-
 import '../models/company_model.dart';
 import '../models/user_model.dart';
 import '../screens/admin/admin_home.dart';
 import '../screens/employee/employee_home.dart';
 import '../models/app_const.dart';
 import 'package:flutter/material.dart';
-import 'admin/company_register/fill_company_info.dart';
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,21 +20,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 500)).whenComplete(()async{
+    Future.delayed(Duration(seconds: 3)).whenComplete(()async{
       User user  = await context.read<UserModel>().getUserFromLocal();
-      await context.read<CompanyModel>().getCompanies();
       if(user==null){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
       }else{
         if(user.role=="admin"){
-          if(user.companyId==null){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>FillCompanyInfo()));
-          }else{
-            context.read<CompanyModel>().getMyCompany(user.companyId);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
-          }
+          await context.read<CompanyModel>().getMyCompany(user.companyId);
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
         }else{
-          context.read<CompanyModel>().getMyCompany(user.companyId);
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
         }
       }

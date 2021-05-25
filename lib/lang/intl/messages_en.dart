@@ -193,5 +193,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "employeeName" : MessageLookupByLibrary.simpleMessage("Employee Name"),
     "accept" : MessageLookupByLibrary.simpleMessage("Accept"),
     "decline" : MessageLookupByLibrary.simpleMessage("Decline"),
+    "harvestReport" : MessageLookupByLibrary.simpleMessage("Harvest Report"),
+    "totalOfTheDay" : MessageLookupByLibrary.simpleMessage("Total of the day"),
+    "totalOfTheSeason" : MessageLookupByLibrary.simpleMessage("Total of the season"),
   };
 }

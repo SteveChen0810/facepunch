@@ -5,7 +5,6 @@ import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/widgets/dialogs.dart';
-import '../../../models/company_model.dart';
 import '../../../widgets/face_painter.dart';
 import '../../../widgets/utils.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
@@ -17,8 +16,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 class FacePunchScreen extends StatefulWidget {
-  final Company company;
-  FacePunchScreen({this.company});
   @override
   _FacePunchScreenState createState() => _FacePunchScreenState();
 }
@@ -41,12 +38,10 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
   bool hasError = false;
   String _photoPath="";
   bool _isCameraAllowed = false;
-  Company selectedCompany;
 
   @override
   void initState() {
     super.initState();
-    selectedCompany = widget.company;
     cameraPermission().whenComplete((){
       _initializeCamera();
     });
@@ -189,45 +184,25 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     return await Geolocator.getCurrentPosition();
   }
 
-  checkCompanyPinDialog(context)async{
-    bool result = await pinCodeCheckDialog(selectedCompany.pin, context);
-    if(result){
-      await cameraClose();
-      Navigator.pop(context);
-    }else{
-      showMessage(S.of(context).pinCodeNotCorrect);
-    }
-  }
 
   punchWithFace(String path)async{
     try{
+      Position currentPosition = await _determinePosition();
       String base64Image = base64Encode(File(path).readAsBytesSync());
-      var result = await context.read<UserModel>().findFace(selectedCompany.id, base64Image);
-      if(result!=null){
-        if(result is User){
-          User employee = result;
-          bool checkPin = await pinCodeCheckDialog(employee.pin, context);
-          if(checkPin){
-            Position currentPosition = await _determinePosition();
-            var punch = await context.read<UserModel>().savePunch(
-                employee: employee,
-                latitude: currentPosition?.latitude,
-                longitude: currentPosition?.longitude
-            );
-            if(punch is Punch){
-              await showWelcomeDialog("${employee.firstName} ${employee.lastName}",punch.punch=="In");
-              await initDetectFace();
-              setState(() {_photoPath="";});
-              _btnController.reset();
-            }else if(punch is String){
-              showMessage(punch);
-            }
-          }else{
-            showMessage(S.of(context).pinCodeNotCorrect);
-          }
-        }else if(result is String){
-          showMessage(result);
-        }
+      var result = await context.read<UserModel>().punchWithFace(
+          photo: base64Image,
+          latitude: currentPosition?.latitude,
+          longitude: currentPosition?.longitude
+      );
+      if(result is String){
+        showMessage(result);
+      }else{
+        User employee = User.fromJson(result['employee']);
+        Punch punch = Punch.fromJson(result['punch']);
+        await showWelcomeDialog("${employee.firstName} ${employee.lastName}", punch.punch=="In");
+        await initDetectFace();
+        setState(() {_photoPath="";});
+        _btnController.reset();
       }
     }catch(e){
       print("[EmployeeLogin.punchWithFace] $e");
@@ -287,8 +262,8 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       key: _scaffoldKey,
       body: WillPopScope(
         onWillPop: ()async{
-          checkCompanyPinDialog(context);
-          return false;
+          await cameraClose();
+          return true;
         },
         child: Stack(
           children: [
@@ -351,7 +326,10 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
               top: MediaQuery.of(context).padding.top+30,
               right: 0,
               child: RaisedButton(
-                onPressed: ()=>checkCompanyPinDialog(context),
+                onPressed: ()async{
+                  await cameraClose();
+                  Navigator.pop(context);
+                },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: CircleBorder(),
                 padding: EdgeInsets.zero,
