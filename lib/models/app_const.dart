@@ -15,7 +15,6 @@ class AppConst{
   static final String getMyCompany = baseUrl+"get-my-company";
   static final String getCompanySettings = baseUrl+"get-company-settings";
   static final String updateCompanySettings = baseUrl+"update-company-settings";
-  static final String createCompany = baseUrl+"create-company";
   static final String updateCompany = baseUrl+"update-company";
   static final String addEditEmployee = baseUrl+"add-edit-employee";
   static final String deleteEmployee = baseUrl+"delete-employee";
@@ -43,6 +42,7 @@ class AppConst{
 
   static final String getHarvestsOfDate = baseUrl+"get-harvests-of-date";
   static final String addHarvest = baseUrl+"add-harvest";
+  static final String deleteHarvest = baseUrl+"delete-harvest";
 
   static final String createOrUpdateTask = baseUrl+"create-update-task";
   static final String getAllTasks = baseUrl+"get-tasks";

@@ -29,9 +29,7 @@ class _AdminSettingState extends State<AdminSetting> {
   TextEditingController _address2;
   TextEditingController _postalCode;
   TextEditingController _phone;
-  TextEditingController _website;
   String country, state, city;
-  int plan;
   String _nameError, _addressError, _postalCodeError;
 
   bool isProfileUpdating = false;
@@ -49,16 +47,13 @@ class _AdminSettingState extends State<AdminSetting> {
 
     myCompany = context.read<CompanyModel>().myCompany;
     _name = TextEditingController(text: myCompany.name);
-    _address1 = TextEditingController(text: myCompany.address1);
-    _address2 = TextEditingController(text: myCompany.address2);
-    _postalCode = TextEditingController(text: myCompany.postalCode);
-    _phone = TextEditingController(text: myCompany.phone);
-    _website = TextEditingController(text: myCompany.website);
-    country = myCompany.country;
-    state = myCompany.state;
-    city = myCompany.city;
-    plan = myCompany.plan;
-
+    _address1 = TextEditingController(text: user.address1);
+    _address2 = TextEditingController(text: user.address2);
+    _postalCode = TextEditingController(text: user.postalCode);
+    _phone = TextEditingController(text: user.phone);
+    country = user.country;
+    state = user.state;
+    city = user.city;
   }
 
   bool profileValidator(){
@@ -157,9 +152,7 @@ class _AdminSettingState extends State<AdminSetting> {
           state: state,
           country: country,
           address2: _address2.text,
-          address1: _address1.text,
-          plan: plan,
-          website: _website.text
+          address1: _address1.text
       );
       setState(() {
         isCompanyUpdating = false;
@@ -193,7 +186,8 @@ class _AdminSettingState extends State<AdminSetting> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text("Settings",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+        title: Text("Settings"),
+        centerTitle: true,
         leading: GestureDetector(
           child: Icon(Icons.arrow_back),
           onTap: (){
@@ -218,9 +212,9 @@ class _AdminSettingState extends State<AdminSetting> {
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         children: [
-                          Icon(Icons.info,color: Colors.black87,size: 35,),
+                          Icon(Icons.info,color: Colors.black87,size: 30,),
                           SizedBox(width: 20,),
-                          Text(S.of(context).aboutApp,style: TextStyle(color: Colors.black87,fontSize: 18,fontWeight: FontWeight.bold),)
+                          Text(S.of(context).aboutApp,style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.bold),)
                         ],
                       ),
                     ),
@@ -411,7 +405,7 @@ class _AdminSettingState extends State<AdminSetting> {
                           keyboardType: TextInputType.streetAddress,
                           textCapitalization: TextCapitalization.words,
                           onChanged: (v){
-                            _address1.value = _address1.value.copyWith(text: firstToUpper(v));
+                            _address2.value = _address2.value.copyWith(text: firstToUpper(v));
                           },
                         ),
                         SelectState(
@@ -461,19 +455,6 @@ class _AdminSettingState extends State<AdminSetting> {
                           controller: _phone,
                           keyboardType: TextInputType.phone,
                           textCapitalization: TextCapitalization.words,
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: S.of(context).website,
-                            labelStyle: TextStyle(color: Colors.grey),
-                            isDense: true,
-                          ),
-                          controller: _website,
-                          keyboardType: TextInputType.url,
-                          textInputAction: TextInputAction.done,
                         ),
                         SizedBox(height: 8,),
                         Center(

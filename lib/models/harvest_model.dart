@@ -394,14 +394,36 @@ class HarvestModel extends ChangeNotifier{
           'nfc':nfc
         }),
       );
-      print('[getHarvestsOfDate] ${res.body}');
+      print('[addHarvest] ${res.body}');
       if(res.statusCode==200){
         return Harvest.fromJson(jsonDecode(res.body));
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.getHarvestsOfDate] $e');
+      print('[HarvestModel.addHarvest] $e');
+    }
+    return null;
+  }
+  Future deleteHarvest(int id)async{
+    try{
+      var res = await http.post(
+        AppConst.deleteHarvest,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({'id':id}),
+      );
+      print('[deleteHarvest] ${res.body}');
+      if(res.statusCode==200){
+        return Harvest.fromJson(jsonDecode(res.body));
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[HarvestModel.deleteHarvest] $e');
     }
     return null;
   }
@@ -507,7 +529,6 @@ class Harvest{
     data['updated_at'] = this.updatedAt;
     return data;
   }
-
 }
 
 class HTask{

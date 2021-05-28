@@ -7,9 +7,22 @@ import 'package:localstorage/localstorage.dart';
 
 class CompanyModel extends ChangeNotifier{
   final LocalStorage storage = LocalStorage('companies');
-  Company myCompany = Company(plan: 0);
-  CompanySettings myCompanySettings = CompanySettings(receivePunchNotification: true, hasNFC: true,receiveRevisionNotification: true);
+  Company myCompany;
+  CompanySettings myCompanySettings;
   List<User> users = [];
+
+  Future<bool> getMyCompany(int companyId)async{
+    await getCompanyFromLocal();
+    await getCompanySettingsFromLocal();
+    if(myCompany==null || myCompany.id!=companyId || myCompanySettings==null){
+      await getCompanyFromServer();
+      await getCompanySettingsFromServer();
+    }else{
+      getCompanyFromServer();
+      getCompanySettingsFromServer();
+    }
+    return myCompany!=null && myCompanySettings!=null;
+  }
 
   getCompanyFromServer()async{
     try{
@@ -24,14 +37,13 @@ class CompanyModel extends ChangeNotifier{
       print("[CompanyModel.getCompanyFromServer] ${res.body}");
       if(res.statusCode==200){
         myCompany = Company.fromJson(jsonDecode(res.body));
-        saveCompanyToLocal();
+        await saveCompanyToLocal();
       }
     }catch(e){
       print("[CompanyModel.getCompanyFromServer] $e");
     }
     notifyListeners();
   }
-
   saveCompanyToLocal()async{
     try{
       bool storageReady = await storage.ready;
@@ -41,7 +53,6 @@ class CompanyModel extends ChangeNotifier{
       print("[CompanyModel.saveCompanyToLocal] $e");
     }
   }
-
   getCompanyFromLocal()async{
     try{
       bool storageReady = await storage.ready;
@@ -55,55 +66,6 @@ class CompanyModel extends ChangeNotifier{
       print("[CompanyModel.getCompanyFromLocal] $e");
     }
     notifyListeners();
-  }
-
-  setAddressMyCompany({int adminId, String name, String address1, String address2,
-    String country, String state, String city, String postalCode, String phone, String website,String pin}){
-    try{
-      myCompany.name = name;
-      myCompany.address1 = address1;
-      myCompany.adminId = adminId;
-      myCompany.address2 = address2;
-      myCompany.country = country;
-      myCompany.state = state;
-      myCompany.city = city;
-      myCompany.postalCode = postalCode;
-      myCompany.phone = phone;
-      myCompany.website = website;
-      myCompany.pin = pin;
-      notifyListeners();
-    }catch(e){
-      print("[CompanyModel.setAddressMyCompany] $e");
-    }
-  }
-
-  setPlanMyCompany(int plan){
-    myCompany.plan = plan;
-    notifyListeners();
-  }
-
-  Future<String> createCompany()async{
-    try{
-      var res = await http.post(
-          AppConst.createCompany,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode(myCompany.toJson())
-      );
-      print("[CompanyModel.createCompany] ${res.body}");
-      if(res.statusCode==200){
-        myCompany = Company.fromJson(jsonDecode(res.body));
-        return null;
-      }else{
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      print("[CompanyModel.createCompany] $e");
-      return e.toString();
-    }
   }
 
   Future<String> createEditEmployee(User user,String photo)async{
@@ -142,15 +104,6 @@ class CompanyModel extends ChangeNotifier{
       print("[CompanyModel.createEditEmployee] $e");
     }
     return result;
-  }
-
-  Future getMyCompany(int companyId)async{
-    await getCompanyFromLocal();
-    if(myCompany==null || myCompany.id!=companyId){
-      await getCompanyFromServer();
-    }else{
-      getCompanyFromServer();
-    }
   }
 
   Future<String> getCompanyUsers()async{
@@ -206,7 +159,7 @@ class CompanyModel extends ChangeNotifier{
   }
 
   Future<String> updateCompany({String name, String address1, String address2,
-    String country, String state, String city, String postalCode, String phone, String website,int plan})async{
+    String country, String state, String city, String postalCode, String phone})async{
     String result = 'Oops, Unknown Errors!';
     try{
       var res = await http.post(
@@ -218,7 +171,6 @@ class CompanyModel extends ChangeNotifier{
           },
           body: jsonEncode(
               {
-                'id':myCompany.id,
                 'name':name,
                 'address1' : address1,
                 'address2' : address2,
@@ -226,9 +178,7 @@ class CompanyModel extends ChangeNotifier{
                 'country' : country,
                 'state' : state,
                 'postal_code' : postalCode,
-                'phone' : phone,
-                'website' : website,
-                'plan' : plan
+                'phone' : phone
               }
           )
       );
@@ -246,9 +196,8 @@ class CompanyModel extends ChangeNotifier{
     return result;
   }
 
-  Future<String> getCompanySettings()async{
+  Future<String> getCompanySettingsFromServer()async{
     try{
-      getCompanySettingsFromLocal();
       var res = await http.get(
           AppConst.getCompanySettings,
           headers: {
@@ -260,7 +209,7 @@ class CompanyModel extends ChangeNotifier{
       print("[CompanyModel.getCompanySettings] ${res.body}");
       if(res.statusCode==200){
         myCompanySettings = CompanySettings.fromJson(jsonDecode(res.body));
-        saveCompanySettingsToLocal();
+        await saveCompanySettingsToLocal();
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -270,7 +219,6 @@ class CompanyModel extends ChangeNotifier{
       return e.toString();
     }
   }
-
   getCompanySettingsFromLocal()async{
     try{
       bool storageReady = await storage.ready;
@@ -286,7 +234,6 @@ class CompanyModel extends ChangeNotifier{
     }
     notifyListeners();
   }
-
   saveCompanySettingsToLocal()async{
     try{
       bool storageReady = await storage.ready;
@@ -307,7 +254,7 @@ class CompanyModel extends ChangeNotifier{
             'Content-Type':'application/json',
             'Authorization':'Bearer '+GlobalData.token
           },
-        body: jsonEncode(settings.toJson())
+          body: jsonEncode(settings.toJson())
       );
       print("[CompanyModel.updateCompanySetting] ${res.body}");
       if(res.statusCode==200){
@@ -360,16 +307,7 @@ class Company {
   int id;
   int adminId;
   String name;
-  String address1;
-  String address2;
-  String city;
-  String country;
-  String state;
-  String postalCode;
-  String phone;
-  String website;
   int plan;
-  String pin;
   String createdAt;
   String updatedAt;
 
@@ -377,14 +315,6 @@ class Company {
     this.id,
     this.adminId,
     this.name,
-    this.phone,
-    this.address1,
-    this.address2,
-    this.city,
-    this.country,
-    this.state,
-    this.postalCode,
-    this.website,
     this.plan,
     this.createdAt,
     this.updatedAt
@@ -395,16 +325,7 @@ class Company {
       id = json['id'];
       adminId = json['admin_id'];
       name = json['name'];
-      phone = json['phone'];
-      address1 = json['address1'];
-      address2 = json['address2'];
-      city = json['city'];
-      country = json['country'];
-      state = json['state'];
-      postalCode = json['postal_code'];
-      website = json['website'];
       plan = json['plan'];
-      pin = json['pin'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -417,16 +338,7 @@ class Company {
     data['id'] = this.id;
     data['admin_id'] = this.adminId;
     data['name'] = this.name;
-    data['phone'] = this.phone;
-    data['address1'] = this.address1;
-    data['address2'] = this.address2;
-    data['city'] = this.city;
-    data['country'] = this.country;
-    data['state'] = this.state;
-    data['postal_code'] = this.postalCode;
-    data['website'] = this.website;
     data['plan'] = this.plan;
-    data['pin'] = this.pin;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
@@ -441,9 +353,16 @@ class CompanySettings{
   String highColor;
   String lastUpdated;
   String reportTime;
-  bool hasNFC;
+  bool hasNFCHarvest;
+  bool hasNFCReport;
+  bool hasHarvestReport;
+  bool hasTimeSheetRevision;
+  bool hasTimeSheetSchedule;
+  bool hasGeolocationPunch;
+
   bool receivePunchNotification;
   bool receiveRevisionNotification;
+
 
 
   CompanySettings({
@@ -454,7 +373,12 @@ class CompanySettings{
     this.highColor,
     this.lastUpdated,
     this.reportTime,
-    this.hasNFC,
+    this.hasNFCHarvest,
+    this.hasNFCReport,
+    this.hasHarvestReport,
+    this.hasTimeSheetRevision,
+    this.hasTimeSheetSchedule,
+    this.hasGeolocationPunch,
     this.receivePunchNotification,
     this.receiveRevisionNotification
   });
@@ -468,9 +392,15 @@ class CompanySettings{
       highColor = json['high_color'];
       lastUpdated = json['last_updated'];
       reportTime = json['report_time'];
-      hasNFC = json['has_nfc']==null || json['has_nfc']=='1';
       receivePunchNotification = json['receive_punch_notification']==null || json['receive_punch_notification']=='1';
       receiveRevisionNotification = json['receive_revision_notification']==null || json['receive_revision_notification']=='1';
+
+      hasNFCHarvest = json['has_nfc_harvest']!=null && json['has_nfc_harvest']=='1';
+      hasNFCReport = json['has_nfc_report']!=null && json['has_nfc_report']=='1';
+      hasHarvestReport = json['has_harvest_report']!=null && json['has_harvest_report']=='1';
+      hasTimeSheetRevision = json['has_time_sheet_revision']!=null && json['has_time_sheet_revision']=='1';
+      hasTimeSheetSchedule = json['has_time_sheet_schedule']!=null && json['has_time_sheet_schedule']=='1';
+      hasGeolocationPunch = json['has_geolocation_punch']!=null && json['has_geolocation_punch']=='1';
     }catch(e){
       print('[CompanySettings.fromJson]$e');
     }
@@ -485,9 +415,16 @@ class CompanySettings{
     if(this.highColor!=null)data['high_color'] = this.highColor;
     if(this.reportTime!=null)data['report_time'] = this.reportTime;
     if(this.lastUpdated!=null)data['last_updated'] = this.lastUpdated;
-    if(this.hasNFC!=null)data['has_nfc'] = this.hasNFC?'1':'0';
     if(this.receivePunchNotification!=null)data['receive_punch_notification'] = this.receivePunchNotification?'1':'0';
     if(this.receiveRevisionNotification!=null)data['receive_revision_notification'] = this.receiveRevisionNotification?'1':'0';
+
+    if(this.hasNFCHarvest!=null)data['has_nfc_harvest'] = this.hasNFCHarvest?'1':'0';
+    if(this.hasNFCReport!=null)data['has_nfc_report'] = this.hasNFCReport?'1':'0';
+    if(this.hasHarvestReport!=null)data['has_harvest_report'] = this.hasHarvestReport?'1':'0';
+    if(this.hasTimeSheetRevision!=null)data['has_time_sheet_revision'] = this.hasTimeSheetRevision?'1':'0';
+    if(this.hasTimeSheetSchedule!=null)data['has_time_sheet_schedule'] = this.hasTimeSheetSchedule?'1':'0';
+    if(this.hasGeolocationPunch!=null)data['has_geolocation_punch'] = this.hasGeolocationPunch?'1':'0';
+
     return data;
   }
 

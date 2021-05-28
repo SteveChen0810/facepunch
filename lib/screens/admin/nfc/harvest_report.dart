@@ -201,7 +201,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(task.field.name[0].toUpperCase(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+                                      Text(task.field.name.substring(0, task.field.name.length>1?2:task.field.name.length).toUpperCase(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 2),
                                         child: FittedBox(child: Text(task.field.crop,),),

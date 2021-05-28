@@ -1,4 +1,5 @@
 import 'package:facepunch/lang/l10n.dart';
+import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/screens/admin/pdf_full_screen.dart';
 import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
@@ -34,6 +35,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   Set<Marker> markers = {};
   Punch deletingPunch;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  CompanySettings settings;
 
   @override
   void initState() {
@@ -84,9 +86,9 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   dateTileBuilder(date, selectedDate, rowIndex, dayName, isDateMarked, isDateOutOfRange) {
     bool isSelectedDate = date.compareTo(selectedDate) == 0;
     Color fontColor = isDateOutOfRange ? Colors.black26 : Colors.black87;
-    TextStyle normalStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: fontColor);
-    TextStyle selectedStyle = TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.black87);
-    TextStyle dayNameStyle = TextStyle(fontSize: 14.5, color: fontColor);
+    TextStyle normalStyle = TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: fontColor);
+    TextStyle selectedStyle = TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black87);
+    TextStyle dayNameStyle = TextStyle(fontSize: 12, color: fontColor);
     List<Widget> _children = [
       Text(dayName, style: dayNameStyle),
       Container(
@@ -97,7 +99,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           padding: EdgeInsets.all(8),
           child: Text(date.day.toString(), style: !isSelectedDate ? normalStyle : selectedStyle,maxLines: 1)
       ),
-      Text("${user.getHoursOfDate(date).toInt()}"),
+      Text("${user.getHoursOfDate(date).toStringAsFixed(2)}",style: TextStyle(fontSize: 10),),
     ];
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
@@ -147,7 +149,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                     child: Text(p.punch=="Lunch"?"Lunch Break from ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))} to ${PunchDateUtils.getTimeString(DateTime.parse(p.updatedAt))}":"Punch ${p.punch} at ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",style: logStyle,)
                 ),
                 secondaryActions: <Widget>[
-                  if(p.latitude !=null && p.longitude!=null)
+                  if(p.latitude !=null && p.longitude!=null && settings.hasGeolocationPunch)
                   IconSlideAction(
                     caption: S.of(context).pin,
                     color: Colors.green,
@@ -359,7 +361,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    settings = context.watch<CompanyModel>().myCompanySettings;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -367,9 +369,10 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           onTap: (){
             if(deletingPunch==null)Navigator.of(context).pop();
           },
-          child: Icon(Icons.navigate_before,size: 40,),
+          child: Icon(Icons.arrow_back),
         ),
-        title: Text(S.of(context).dailyLogs,style: TextStyle(color: Colors.black87,fontSize: 28,fontWeight: FontWeight.bold),),
+        title: Text(S.of(context).dailyLogs),
+        centerTitle: true,
         backgroundColor: Color(primaryColor),
       ),
       body: WillPopScope(
@@ -379,9 +382,10 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
         child: Container(
           margin: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
             color: Colors.white
           ),
+          clipBehavior: Clip.hardEdge,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -426,28 +430,30 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                   ],
                 )
               ),
-              Container(
-                width: width,
-                height: height/3,
-                padding: EdgeInsets.all(4),
-                margin: EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.black87)
-                ),
-                child: SmartRefresher(
-                  enablePullDown: true,
-                  enablePullUp: false,
-                  header: WaterDropMaterialHeader(backgroundColor: Color(primaryColor),distance: 40,),
-                  controller: _refreshController,
-                  onRefresh: _onRefresh,
-                  child: ListView(
-                    padding: EdgeInsets.symmetric(vertical: 2),
-                    children: employeeLogs(),
+              Expanded(
+                child: Container(
+                  width: width,
+                  padding: EdgeInsets.all(4),
+                  margin: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.black87)
+                  ),
+                  child: SmartRefresher(
+                    enablePullDown: true,
+                    enablePullUp: false,
+                    header: WaterDropMaterialHeader(backgroundColor: Color(primaryColor),distance: 40,),
+                    controller: _refreshController,
+                    onRefresh: _onRefresh,
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(vertical: 2),
+                      children: employeeLogs(),
+                    ),
                   ),
                 ),
               ),
-              Expanded(
+              if(settings.hasGeolocationPunch)
+                Expanded(
                 child: Stack(
                   children: [
                     GoogleMap(

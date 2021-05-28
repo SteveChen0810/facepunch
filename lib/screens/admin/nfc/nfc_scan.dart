@@ -1,3 +1,4 @@
+import 'package:audioplayers/audio_cache.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/harvest_model.dart';
@@ -6,6 +7,7 @@ import 'package:facepunch/widgets/popover/cool_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -23,6 +25,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
   List<Harvest> harvests = [];
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   bool isLoading = false;
+  final AudioCache player = AudioCache();
 
   void _onRefresh() async{
     harvests = await context.read<HarvestModel>().getHarvestsOfDate(selectedDate.toString());
@@ -293,6 +296,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     // await FlutterNfcReader.stop();
     FlutterNfcReader.read().then((NfcData data)async{
       if(data!=null){
+        player.play('sound/sound.mp3').catchError(print);
         print([data.id,data.content]);
         if(data.id!=null && data.id.isNotEmpty){
           _addHarvest(data.id);
@@ -449,7 +453,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(task.field.name[0].toUpperCase(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+                                        Text(task.field.name.substring(0, task.field.name.length>1?2:task.field.name.length).toUpperCase(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 2),
                                           child: FittedBox(child: Text(task.field.crop,),),
@@ -527,38 +531,49 @@ class _NFCScanPageState extends State<NFCScanPage>{
                     child: ListView(
                       children: [
                         for(var harvest in harvests)
-                          Container(
-                            padding: EdgeInsets.symmetric(vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.5),
-                                  spreadRadius: 1,
-                                  blurRadius: 1,
-                                  offset: Offset(0, 1),
-                                )
-                              ]
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                    flex: 1,
-                                    child: Text(harvest.user.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
-                                ),
-                                Expanded(
-                                    flex: 1,
-                                    child: Text(harvest.field.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
-                                ),
-                                Expanded(
-                                    flex: 1,
-                                    child: Text(harvest.container.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
-                                ),
-                                Expanded(
-                                    flex: 1,
-                                    child: Text(harvest.quantity.toString(),style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
-                                ),
-                              ],
+                          Slidable(
+                            actionPane: SlidableDrawerActionPane(),
+                            actionExtentRatio: 0.15,
+                            secondaryActions: <Widget>[
+                              IconSlideAction(
+                                caption: S.of(context).delete,
+                                color: Colors.red,
+                                foregroundColor: Colors.white,
+                                iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
+                                onTap: ()async{
+                                  setState(() {harvests.remove(harvest);});
+                                  context.read<HarvestModel>().deleteHarvest(harvest.id).then((value){
+                                    if(mounted && value!=null && (value is String))showMessage(value);
+                                  });
+                                },
+                              ),
+                            ],
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border(bottom: BorderSide(color: Colors.grey))
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      flex: 1,
+                                      child: Text(harvest.user.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                  ),
+                                  Expanded(
+                                      flex: 1,
+                                      child: Text(harvest.field.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                  ),
+                                  Expanded(
+                                      flex: 1,
+                                      child: Text(harvest.container.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                  ),
+                                  Expanded(
+                                      flex: 1,
+                                      child: Text(harvest.quantity.toString(),style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                       ],

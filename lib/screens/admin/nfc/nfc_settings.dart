@@ -557,7 +557,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(field.name[0].toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                              Text(field.name.substring(0, field.name.length>1?2:field.name.length).toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
                               FittedBox(
                                   child: Text(field.crop, style: TextStyle(fontSize: 12),)
                               ),

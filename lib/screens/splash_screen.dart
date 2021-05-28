@@ -20,16 +20,20 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 3)).whenComplete(()async{
+    Future.delayed(Duration(seconds: 2)).whenComplete(()async{
       User user  = await context.read<UserModel>().getUserFromLocal();
       if(user==null){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
       }else{
-        if(user.role=="admin"){
-          await context.read<CompanyModel>().getMyCompany(user.companyId);
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
+        bool result = await context.read<CompanyModel>().getMyCompany(user.companyId);
+        if(result){
+          if(user.role=="admin"){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
+          }else{
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
+          }
         }else{
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
         }
       }
     });

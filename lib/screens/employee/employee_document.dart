@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
+import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart';
@@ -29,6 +30,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final user = context.watch<UserModel>().user;
+    final settings = context.watch<CompanyModel>().myCompanySettings;
     return Container(
       child: Column(
         children: [
@@ -97,7 +99,8 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                             },
                           ),
                         ),
-                        CachedNetworkImage(
+                        if(settings.hasHarvestReport)
+                          CachedNetworkImage(
                           imageUrl: harvestReportImage(),
                           width: width,
                           placeholder: (_,__)=>Container(
