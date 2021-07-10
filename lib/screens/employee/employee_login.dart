@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:facepunch/lang/l10n.dart';
+import 'package:facepunch/models/company_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:wakelock/wakelock.dart';
 import '../../models/user_model.dart';
 import '../../screens/employee/employee_home.dart';
 import '../../models/app_const.dart';
@@ -47,11 +49,13 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   void initState() {
     super.initState();
     cameraPermission();
+    Wakelock.enable();
   }
 
   @override
   void dispose() {
     cameraClose();
+    Wakelock.disable();
     super.dispose();
   }
 
@@ -153,11 +157,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       String base64Image = base64Encode(File(path).readAsBytesSync());
       String result = await context.read<UserModel>().loginWithFace(base64Image);
       if(result==null){
-        final user = context.read<UserModel>().user;
-        if(mounted){setState(() {_pageIndex = 2; userName = "${user.firstName} ${user.lastName}";});}
-        Future.delayed(Duration(seconds: 2)).whenComplete((){
-          if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
-        });
+        return true;
       }else{
         widget.showMessage(result);
       }
@@ -255,7 +255,13 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                 if(_photoPath!=null && _photoPath.isNotEmpty){
                   result = await loginWithFace(_photoPath);
                 }
-                if(!result)_btnController.reset();
+                _btnController?.reset();
+                if(result){
+                  final user = context.read<UserModel>().user;
+                  if(mounted){setState(() {_pageIndex = 2; userName = "${user.getFullName()}";});}
+                  await context.read<CompanyModel>().getMyCompany(user.companyId);
+                  if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
+                }
               }else{
                 await initDetectFace();
                 setState(() {_photoPath="";});

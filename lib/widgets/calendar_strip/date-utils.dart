@@ -177,4 +177,13 @@ class PunchDateUtils {
   static String getTimeString(DateTime date){
     return DateFormat("kk:mm").format(date);
   }
+
+  static String getTimeSecondString(DateTime date){
+    return DateFormat("kk:mm:ss").format(date);
+  }
+
+  static String get12TimeString(String time){
+    if(time==null || time.isEmpty)return '--:--';
+    return DateFormat("hh:mm a").format(DateTime.parse('2021-01-01 $time'));
+  }
 }

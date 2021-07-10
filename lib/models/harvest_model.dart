@@ -484,6 +484,34 @@ class HarvestModel extends ChangeNotifier{
       return e.toString();
     }
   }
+
+  Future getDateHarvestStats(String date)async{
+    try{
+      var res = await http.post(
+        AppConst.getDateHarvestStats,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({
+          'date':date,
+        }),
+      );
+      print('[getDateHarvestStats]${res.body}');
+      if(res.statusCode==200){
+        List<HarvestDateStats> dateStats = [];
+        for(var stats in jsonDecode(res.body))
+          dateStats.add(HarvestDateStats.fromJson(stats));
+        return dateStats;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[getDateHarvestStats]$e');
+      return e.toString();
+    }
+  }
 }
 
 class Harvest{
@@ -691,4 +719,32 @@ class HarvestCompanyStats{
     }
   }
 
+}
+
+class HarvestDateStats{
+  int fieldId;
+  String fieldName;
+  List containers;
+
+  HarvestDateStats.fromJson(Map<String, dynamic> json){
+    try{
+      fieldId = json['id'];
+      fieldName = json['name'];
+      containers = json['containers'];
+    }catch(e){
+      print('[HarvestCompanyStats.fromJson]$e');
+    }
+  }
+
+  double getTotalQuantity(){
+    double quantity = 0;
+    try{
+      for(var c in containers){
+        quantity += double.tryParse(c['quantity'].toString())??0;
+      }
+    }catch(e){
+      print(e);
+    }
+    return quantity;
+  }
 }

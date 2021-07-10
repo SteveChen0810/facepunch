@@ -1443,6 +1443,166 @@ class S {
       args: [],
     );
   }
+  String get  nfc{
+    return Intl.message(
+      'NFC',
+      name: 'nfc',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  searchEmployee{
+    return Intl.message(
+      'Search Employee',
+      name: 'searchEmployee',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  selectProject{
+    return Intl.message(
+      'Select a project',
+      name: 'selectProject',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  selectTask{
+    return Intl.message(
+      'Select a task',
+      name: 'selectTask',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  youAreNowWorkingOn{
+    return Intl.message(
+      'You Are Now Working On',
+      name: 'youAreNowWorkingOn',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  project{
+    return Intl.message(
+      'Project',
+      name: 'project',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  activity{
+    return Intl.message(
+      'Activity',
+      name: 'activity',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  startTime{
+    return Intl.message(
+      'Start Time',
+      name: 'startTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  endTime{
+    return Intl.message(
+      'End Time',
+      name: 'endTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  dailySchedule{
+    return Intl.message(
+      'Daily Schedule',
+      name: 'dailySchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  editWorkHistory{
+    return Intl.message(
+      'Edit Work History',
+      name: 'editWorkHistory',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  start{
+    return Intl.message(
+      'Start',
+      name: 'start',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  end{
+    return Intl.message(
+      'End',
+      name: 'end',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  pressToStart{
+    return Intl.message(
+      'Press to start',
+      name: 'pressToStart',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  pressToEnd{
+    return Intl.message(
+      'Press to end',
+      name: 'pressToEnd',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  pressToAskRevision{
+    return Intl.message(
+      'Press to ask a revision',
+      name: 'pressToAskRevision',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  scheduleRevision{
+    return Intl.message(
+      'Schedule Revision',
+      name: 'scheduleRevision',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  todo{
+    return Intl.message(
+      'ToDo',
+      name: 'todo',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  notes{
+    return Intl.message(
+      'Notes',
+      name: 'notes',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  dispatch{
+    return Intl.message(
+      'Dispatch',
+      name: 'dispatch',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

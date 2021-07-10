@@ -19,9 +19,12 @@ class AppConst{
   static final String addEditEmployee = baseUrl+"add-edit-employee";
   static final String deleteEmployee = baseUrl+"delete-employee";
   static final String getCompanyEmployees = baseUrl+"get-company-employees";
-  static final String punchWithFace = baseUrl+"punch-with-face";
+  // static final String punchWithFace = baseUrl+"punch-with-face";
+  static final String punchWithFace = baseUrl+"face-punch";
   static final String getUserPunches = baseUrl+"get-user-punches";
+  static final String getUserWorks = baseUrl+"get-user-works";
   static final String getEmployeePunches = baseUrl+"get-employee-punches";
+  static final String getEmployeeWorks = baseUrl+"get-employee-works";
   static final String editPunch = baseUrl+"edit-punch";
   static final String deletePunch = baseUrl+"delete-punch";
   static final String punchByAdmin= baseUrl+"punch-by-admin";
@@ -50,7 +53,17 @@ class AppConst{
 
   static final String getEmployeeHarvestStats = baseUrl+"get-employee-harvest-stats";
   static final String getCompanyHarvestStats = baseUrl+"get-company-harvest-stats";
+  static final String getDateHarvestStats = baseUrl+"get-date-harvest-stats";
 
+  static final String startWork = baseUrl+"start-work";
+  static final String startSchedule = baseUrl+"start-schedule";
+  static final String endSchedule = baseUrl+"end-schedule";
+  static final String punchOut = baseUrl+"punch-out";
+  static final String getProjectsAndTasks = baseUrl+"get-projects-tasks";
+
+  static final String getDailySchedule = baseUrl+"get-daily-schedule";
+  static final String editWork = baseUrl+"edit-work";
+  static final String deleteWork = baseUrl+"delete-work";
 
 }
 
@@ -58,19 +71,4 @@ class GlobalData{
   static String token;
 }
 
-List<CompanyPlan> companyPlans = [
-  CompanyPlan(price: 0.0,maxRange: 5,minRange: 1),
-  CompanyPlan(price: 45.00,maxRange: 50,minRange: 6),
-  CompanyPlan(price: 98.00,maxRange: 100,minRange: 51),
-  CompanyPlan(price: 168.00,maxRange: 9999,minRange: 100),
-];
-
-class CompanyPlan{
-  int minRange;
-  int maxRange;
-  double price;
-  CompanyPlan({this.maxRange,this.minRange,this.price});
-}
-
 const int primaryColor = 0xFF09d55b;
-const List<String> subscriptionPlans = <String>['free','facepunch_plan_1','facepunch_plan_2','facepunch_plan_3'];

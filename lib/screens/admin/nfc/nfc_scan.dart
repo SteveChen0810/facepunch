@@ -277,7 +277,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
       setState(() {isLoading=false;});
       if(result!=null){
         if(result is Harvest){
-          harvests.add(result);
+          harvests.insert(0, result);
           if(mounted)setState(() {});
         }else{
           showMessage(result.toString());

@@ -1,4 +1,5 @@
 import 'package:facepunch/models/user_model.dart';
+import 'package:facepunch/models/work_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,7 +7,7 @@ import 'app_const.dart';
 
 class RevisionModel with ChangeNotifier{
 
-  Future<String> sendTimeRevisionRequest({int punchId, String newValue, String oldValue})async{
+  Future<String> sendPunchRevisionRequest({int punchId, String newValue, String oldValue})async{
     try{
       var res = await http.post(
           AppConst.sendTimeRevisionRequest,
@@ -33,17 +34,46 @@ class RevisionModel with ChangeNotifier{
     }
   }
 
+  Future<String> sendWorkRevisionRequest({WorkHistory newWork, WorkHistory oldWork})async{
+    try{
+      var res = await http.post(
+          AppConst.sendTimeRevisionRequest,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: jsonEncode({
+            'work_id': oldWork.id,
+            'new_value': newWork.toJson(),
+            'old_value': oldWork.toJson(),
+          })
+      );
+      print("[RevisionModel.sendWorkRevisionRequest] ${res.body}");
+      if(res.statusCode==200){
+        return "A revision request has been sent.";
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[RevisionModel.sendWorkRevisionRequest] $e");
+      return e.toString();
+    }
+  }
+
 }
 
 class Revision{
   int id;
   int userId;
   int punchId;
+  int workId;
   String type;
-  String oldValue;
-  String newValue;
+  var oldValue;
+  var newValue;
   User user;
   Punch punch;
+  WorkHistory work;
   String status;
   String createdAt;
   String updatedAt;
@@ -76,6 +106,9 @@ class Revision{
       }
       if(json['punch']!=null){
         punch = Punch.fromJson(json['punch']);
+      }
+      if(json['work']!=null){
+        work = WorkHistory.fromJson(json['work']);
       }
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];

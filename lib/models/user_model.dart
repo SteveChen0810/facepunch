@@ -6,6 +6,8 @@ import 'app_const.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import 'work_model.dart';
+
 
 class UserModel with ChangeNotifier{
   User user;
@@ -327,6 +329,34 @@ class UserModel with ChangeNotifier{
     }
   }
 
+  Future<String> getUserWorkHistory()async{
+    try{
+      var res = await http.get(
+          AppConst.getUserWorks,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer ${user.token}'
+          }
+      );
+      print("[UserModel.getUserWorkHistory] ${res.body}");
+      if(res.statusCode==200){
+        List<WorkHistory> works = [];
+        for(var work in jsonDecode(res.body)){
+          works.add(WorkHistory.fromJson(work));
+        }
+        user.works = works;
+        notifyListeners();
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[UserModel.getUserWorkHistory] $e");
+      return e.toString();
+    }
+  }
+
   Future<List<Punch>> getEmployeePunches(int userId)async{
     try{
       var res = await http.post(
@@ -348,6 +378,31 @@ class UserModel with ChangeNotifier{
       }
     }catch(e){
       print("[UserModel.getEmployeePunches] $e");
+    }
+    return [];
+  }
+
+  Future<List<WorkHistory>> getEmployeeWorks(int userId)async{
+    try{
+      var res = await http.post(
+          AppConst.getEmployeeWorks,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+user.token
+          },
+        body: jsonEncode({'user_id':userId}),
+      );
+      print("[UserModel.getEmployeeWorks] ${res.body}");
+      if(res.statusCode==200){
+        List<WorkHistory> works = [];
+        for(var work in jsonDecode(res.body)){
+          works.add(WorkHistory.fromJson(work));
+        }
+        return works;
+      }
+    }catch(e){
+      print("[UserModel.getEmployeeWorks] $e");
     }
     return [];
   }
@@ -386,6 +441,50 @@ class UserModel with ChangeNotifier{
     notifyListeners();
   }
 
+  Future<String> startWork({User employee, int taskId, int projectId})async{
+    try{
+      var res = await http.post(
+          AppConst.startWork,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+employee.token
+          },
+          body: jsonEncode({'task_id':taskId,'project_id':projectId})
+      );
+      print("[UserModel.startWork] ${res.body}");
+      if(res.statusCode!=200){
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[UserModel.startWork] $e");
+    }
+    return null;
+  }
+  Future punchOut({User employee, double longitude, double latitude})async{
+    try{
+      var res = await http.post(
+          AppConst.punchOut,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+employee.token
+          },
+          body: jsonEncode({
+            'longitude':longitude,
+            'latitude':latitude,
+          })
+      );
+      print("[UserModel.punchOut] ${res.body}");
+      if(res.statusCode==200){
+        return Punch.fromJson(jsonDecode(res.body));
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[UserModel.punchOut] $e");
+    }
+  }
 }
 
 class User {
@@ -410,6 +509,7 @@ class User {
   String language;
   String avatar;
   String role;
+  String type;
   String firebaseToken;
   String emailVerifyNumber;
   int companyId;
@@ -420,7 +520,10 @@ class User {
   String createdAt;
   String updatedAt;
   List<Punch> punches = [];
+  List<WorkHistory> works = [];
   Punch lastPunch;
+  bool canNTCTracking = true;
+  bool sendScheduleNotification = true;
 
   User({
     this.id,
@@ -444,6 +547,7 @@ class User {
     this.language,
     this.avatar,
     this.role,
+    this.type,
     this.firebaseToken,
     this.emailVerifyNumber,
     this.companyId,
@@ -454,7 +558,10 @@ class User {
     this.lastPunch,
     this.lunchTime,
     this.createdAt,
-    this.updatedAt
+    this.updatedAt,
+    this.works,
+    this.canNTCTracking,
+    this.sendScheduleNotification
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -486,6 +593,7 @@ class User {
         avatar = 'user_avatar.png';
       }
       role = json['role'];
+      type = json['type'];
       firebaseToken = json['firebase_token'];
       emailVerifyNumber = json['email_verify_number'];
       companyId = json['company_id'];
@@ -496,6 +604,8 @@ class User {
       }
       lunchTime = json['lunch_time'];
       nfc = json['nfc'];
+      canNTCTracking = json['can_nfc_tracking']!=null && json['can_nfc_tracking']==1;
+      sendScheduleNotification = json['send_schedule_notification']==1 && json['send_schedule_notification']==1;
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -526,6 +636,7 @@ class User {
     if(language!=null)data['language'] = this.language;
     if(avatar!=null)data['avatar'] = this.avatar;
     data['role'] = this.role;
+    data['type'] = this.type;
     data['firebase_token'] = this.firebaseToken;
     data['email_verify_number'] = this.emailVerifyNumber;
     data['company_id'] = this.companyId;
@@ -533,9 +644,15 @@ class User {
     data['token'] = this.token;
     data['lunch_time'] = this.lunchTime;
     data['nfc'] = this.nfc;
+    data['can_nfc_tracking'] = this.canNTCTracking?1:0;
+    data['send_schedule_notification'] = this.sendScheduleNotification?1:0;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
+  }
+
+  String getFullName(){
+    return '$firstName $lastName';
   }
 
   Punch getTodayPunch(){
@@ -639,7 +756,7 @@ class User {
     return getTotalHoursOfWeek(startOfWeek.subtract(Duration(days: 7)));
   }
 
-  Future<String> editPunch(int punchId,String value)async{
+  Future<String> editPunch(int punchId, String value)async{
     try{
       var res = await http.post(
         AppConst.editPunch,
@@ -685,6 +802,52 @@ class User {
     }
   }
 
+  Future<String> editWork(WorkHistory work)async{
+    try{
+      var res = await http.post(
+        AppConst.editWork,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode(work.toJson()),
+      );
+      print("[User.editWork] ${res.body}");
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[User.editWork] $e");
+      return e.toString();
+    }
+  }
+
+  Future<String> deleteWork(int workId)async{
+    try{
+      var res = await http.post(
+        AppConst.deleteWork,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({'id':workId}),
+      );
+      print("[User.deleteWork] ${res.body}");
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[User.deleteWork] $e");
+      return e.toString();
+    }
+  }
+
   bool isPunchIn(){
     return lastPunch!=null && lastPunch.punch=='In';
   }
@@ -694,6 +857,23 @@ class User {
     final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";
     print(pdfLink);
     return Uri.encodeFull('https://facepunch.app/punch-pdfs/$companyId/$pdfLink');
+  }
+
+  List<WorkHistory> worksOfPunch(Punch punchIn, Punch punchOut){
+    try{
+      final inTime = DateTime.parse(punchIn.createdAt);
+      final outTime = punchOut!=null?DateTime.parse(punchOut.createdAt):null;
+      return works.where((w){
+        final workTime = DateTime.parse(w.createdAt);
+        if(workTime.day != inTime.day || workTime.month !=inTime.month)return false;
+        if(workTime.isBefore(inTime))return false;
+        if(outTime!=null && workTime.isAfter(outTime))return false;
+        return true;
+      }).toList();
+    }catch(e){
+      print('[User.worksOfPunch] $e');
+    }
+    return [];
   }
 }
 

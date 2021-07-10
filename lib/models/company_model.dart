@@ -380,7 +380,7 @@ class CompanySettings{
     this.hasTimeSheetSchedule,
     this.hasGeolocationPunch,
     this.receivePunchNotification,
-    this.receiveRevisionNotification
+    this.receiveRevisionNotification,
   });
 
   CompanySettings.fromJson(Map<String, dynamic> json){

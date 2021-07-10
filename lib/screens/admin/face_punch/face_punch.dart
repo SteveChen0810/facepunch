@@ -4,7 +4,11 @@ import 'package:camera/camera.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/user_model.dart';
+import 'package:facepunch/models/work_model.dart';
+import 'package:facepunch/screens/admin/face_punch/select_project.dart';
 import 'package:facepunch/widgets/dialogs.dart';
+import 'package:flutter/services.dart';
+import 'package:wakelock/wakelock.dart';
 import '../../../widgets/face_painter.dart';
 import '../../../widgets/utils.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
@@ -38,13 +42,23 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
   bool hasError = false;
   String _photoPath="";
   bool _isCameraAllowed = false;
+  Position currentPosition;
 
   @override
   void initState() {
     super.initState();
     cameraPermission().whenComplete((){
       _initializeCamera();
+      _determinePosition();
     });
+    Wakelock.enable();
+  }
+
+
+  @override
+  void dispose() {
+    Wakelock.disable();
+    super.dispose();
   }
 
   Future cameraPermission()async{
@@ -97,18 +111,26 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     }on CameraException catch(e){
       print(e);
       showMessage(e.toString());
+    }on PlatformException catch(e){
+      print(e);
+      showMessage(e.toString());
     }
   }
 
   Future<void> cameraClose()async{
     try{
       if (cameraController!=null) {
-        await cameraController.stopImageStream();
+        if(cameraController.value.isStreamingImages){
+          await cameraController.stopImageStream();
+        }
         await faceDetector.close();
         await Future.delayed(Duration(milliseconds: 100));
         await cameraController?.dispose();
       }
     }on CameraException catch(e){
+      print(e);
+      showMessage(e.toString());
+    }on PlatformException catch(e){
       print(e);
       showMessage(e.toString());
     }
@@ -153,21 +175,23 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       if(cameraController.value.isStreamingImages){
         await cameraController.stopImageStream();
       }
-      await Future.delayed(new Duration(milliseconds: 100));
+      await Future.delayed(Duration(milliseconds: 100));
       XFile file = await cameraController.takePicture();
       print(file.path);
       setState(() {_photoPath = file.path;});
       await punchWithFace(file.path);
+      await File(file.path).delete().catchError(print);
     } on CameraException catch (e) {
+      showMessage(e.toString());
       print(e);
     } catch(e){
+      showMessage(e.toString());
       print(e);
     }
   }
 
-  Future<Position> _determinePosition() async {
+  _determinePosition() async {
     LocationPermission permission;
-
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
       showMessage(S.of(context).locationPermissionDenied);
@@ -181,13 +205,12 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         return null;
       }
     }
-    return await Geolocator.getCurrentPosition();
+    Geolocator.getCurrentPosition().timeout(Duration(seconds: 5)).then((value){currentPosition = value;}).catchError(print);
   }
 
 
   punchWithFace(String path)async{
     try{
-      Position currentPosition = await _determinePosition();
       String base64Image = base64Encode(File(path).readAsBytesSync());
       var result = await context.read<UserModel>().punchWithFace(
           photo: base64Image,
@@ -198,59 +221,41 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         showMessage(result);
       }else{
         User employee = User.fromJson(result['employee']);
-        Punch punch = Punch.fromJson(result['punch']);
-        await showWelcomeDialog("${employee.firstName} ${employee.lastName}", punch.punch=="In");
+        Punch punch;
+        if(result['punch']!=null){
+          punch = Punch.fromJson(result['punch']);
+        }
+        List<Project> projects;
+        List<ScheduleTask> tasks;
+        if(result['projects']!=null){
+          projects = [];
+          for(var project in result['projects'])
+            projects.add(Project.fromJson(project));
+        }
+        if(result['tasks']!=null){
+          tasks = [];
+          for(var task in result['tasks'])
+            tasks.add(ScheduleTask.fromJson(task));
+        }
+        if(projects==null && tasks==null){
+          await showWelcomeDialog(context: context, userName: "${employee.getFullName()}",isPunchIn: punch.punch=="In");
+        }else{
+          await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectProject(
+            employee: employee,
+            projects: projects,
+            tasks: tasks,
+            punch: punch,
+            latitude: currentPosition?.latitude,
+            longitude: currentPosition?.longitude
+          )));
+        }
         await initDetectFace();
         setState(() {_photoPath="";});
-        _btnController.reset();
       }
     }catch(e){
       print("[EmployeeLogin.punchWithFace] $e");
       showMessage(e.toString());
     }
-  }
-
-  showWelcomeDialog(String userName, bool isPunchIn)async{
-    await showDialog(
-      context: context,
-      builder: (_context){
-        Future.delayed(Duration(seconds: 3)).whenComplete((){
-          try{
-            Navigator.of(_context).pop();
-          }catch(e){
-            print(e);
-          }
-        });
-        return Align(
-          alignment: Alignment.center,
-          child: AnimatedContainer(
-            height: MediaQuery.of(context).size.height*0.25,
-            width: MediaQuery.of(context).size.width-80,
-            duration: const Duration(milliseconds: 300),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Material(
-                color: isPunchIn?Colors.green:Colors.red,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(isPunchIn?S.of(context).welcome:S.of(context).bye,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("$userName",style: TextStyle(fontSize: 25),textAlign: TextAlign.center,),
-                    ),
-                  ],
-                ),
-                type: MaterialType.card,
-              ),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override

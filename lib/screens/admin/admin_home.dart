@@ -1,14 +1,16 @@
+import 'package:audioplayers/audio_cache.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/models/notification.dart';
+import 'package:facepunch/models/work_model.dart';
 import 'package:facepunch/screens/admin/employee_logs.dart';
 import 'package:facepunch/screens/admin/settings/admin_settings.dart';
 import 'package:facepunch/screens/admin/settings/notification_page.dart';
+import 'package:facepunch/widgets/autocomplete_textfield.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:facepunch/widgets/dialogs.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../models/company_model.dart';
 import '../../widgets/popover/cool_ui.dart';
@@ -34,6 +36,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   Position currentPosition;
   int loadingUser = 0;
+  User selectedUser;
+  final AudioCache player = AudioCache();
+  GlobalKey<AutoCompleteTextFieldState<String>> _searchKey = GlobalKey<AutoCompleteTextFieldState<String>>();
 
   void _onRefresh() async{
     await context.read<CompanyModel>().getCompanyUsers();
@@ -45,18 +50,14 @@ class _AdminHomePageState extends State<AdminHomePage> {
     super.initState();
     initFireBaseNotification();
     _determinePosition();
-    Future.delayed(Duration(milliseconds: 500)).whenComplete((){_fetchCompanyData();});
+    _fetchCompanyData();
   }
 
   _fetchCompanyData()async{
+    await context.read<WorkModel>().getProjectsAndTasks();
     await context.read<HarvestModel>().getHarvestTasks();
     await context.read<HarvestModel>().getFields();
     await context.read<HarvestModel>().getContainers();
-    String message = await context.read<CompanyModel>().getCompanySettings();
-    if(message!=null){
-      await context.read<UserModel>().logOut();
-      await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
-    }
   }
 
   Widget userItem(User user, double width){
@@ -64,7 +65,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       popoverBoxShadow: [
         BoxShadow(color: Colors.black54,blurRadius: 5.0)
       ],
-      popoverWidth: 180,
+      popoverWidth: 200,
       popoverBuild: (_context){
         return CupertinoPopoverMenuList(
           children: <Widget>[
@@ -126,7 +127,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
       },
       child: Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.all(4),
+        margin: EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: selectedUser?.id==user.id?Colors.red:Colors.transparent,width: 2)
+        ),
         child: ClipOval(
           child: Stack(
             alignment: Alignment.bottomCenter,
@@ -271,13 +276,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   _onMessage(message){
     AppNotification newNotification = AppNotification.fromJsonFirebase(message);
     context.read<NotificationModel>().addNotification(newNotification);
-    FlutterRingtonePlayer.play(
-      android: AndroidSounds.notification,
-      ios: IosSounds.glass,
-      looping: false,
-      volume: 1,
-      asAlarm: false,
-    ).catchError(print);
+    player.play('sound/sound.mp3').catchError(print);
     if(newNotification.revision!=null){
       showRevisionNotificationDialog(newNotification,context,showMessage);
     }else{
@@ -317,6 +316,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
     List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
     List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
     List<AppNotification> notifications  = context.watch<NotificationModel>().notifications.where((n) =>(n.seen!=null && !n.seen)).toList();
+    final settings = context.watch<CompanyModel>().myCompanySettings;
+    List<User> users = context.watch<CompanyModel>().users;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -351,10 +352,32 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text("${DateTime.now().toString().split(" ").first}",style: TextStyle(fontWeight: FontWeight.bold),),
-                        ),
+                        if(users.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
+                            child: SimpleAutoCompleteTextField(
+                              key: _searchKey,
+                              suggestions: users.map((e) => e.getFullName()).toList(),
+                              suggestionsAmount: 10,
+                              submitOnSuggestionTap: true,
+                              clearOnSubmit: false,
+                              textSubmitted: (v)async{
+                                setState(() {
+                                  selectedUser = users.firstWhere((u) => u.getFullName()==v,orElse: ()=>null);
+                                });
+                                print(v);
+                              },
+                              minLength: 1,
+                              keyboardType: TextInputType.name,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(5)),),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                                isDense: true,
+                                hintText: S.of(context).searchEmployee
+                              ),
+                              autoFocus: false,
+                            ),
+                          ),
                         Expanded(
                           child: SmartRefresher(
                             enablePullDown: true,
@@ -443,16 +466,18 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   ],
                                 )
                             ),
-                            FlatButton(
-                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NFCScanPage())),
-                              shape: CircleBorder(),
-                              child: Image.asset('assets/images/nfc.png',color: Color(primaryColor),height: 40,),
-                            ),
-                            FlatButton(
-                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
-                              shape: CircleBorder(),
-                              child: Icon(Icons.description_outlined,color: Color(primaryColor),size: 35,),
-                            ),
+                            if(settings.hasNFCHarvest)
+                              FlatButton(
+                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NFCScanPage())),
+                                shape: CircleBorder(),
+                                child: Image.asset('assets/images/nfc.png',color: Color(primaryColor),height: 40,),
+                              ),
+                            if(settings.hasNFCReport)
+                              FlatButton(
+                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
+                                shape: CircleBorder(),
+                                child: Icon(Icons.description_outlined,color: Color(primaryColor),size: 35,),
+                              ),
                             FlatButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting())),
                                 shape: CircleBorder(),
@@ -486,6 +511,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
         ),
       ),
       backgroundColor: Color(primaryColor),
+      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
     );
   }
 

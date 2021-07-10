@@ -1,7 +1,6 @@
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/notification.dart';
-import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:facepunch/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +49,7 @@ class _NotificationPageState extends State<NotificationPage> {
             ],
             child: notification.revision!=null?ListTile(
               title: Text(
-                "${notification.revision.user.firstName} ${notification.revision.user.lastName}",
+                "${notification.revision.user.getFullName()}",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               trailing: Text("${notification.revision.status.toUpperCase()}"),
@@ -98,7 +97,6 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     List<AppNotification> notifications  = context.watch<NotificationModel>().notifications;
-    print(context.watch<UserModel>().locale);
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(

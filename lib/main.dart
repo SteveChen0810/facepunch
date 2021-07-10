@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'models/notification.dart';
 import 'models/user_model.dart';
 import 'models/revision_model.dart';
+import 'models/work_model.dart';
 import 'screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
             ChangeNotifierProvider(create: (_) => RevisionModel()),
             ChangeNotifierProvider(create: (_) => NotificationModel(),lazy: false,),
             ChangeNotifierProvider(create: (_) => HarvestModel()),
+            ChangeNotifierProvider(create: (_) => WorkModel()),
           ],
           child: MyApp()
       )

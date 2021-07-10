@@ -20,15 +20,21 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
   HTask selectedTask;
   List<HarvestEmployeeStats> employeeStats = [];
   HarvestCompanyStats companyStats;
+  List<HarvestDateStats> dateStats = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Timer _timer;
-  bool isFetchingCompanyStats = false;
-
+  bool isFetchingDateStats = false;
+  bool isShowEmployeeStats = true;
 
   @override
   void initState() {
     _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      _getEmployeeStats();
+      if(isShowEmployeeStats){
+        _getEmployeeStats();
+        _getCompanyStats();
+      }else{
+        _getDateStats();
+      }
     });
     super.initState();
   }
@@ -47,7 +53,12 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
   }
 
   void _onRefresh() async{
-    await _getEmployeeStats();
+    if(isShowEmployeeStats){
+      await _getEmployeeStats();
+      await _getCompanyStats();
+    }else{
+      await _getDateStats();
+    }
     _refreshController.refreshCompleted();
   }
 
@@ -62,6 +73,25 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
       if(mounted)setState(() {});
     }
   }
+
+  _getDateStats()async{
+    final result = await context.read<HarvestModel>().getDateHarvestStats(selectedDate.toString());
+    if(result is String){
+      showMessage(result);
+    }else{
+      dateStats = result;
+    }
+    if(mounted)setState(() {});
+  }
+
+  double harvestTotalOfDate(){
+    double total = 0;
+    dateStats.forEach((d) {
+      total += d.getTotalQuantity();
+    });
+    return total;
+  }
+
 
   _getCompanyStats()async{
     if(selectedTask!=null && selectedDate !=null){
@@ -103,9 +133,9 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
       Color highColor = Color(0xFF6fe23c);
       if(settings.lowValue!=null)lowValue = double.parse(settings.lowValue);
       if(settings.highValue!=null)highValue = double.parse(settings.highValue);
-      if(settings.lowColor!=null)lowColor = Color(int.parse(settings.lowColor));
-      if(settings.mediumColor!=null)mediumColor = Color(int.parse(settings.mediumColor));
-      if(settings.highColor!=null)highColor = Color(int.parse(settings.highColor));
+      if(settings.lowColor!=null)lowColor = Color(int.parse(settings.lowColor,radix: 16));
+      if(settings.mediumColor!=null)mediumColor = Color(int.parse(settings.mediumColor,radix: 16));
+      if(settings.highColor!=null)highColor = Color(int.parse(settings.highColor,radix: 16));
       if(avg>=highValue) return highColor;
       if(avg>=lowValue) return mediumColor;
       return lowColor;
@@ -187,7 +217,10 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                               padding: const EdgeInsets.all(4.0),
                               child: MaterialButton(
                                 onPressed: (){
-                                  setState(() {selectedTask = task;});
+                                  setState(() {
+                                    selectedTask = task;
+                                    isShowEmployeeStats = true;
+                                  });
                                   _refreshController.requestRefresh();
                                 },
                                 minWidth: 0,
@@ -221,26 +254,30 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: MaterialButton(
                     onPressed: ()async{
-                      setState(() {isFetchingCompanyStats = true;});
-                      await _getCompanyStats();
-                      setState(() {isFetchingCompanyStats = false;});
+                      setState(() {isShowEmployeeStats = !isShowEmployeeStats;});
+                      if(!isShowEmployeeStats){
+                        setState(() {isFetchingDateStats = true;});
+                        await _getDateStats();
+                        setState(() {isFetchingDateStats = false;});
+                      }
                     },
                     height: 70,
                     minWidth: 0,
                     shape: CircleBorder(),
-                    color: Color(primaryColor),
+                    color: isShowEmployeeStats?Color(0xFFDDDDDD)
+                        :Color(primaryColor),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    child: isFetchingCompanyStats?SizedBox(
+                    child: isFetchingDateStats?SizedBox(
                       width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                      height: 24,
+                      child: CircularProgressIndicator(backgroundColor: Colors.white,)
                     ):Icon(Icons.title),
                   ),
                 )
               ],
             ),
           ),
-          if(companyStats!=null)
+          if(companyStats!=null && isShowEmployeeStats)
           Container(
             padding: EdgeInsets.all(16),
             child: Column(
@@ -264,7 +301,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                     ),
                     Flexible(
                         flex: 1,
-                        child: Text('${companyStats.harvestTimeOfDate==0?'0.00':(companyStats.quantityOfDate/companyStats.harvestTimeOfDate).toStringAsFixed(2)}/hour'),
+                        child: Text('${companyStats.harvestTimeOfDate==0?'0.00':(companyStats.quantityOfDate/companyStats.harvestTimeOfDate).toStringAsFixed(2)} ${S.of(context).containerHour}'),
                     ),
                   ],
                 ),
@@ -287,13 +324,14 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                         )
                     ),
                     Flexible(
-                        child: Text('${companyStats.harvestTimeOfYear==0?'0.00':(companyStats.quantityOfYear/companyStats.harvestTimeOfYear).toStringAsFixed(2)}/hour')
+                        child: Text('${companyStats.harvestTimeOfYear==0?'0.00':(companyStats.quantityOfYear/companyStats.harvestTimeOfYear).toStringAsFixed(2)} ${S.of(context).containerHour}')
                     ),
                   ],
                 ),
               ],
             ),
           ),
+          if(isShowEmployeeStats)
           Container(
             color: Color(primaryColor),
             padding: EdgeInsets.symmetric(vertical: 4),
@@ -314,6 +352,41 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
               ],
             ),
           ),
+          if(!isShowEmployeeStats)
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(S.of(context).totalOfTheDay),
+                    Text('${harvestTotalOfDate()} ${S.of(context).containers}'),
+                  ],
+                ),
+              ),
+              Container(
+                color: Color(primaryColor),
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(S.of(context).field,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: Text(S.of(context).container,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                    ),
+                    Expanded(
+                        flex: 1,
+                        child: Text(S.of(context).quantity,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: SmartRefresher(
               enablePullDown: true,
@@ -322,7 +395,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
               controller: _refreshController,
               onRefresh: _onRefresh,
               child: ListView(
-                children: [
+                children: isShowEmployeeStats?[
                   for(var stats in employeeStats)
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 4),
@@ -346,7 +419,42 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                           ),
                         ],
                       ),
-                    ),
+                    )
+                ]:[
+                  for(var stats in dateStats)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12,vertical: 4),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: Colors.grey)),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: Text(stats.fieldName,textAlign: TextAlign.center,)
+                          ),
+                          Expanded(
+                              flex: 2,
+                              child: Column(
+                                children: [
+                                  for(var container in stats.containers)
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                            child: Text(container['name'],textAlign: TextAlign.center,)
+                                        ),
+                                        Expanded(
+                                            child: Text("${container['quantity']}",textAlign: TextAlign.center,)
+                                        ),
+                                      ],
+                                    )
+                                ],
+                              )
+                          )
+                        ],
+                      ),
+                    )
                 ],
               ),
             ),

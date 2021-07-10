@@ -111,7 +111,7 @@ showRevisionNotificationDialog(AppNotification notification, BuildContext contex
                         Text(S.of(context).employeeName),
                         SizedBox(width: 8,),
                         Flexible(
-                            child: Text("${notification.revision.user.firstName} ${notification.revision.user.lastName}")
+                            child: Text("${notification.revision.user.getFullName()}")
                         ),
                       ],
                     ),
@@ -239,4 +239,47 @@ Future<bool> showLocationPermissionDialog(BuildContext context)async{
     ),
   );
   return allow;
+}
+
+showWelcomeDialog({String userName, bool isPunchIn, BuildContext context})async{
+  await showDialog(
+    context: context,
+    builder: (_context){
+      Future.delayed(Duration(seconds: 3)).whenComplete((){
+        try{
+          Navigator.of(_context).pop();
+        }catch(e){
+          print(e);
+        }
+      });
+      return Align(
+        alignment: Alignment.center,
+        child: AnimatedContainer(
+          height: MediaQuery.of(context).size.height*0.25,
+          width: MediaQuery.of(context).size.width-80,
+          duration: const Duration(milliseconds: 300),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Material(
+              color: isPunchIn?Colors.green:Colors.red,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(isPunchIn?S.of(context).welcome:S.of(context).bye,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text("$userName",style: TextStyle(fontSize: 25),textAlign: TextAlign.center,),
+                  ),
+                ],
+              ),
+              type: MaterialType.card,
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

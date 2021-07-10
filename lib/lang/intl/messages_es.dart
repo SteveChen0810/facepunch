@@ -179,5 +179,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "askRevision" : MessageLookupByLibrary.simpleMessage("Para solicitar una revisión, seleccione la línea con el error"),
     "enterPinCode" : MessageLookupByLibrary.simpleMessage("Nombre de empleado"),
     "employeeName" : MessageLookupByLibrary.simpleMessage("Cerrar sesión"),
+    "nfc" : MessageLookupByLibrary.simpleMessage("NFC"),
+    "searchEmployee" : MessageLookupByLibrary.simpleMessage("Buscar empleada"),
   };
 }
