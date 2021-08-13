@@ -644,8 +644,12 @@ class User {
     data['token'] = this.token;
     data['lunch_time'] = this.lunchTime;
     data['nfc'] = this.nfc;
-    data['can_nfc_tracking'] = this.canNTCTracking?1:0;
-    data['send_schedule_notification'] = this.sendScheduleNotification?1:0;
+    if(this.canNTCTracking!=null){
+      data['can_nfc_tracking'] = this.canNTCTracking?1:0;
+    }
+    if(this.sendScheduleNotification!=null){
+      data['send_schedule_notification'] = this.sendScheduleNotification?1:0;
+    }
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
@@ -852,6 +856,11 @@ class User {
     return lastPunch!=null && lastPunch.punch=='In';
   }
 
+  bool isTracking(){
+    return ['shop_tracking','call_shop_tracking'].contains(type);
+  }
+
+
   String pdfUrl(DateTime startDate){
     DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";
@@ -874,6 +883,31 @@ class User {
       print('[User.worksOfPunch] $e');
     }
     return [];
+  }
+
+  Future<List<WorkSchedule>> getDailySchedule(String date)async{
+    List<WorkSchedule> schedules = [];
+    try{
+      var res = await http.post(
+          AppConst.getDailySchedule,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+token
+          },
+          body: {
+            'date':date
+          }
+      );
+      print('[WorkModel.getDailySchedule]${res.body}');
+      if(res.statusCode==200){
+        for(var json in jsonDecode(res.body))
+          schedules.add(WorkSchedule.fromJson(json));
+      }
+    }catch(e){
+      print('[WorkModel.getDailySchedule]$e');
+    }
+    return schedules;
   }
 }
 

@@ -36,31 +36,6 @@ class WorkModel with ChangeNotifier{
     }
   }
 
-  Future<List<WorkSchedule>> getDailySchedule(String date)async{
-    List<WorkSchedule> schedules = [];
-    try{
-      var res = await http.post(
-        AppConst.getDailySchedule,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/x-www-form-urlencoded',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: {
-          'date':date
-        }
-      );
-      print('[WorkModel.getDailySchedule]${res.body}');
-      if(res.statusCode==200){
-        for(var json in jsonDecode(res.body))
-          schedules.add(WorkSchedule.fromJson(json));
-      }
-    }catch(e){
-      print('[WorkModel.getDailySchedule]$e');
-    }
-    return schedules;
-  }
-
   Future<String> submitRevision({WorkSchedule newSchedule, WorkSchedule oldSchedule})async{
     try{
       var res = await http.post(
@@ -86,6 +61,32 @@ class WorkModel with ChangeNotifier{
       print('[WorkModel.submitRevision]$e');
       return e.toString();
     }
+  }
+
+  Future<List<WorkSchedule>> getEmployeeSchedule({String date, int userId})async{
+    List<WorkSchedule> schedules = [];
+    try{
+      var res = await http.post(
+          AppConst.getEmployeeSchedule,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: {
+            'date':date,
+            'id':userId.toString()
+          }
+      );
+      print('[WorkModel.getEmployeeSchedule]${res.body}');
+      if(res.statusCode==200){
+        for(var json in jsonDecode(res.body))
+          schedules.add(WorkSchedule.fromJson(json));
+      }
+    }catch(e){
+      print('[WorkModel.getEmployeeSchedule]$e');
+    }
+    return schedules;
   }
 }
 
@@ -340,6 +341,73 @@ class WorkSchedule{
       }
     }catch(e){
       print('[WorkModel.endSchedule]$e');
+      return e.toString();
+    }
+  }
+
+  Future<String> deleteSchedule()async{
+    try{
+      var res = await http.post(
+          AppConst.deleteSchedule,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: {'id':id.toString()}
+      );
+      print('[WorkSchedule.deleteSchedule]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[WorkModel.deleteSchedule]$e');
+      return e.toString();
+    }
+  }
+  Future<String> editSchedule()async{
+    try{
+      var res = await http.post(
+          AppConst.editSchedule,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: jsonEncode(toJson()),
+      );
+      print('[WorkSchedule.editSchedule]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[WorkModel.editSchedule]$e');
+      return e.toString();
+    }
+  }
+  Future<String> addSchedule()async{
+    try{
+      var res = await http.post(
+          AppConst.addSchedule,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: jsonEncode(toJson()),
+      );
+      print('[WorkSchedule.addSchedule]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[WorkModel.addSchedule]$e');
       return e.toString();
     }
   }

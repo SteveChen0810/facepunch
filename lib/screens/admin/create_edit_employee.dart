@@ -227,6 +227,19 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         language: language,
         lunchTime: lunchTime,
         role: "employee",
+        canNTCTracking: widget.employee?.canNTCTracking,
+        companyId: widget.employee?.companyId,
+        createdAt: widget.employee?.createdAt,
+        emailVerifiedAt: widget.employee?.emailVerifiedAt,
+        emailVerifyNumber: widget.employee?.emailVerifyNumber,
+        firebaseToken: widget.employee?.firebaseToken,
+        sendScheduleNotification: widget.employee?.sendScheduleNotification,
+        token: widget.employee?.token,
+        lastPunch: widget.employee?.lastPunch,
+        punches: widget.employee?.punches,
+        type: widget.employee?.type??'shop_daily',
+        updatedAt: widget.employee?.updatedAt,
+        works: widget.employee?.works
       );
       String base64Image;
       if(_photoFile!=null){

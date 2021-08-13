@@ -62,6 +62,10 @@ class AppConst{
   static final String getProjectsAndTasks = baseUrl+"get-projects-tasks";
 
   static final String getDailySchedule = baseUrl+"get-daily-schedule";
+  static final String getEmployeeSchedule = baseUrl+"get-employee-schedule";
+  static final String deleteSchedule = baseUrl+"delete-schedule";
+  static final String editSchedule = baseUrl+"edit-schedule";
+  static final String addSchedule = baseUrl+"add-schedule";
   static final String editWork = baseUrl+"edit-work";
   static final String deleteWork = baseUrl+"delete-work";
 

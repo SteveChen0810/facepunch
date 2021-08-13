@@ -102,6 +102,7 @@ class CompanyModel extends ChangeNotifier{
       }
     }catch(e){
       print("[CompanyModel.createEditEmployee] $e");
+      result = e.toString();
     }
     return result;
   }

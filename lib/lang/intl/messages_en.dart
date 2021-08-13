@@ -216,5 +216,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "todo" : MessageLookupByLibrary.simpleMessage("ToDo"),
     "notes" : MessageLookupByLibrary.simpleMessage("Notes"),
     "dispatch" : MessageLookupByLibrary.simpleMessage("Dispatch"),
+    "addSchedule" : MessageLookupByLibrary.simpleMessage("Add Schedule"),
+    "type" : MessageLookupByLibrary.simpleMessage("Type"),
+    "call" : MessageLookupByLibrary.simpleMessage("Call"),
+    "shop" : MessageLookupByLibrary.simpleMessage("Shop"),
+    "schedule" : MessageLookupByLibrary.simpleMessage("Schedule"),
   };
 }

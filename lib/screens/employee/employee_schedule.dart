@@ -1,5 +1,6 @@
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
+import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/models/work_model.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   _onRefresh()async{
-    schedules = await context.read<WorkModel>().getDailySchedule(selectedDate.toString());
+    final user = context.read<UserModel>().user;
+    schedules = await user.getDailySchedule(selectedDate.toString());
     _refreshController.refreshCompleted();
     if(mounted)setState(() {
       _schedule = null;
@@ -210,7 +212,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                     children: [
                       Center(
                           child: Text(
-                            S.of(context).scheduleRevision,
+                            "${schedule.type=='call'?S.of(context).call:S.of(context).shop} ${S.of(context).schedule}",
                             style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
                           )
                       ),
@@ -276,6 +278,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                           },
                         ),
                       ),
+                      if(schedule.type=='call')
+                        Text(S.of(context).priority,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                       if(schedule.type=='call')
                         Row(
                           children: [
@@ -358,7 +362,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                       Text(S.of(context).notes,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                       Padding(
                         padding: const EdgeInsets.all(4.0),
-                        child: Text(schedule.todo??'',style: TextStyle(fontSize: 12,),),
+                        child: Text(schedule.note??'',style: TextStyle(fontSize: 12,),),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,

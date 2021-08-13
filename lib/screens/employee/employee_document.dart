@@ -35,18 +35,20 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
       child: Column(
         children: [
           Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top,
+            ),
+            height: kToolbarHeight+MediaQuery.of(context).padding.top,
+            alignment: Alignment.center,
+            color: Color(primaryColor),
+            child: Text(S.of(context).document,style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
+          ),
+          Container(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(4)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 3.0,
-                  spreadRadius: 3.0,
-                )
-              ]
             ),
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top,left: 4,right: 4,bottom: 4),
+            padding: EdgeInsets.all(4),
             child: WeekPicker(
                 selectedDate: selectedDate??DateTime.now(),
                 onChanged: (v){

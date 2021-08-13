@@ -401,8 +401,8 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                     width: MediaQuery.of(context).size.width-50,
                     padding: EdgeInsets.all(8),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Center(child: Text(S.of(context).editWorkHistory,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),)),
                         SizedBox(height: 8,),
@@ -419,7 +419,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                             items: projects.map((Project value) {
                               return DropdownMenuItem<Project>(
                                 value: value,
-                                child: Text(value.name,style: TextStyle(fontSize: 18),),
+                                child: Text(value.name),
                               );
                             }).toList(),
                             value: projects.firstWhere((p) => p.id==work.projectId,orElse: ()=>null),
@@ -445,7 +445,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                             items:tasks.map((ScheduleTask value) {
                               return DropdownMenuItem<ScheduleTask>(
                                 value: value,
-                                child: Text(value.name,style: TextStyle(fontSize: 18),),
+                                child: Text(value.name),
                               );
                             }).toList(),
                             value: tasks.firstWhere((t) => t.id==work.taskId,orElse: ()=>null),
@@ -471,7 +471,8 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                                 },
                                 shape: CircleBorder(),
                                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.zero,
+                                padding: EdgeInsets.all(4),
+                                minWidth: 0,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -490,7 +491,8 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                                 },
                                 shape: CircleBorder(),
                                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.zero,
+                                padding: EdgeInsets.all(4),
+                                minWidth: 0,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],

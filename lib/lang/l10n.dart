@@ -1603,6 +1603,54 @@ class S {
       args: [],
     );
   }
+  String get  addSchedule{
+    return Intl.message(
+      'Add Schedule',
+      name: 'addSchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  type{
+    return Intl.message(
+      'type',
+      name: 'type',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  priority{
+    return Intl.message(
+      'Priority',
+      name: 'priority',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  call{
+    return Intl.message(
+      'Call',
+      name: 'call',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  shop{
+    return Intl.message(
+      'Shop',
+      name: 'shop',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  schedule{
+    return Intl.message(
+      'Schedule',
+      name: 'schedule',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -60,11 +60,11 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   }
 
   _fetchData()async{
+    await context.read<WorkModel>().getProjectsAndTasks();
     final user = context.read<UserModel>().user;
     if(['sub_admin','manager'].contains(user.role)){
       await context.read<CompanyModel>().getCompanyUsers();
     }
-    await context.read<WorkModel>().getProjectsAndTasks();
   }
 
   @override
