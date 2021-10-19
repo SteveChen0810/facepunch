@@ -1,6 +1,6 @@
 class AppConst{
   // static final String domainURL = "http://192.168.3.28/";
-  static final String domainURL = "https://facepunch.app/";
+  static final String domainURL = "https://dev.facepunch.app/";
   static final String baseUrl = domainURL+"api/";
 
   static final String adminRegister = baseUrl+"admin-register";
@@ -60,6 +60,9 @@ class AppConst{
   static final String endSchedule = baseUrl+"end-schedule";
   static final String punchOut = baseUrl+"punch-out";
   static final String getProjectsAndTasks = baseUrl+"get-projects-tasks";
+
+  static final String startCall = baseUrl+"start-call";
+  static final String endCall = baseUrl+"end-call";
 
   static final String getDailySchedule = baseUrl+"get-daily-schedule";
   static final String getEmployeeSchedule = baseUrl+"get-employee-schedule";

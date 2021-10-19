@@ -947,6 +947,14 @@ class Punch{
     }
   }
 
+  bool isIn(){
+    return punch == "In";
+  }
+
+  bool isOut(){
+    return punch == "Out";
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;

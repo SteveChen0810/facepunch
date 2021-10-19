@@ -117,6 +117,7 @@ class ScheduleTask{
   String name;
   String code;
   int companyId;
+  int projectId;
 
   ScheduleTask.fromJson(Map<String, dynamic> json){
     try{
@@ -218,10 +219,9 @@ class WorkSchedule{
   String taskName;
   String start;
   String end;
-  String type;
-  String todo;
-  String note;
-  int priority;
+  String shift;
+  String color;
+  String noAvailable;
   String createdAt;
   String updatedAt;
 
@@ -234,10 +234,9 @@ class WorkSchedule{
     this.taskName,
     this.start,
     this.end,
-    this.type,
-    this.todo,
-    this.note,
-    this.priority,
+    this.shift,
+    this.color,
+    this.noAvailable,
     this.createdAt,
     this.updatedAt
   });
@@ -252,10 +251,9 @@ class WorkSchedule{
       taskName = json['task_name'];
       start = json['start'];
       end = json['end'];
-      type = json['type'];
-      todo = json['todo'];
-      note = json['note'];
-      priority = json['priority'];
+      shift = json['shift'];
+      noAvailable = json['no_available'];
+      color = json['color'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -273,42 +271,66 @@ class WorkSchedule{
       'task_name':taskName,
       'start':start,
       'end':end,
-      'type':type,
-      'todo':todo,
-      'note':note,
-      'priority':priority,
+      'shift':shift,
+      'no_available':noAvailable,
+      'color':color,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
   }
 
   bool isStarted(){
-    return type=='call' && (start !=null && start.isNotEmpty) && (end==null || end.isEmpty);
+    return (start !=null && start.isNotEmpty) && (end==null || end.isEmpty);
   }
 
   bool isEnded(){
-    return type=='call' && (start !=null && start.isNotEmpty) && (end !=null && end.isNotEmpty);
+    return (start !=null && start.isNotEmpty) && (end !=null && end.isNotEmpty);
   }
 
   DateTime getStartTime(){
-    final workDate = createdAt.split(' ')[0];
-    return DateTime.parse('$workDate $start');
-  }
-  DateTime getEndTime(){
-    final workDate = createdAt.split(' ')[0];
-    return DateTime.parse('$workDate $end');
+    return DateTime.parse(start);
   }
 
-  Future<String> startSchedule()async{
+  DateTime getEndTime(){
+    return DateTime.parse(end);
+  }
+
+  String startTime(){
+    return start.substring(11, 16);
+  }
+
+  String endTime(){
+    return end.substring(11, 16);
+  }
+
+  String isValid(){
+    int startDiff = getStartTime().difference(DateTime.now()).inMinutes;
+    if(startDiff > 5){
+      return 'Why do you start this schedule early?';
+    }else if(startDiff < -5){
+      return 'Why do you start this schedule late?';
+    }
+    int endDiff = getEndTime().difference(DateTime.now()).inMinutes;
+    if(endDiff > 5){
+      return 'Why do you finish this schedule early?';
+    }else if(endDiff < -5){
+      return 'Why do you finish this schedule late?';
+    }
+    return null;
+  }
+
+  Future<String> startSchedule(token)async{
     try{
       var res = await http.post(
         AppConst.startSchedule,
         headers: {
           'Accept':'application/json',
           'Content-Type':'application/x-www-form-urlencoded',
-          'Authorization':'Bearer '+GlobalData.token
+          'Authorization':'Bearer '+ token??GlobalData.token
         },
-        body: {'id':id.toString()}
+        body: {
+          'id' : id.toString()
+        }
       );
       print('[WorkSchedule.startSchedule]${res.body}');
       if(res.statusCode==200){
@@ -408,6 +430,126 @@ class WorkSchedule{
       }
     }catch(e){
       print('[WorkModel.addSchedule]$e');
+      return e.toString();
+    }
+  }
+}
+
+class EmployeeCall{
+  int id;
+  int userId;
+  int projectId;
+  int taskId;
+  String projectName;
+  String taskName;
+  String start;
+  String end;
+  String todo;
+  String note;
+  int priority;
+  bool worked;
+  String createdAt;
+  String updatedAt;
+
+  EmployeeCall({
+    this.id,
+    this.userId,
+    this.projectId,
+    this.taskId,
+    this.projectName,
+    this.taskName,
+    this.start,
+    this.end,
+    this.todo,
+    this.note,
+    this.priority,
+    this.worked,
+    this.createdAt,
+    this.updatedAt
+  });
+
+  EmployeeCall.fromJson(Map<String, dynamic> json){
+    try{
+      id = json['id'];
+      userId = json['user_id'];
+      projectId = json['project_id'];
+      taskId = json['task_id'];
+      projectName = json['project_name'];
+      taskName = json['task_name'];
+      start = json['start'];
+      end = json['end'];
+      todo = json['todo'];
+      note = json['note'];
+      priority = json['priority'];
+      worked = json['worked'] == 1;
+      createdAt = json['created_at'];
+      updatedAt = json['updated_at'];
+    }catch(e){
+      print('[EmployeeCall.fromJson]$e');
+    }
+  }
+
+  Map<String, dynamic> toJson(){
+    return {
+      'id':id,
+      'user_id':userId,
+      'project_id':projectId,
+      'task_id':taskId,
+      'project_name':projectName,
+      'task_name':taskName,
+      'start':start,
+      'end':end,
+      'todo':todo,
+      'note':note,
+      'worked':worked?1:0,
+      'priority':priority,
+      'created_at':createdAt,
+      'updated_at':updatedAt
+    };
+  }
+
+  bool isStarted(){
+    return (start !=null && start.isNotEmpty) && (end==null || end.isEmpty);
+  }
+
+  bool isEnded(){
+    return (start !=null && start.isNotEmpty) && (end !=null && end.isNotEmpty);
+  }
+
+  DateTime getStartTime(){
+    return DateTime.parse(start);
+  }
+  DateTime getEndTime(){
+    return DateTime.parse(end);
+  }
+
+  String startTime(){
+    return start.substring(11, 16);
+  }
+
+  String endTime(){
+    return end.substring(11, 16);
+  }
+
+  Future<String> startCall(String token)async{
+    try{
+      var res = await http.post(
+          AppConst.startCall,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+token
+          },
+          body: {'id':id.toString()}
+      );
+      print('[EmployeeCall.startCall]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[EmployeeCall.startSchedule]$e');
       return e.toString();
     }
   }

@@ -1651,6 +1651,78 @@ class S {
       args: [],
     );
   }
+  String get  selectCall{
+    return Intl.message(
+      'Select Call',
+      name: 'selectCall',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  startCall{
+    return Intl.message(
+      'Start Call',
+      name: 'startCall',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  task{
+    return Intl.message(
+      'Task',
+      name: 'task',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  note{
+    return Intl.message(
+      'Note',
+      name: 'note',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  selectSchedule{
+    return Intl.message(
+      'Select Schedule',
+      name: 'selectSchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  shift{
+    return Intl.message(
+      'Shift',
+      name: 'shift',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  startSchedule{
+    return Intl.message(
+      'Start Schedule',
+      name: 'startSchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  description{
+    return Intl.message(
+      'Description',
+      name: 'description',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  youMustWriteDescription{
+    return Intl.message(
+      'You must write description.',
+      name: 'youMustWriteDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
