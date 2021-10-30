@@ -19,24 +19,11 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
   DateTime selectedDate = DateTime.now();
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   List<User> employees = [];
-  List<WorkSchedule> schedules = [];
+  List<EmployeeCall> calls = [];
   User selectedUser;
-  WorkSchedule _schedule;
+  EmployeeCall _call;
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
-  List<Color> colors = [
-    Colors.blue,
-    Colors.green,
-    Colors.teal,
-    Colors.amber,
-    Colors.brown,
-    Colors.cyan,
-    Colors.indigo,
-    Colors.orange,
-    Colors.pink,
-    Colors.purple,
-    Colors.teal,
-  ];
 
   _selectScheduleDate() async {
     final DateTime picked = await showDatePicker(
@@ -53,15 +40,20 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
 
   _onRefresh()async{
     if(selectedUser!=null){
-      schedules = await context.read<WorkModel>().getEmployeeSchedule(userId: selectedUser.id,date: selectedDate.toString());
+      final result = await selectedUser.getDailyCall(selectedDate.toString());
+      if(result != null){
+        _showMessage(result);
+      }else{
+        calls = selectedUser.calls;
+      }
     }
     _refreshController.refreshCompleted();
-    if(mounted)setState(() {_schedule=null;});
+    if(mounted)setState(() {_call = null;});
   }
 
-  Widget _scheduleItem(WorkSchedule s){
+  Widget _scheduleItem(EmployeeCall call){
     try{
-      if(s==_schedule){
+      if(call == _call){
         return Container(
           height: 70,
           alignment: Alignment.center,
@@ -69,63 +61,33 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
           child: CircularProgressIndicator(),
         );
       }
-      // if(s.type=='call'){
-      //   return InkWell(
-      //     onTap: ()async{
-      //       if(_schedule!=null)return;
-      //       _showEditDialog(s);
-      //     },
-      //     child: Container(
-      //       decoration: BoxDecoration(
-      //           color: colors[s.id%11],
-      //           border: Border.all(color: Colors.red, width: 2,style: s.isStarted()?BorderStyle.solid:BorderStyle.none)
-      //       ),
-      //       width: MediaQuery.of(context).size.width,
-      //       padding: EdgeInsets.all(4),
-      //       child: Column(
-      //         children: [
-      //           Text(s.projectName??'',style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16), textAlign: TextAlign.center,),
-      //           Text(s.taskName??'', textAlign: TextAlign.center,),
-      //           SizedBox(height: 12,),
-      //           Row(
-      //             mainAxisAlignment: MainAxisAlignment.end,
-      //             children: [
-      //               Text("${S.of(context).start}:".toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
-      //               Text(PunchDateUtils.get12TimeString(s.start)),
-      //               SizedBox(width: 8,),
-      //               Text("${S.of(context).end}:".toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
-      //               Text(PunchDateUtils.get12TimeString(s.end)),
-      //             ],
-      //           )
-      //         ],
-      //       ),
-      //     ),
-      //   );
-      // }
       return InkWell(
         onTap: (){
-          if(_schedule!=null)return;
-          _showEditDialog(s);
+          if(_call!=null)return;
+          _showCallDialog(call);
         },
         child: Container(
           decoration: BoxDecoration(
-            color: colors[s.id%11],
+            color: call.color(),
           ),
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(4),
           child: Column(
             children: [
-              Text(s.projectName??'',style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
-              Text(s.taskName??'',textAlign: TextAlign.center,),
+              Text(call.projectName??'',style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
+              Text(call.taskName??'',textAlign: TextAlign.center,),
               SizedBox(height: 12,),
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(PunchDateUtils.get12TimeString(s.start),style: TextStyle(fontWeight: FontWeight.bold),),
-                  Text(' ~ '),
-                  Text(PunchDateUtils.get12TimeString(s.end),style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text("${call.priority}",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text("${PunchDateUtils.get12TimeString(call.start)} ~ ${PunchDateUtils.get12TimeString(call.end)}",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -140,7 +102,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
   }
 
   Widget _scheduleLine(){
-    if(schedules.isEmpty){
+    if(calls.isEmpty){
       return Container(
           height: 200,
           alignment: Alignment.center,
@@ -151,11 +113,15 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
-          for(var s in schedules)
-            _scheduleItem(s),
+          for(var call in calls)
+            _scheduleItem(call),
         ],
       ),
     );
+  }
+
+  _showMessage(String message){
+    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -176,477 +142,241 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     return null;
   }
 
-  _showEditDialog(WorkSchedule s){
-    // showDialog(
-    //     context: context,
-    //     builder:(_)=> AlertDialog(
-    //       contentPadding: EdgeInsets.zero,
-    //       insetPadding: EdgeInsets.zero,
-    //       content: StatefulBuilder(
-    //           builder: (BuildContext _context, StateSetter _setState){
-    //             return Container(
-    //               width: MediaQuery.of(context).size.width-50,
-    //               padding: const EdgeInsets.all(16.0),
-    //               child: Column(
-    //                 mainAxisSize: MainAxisSize.min,
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: [
-    //                   Center(
-    //                       child: Text(
-    //                         S.of(context).scheduleRevision,
-    //                         style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
-    //                       )
-    //                   ),
-    //                   SizedBox(height: 8,),
-    //                   Text(S.of(context).project,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                   Container(
-    //                     decoration: BoxDecoration(
-    //                       border: Border.all(color: Colors.black54),
-    //                       borderRadius: BorderRadius.circular(30),
-    //                     ),
-    //                     padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-    //                     clipBehavior: Clip.hardEdge,
-    //                     margin: EdgeInsets.only(top: 4),
-    //                     child: DropdownButton<Project>(
-    //                       items: projects.map((Project value) {
-    //                         return DropdownMenuItem<Project>(
-    //                           value: value,
-    //                           child: Text(
-    //                             value.name,
-    //                             style: TextStyle(fontSize: 12),
-    //                             maxLines: 1,
-    //                             overflow: TextOverflow.ellipsis,
-    //                           ),
-    //                         );
-    //                       }).toList(),
-    //                       value: projects.firstWhere((p) => p.id==s.projectId,orElse: ()=>null),
-    //                       isExpanded: true,
-    //                       isDense: true,
-    //                       underline: SizedBox(),
-    //                       onChanged: (v) {
-    //                         _setState((){ s.projectId = v.id; s.projectName = v.name; });
-    //                       },
-    //                     ),
-    //                   ),
-    //                   SizedBox(height: 8,),
-    //                   Text(S.of(context).activity,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                   Container(
-    //                     decoration: BoxDecoration(
-    //                       border: Border.all(color: Colors.black54),
-    //                       borderRadius: BorderRadius.circular(30),
-    //                     ),
-    //                     padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-    //                     clipBehavior: Clip.hardEdge,
-    //                     margin: EdgeInsets.only(top: 4),
-    //                     child: DropdownButton<ScheduleTask>(
-    //                       items:tasks.map((ScheduleTask value) {
-    //                         return DropdownMenuItem<ScheduleTask>(
-    //                           value: value,
-    //                           child: Text(
-    //                             value.name,
-    //                             style: TextStyle(fontSize: 12),
-    //                             maxLines: 1,
-    //                             overflow: TextOverflow.ellipsis,
-    //                           ),
-    //                         );
-    //                       }).toList(),
-    //                       value: tasks.firstWhere((t) => t.id==s.taskId,orElse: ()=>null),
-    //                       isExpanded: true,
-    //                       isDense: true,
-    //                       underline: SizedBox(),
-    //                       onChanged: (v) {
-    //                         _setState((){s.taskId = v.id; s.taskName = v.name;});
-    //                       },
-    //                     ),
-    //                   ),
-    //                   if(s.type=='call')
-    //                     Text(S.of(context).priority,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                   if(s.type=='call')
-    //                     Row(
-    //                       children: [
-    //                         Radio(
-    //                             value: 1,
-    //                             groupValue: s.priority,
-    //                             onChanged: (v){
-    //                               _setState((){s.priority = v;});
-    //                             }
-    //                         ),
-    //                         Text('1'),
-    //                         SizedBox(width: 12,),
-    //                         Radio(
-    //                             value: 2,
-    //                             groupValue: s.priority,
-    //                             onChanged: (v){
-    //                               _setState((){s.priority = v;});
-    //                             }
-    //                         ),
-    //                         Text('2'),
-    //                         SizedBox(width: 12,),
-    //                         Radio(
-    //                             value: 3,
-    //                             groupValue: s.priority,
-    //                             onChanged: (v){
-    //                               _setState((){s.priority = v;});
-    //                             }
-    //                         ),
-    //                         Text('3'),
-    //                       ],
-    //                     ),
-    //                   if(s.start!=null && s.start.isNotEmpty)
-    //                     Row(
-    //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                       children: [
-    //                         Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                         Text("${PunchDateUtils.get12TimeString(s.start)}"),
-    //                         FlatButton(
-    //                             onPressed: ()async{
-    //                               DateTime pickedTime = await _selectTime(s.getStartTime().toString());
-    //                               if(pickedTime!=null){
-    //                                 _setState(() { s.start = pickedTime.toString().substring(11, 19);});
-    //                               }
-    //                             },
-    //                             shape: CircleBorder(),
-    //                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    //                             padding: EdgeInsets.all(8),
-    //                             minWidth: 0,
-    //                             child: Icon(Icons.edit,color: Color(primaryColor))
-    //                         ),
-    //                       ],
-    //                     ),
-    //                   if(s.end!=null && s.end.isNotEmpty)
-    //                     Row(
-    //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                       children: [
-    //                         Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                         Text("${PunchDateUtils.get12TimeString(s.end)}"),
-    //                         FlatButton(
-    //                             onPressed: ()async{
-    //                               DateTime pickedTime = await _selectTime(s.getEndTime().toString());
-    //                               if(pickedTime!=null){
-    //                                 _setState(() { s.end = pickedTime.toString().substring(11, 19);});
-    //                               }
-    //                             },
-    //                             shape: CircleBorder(),
-    //                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    //                             padding: EdgeInsets.all(8),
-    //                             minWidth: 0,
-    //                             child: Icon(Icons.edit,color: Color(primaryColor))
-    //                         ),
-    //                       ],
-    //                     ),
-    //                   SizedBox(height: 8,),
-    //                   Text(S.of(context).todo,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                   Padding(
-    //                     padding: const EdgeInsets.all(4.0),
-    //                     child: Text(s.todo??'',style: TextStyle(fontSize: 12,),),
-    //                   ),
-    //                   Text(S.of(context).notes,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                   Padding(
-    //                     padding: const EdgeInsets.all(4.0),
-    //                     child: Text(s.note??'',style: TextStyle(fontSize: 12,),),
-    //                   ),
-    //                   Row(
-    //                     mainAxisAlignment: MainAxisAlignment.end,
-    //                     children: [
-    //                       TextButton(
-    //                           onPressed: (){
-    //                             Navigator.of(_context).pop();
-    //                           },
-    //                           child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
-    //                       ),
-    //                       TextButton(
-    //                           onPressed: ()async{
-    //                             Navigator.of(_context).pop();
-    //                             setState(() {_schedule = s;});
-    //                             await s.deleteSchedule();
-    //                             _refreshController.requestRefresh();
-    //                           },
-    //                           child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)
-    //                       ),
-    //                       TextButton(
-    //                           onPressed: ()async{
-    //                             Navigator.of(_context).pop();
-    //                             setState(() {_schedule = s;});
-    //                             await s.editSchedule();
-    //                             _refreshController.requestRefresh();
-    //                           },
-    //                           child: Text(S.of(context).edit, style: TextStyle(color: Colors.green),)
-    //                       ),
-    //                     ],
-    //                   )
-    //                 ],
-    //               ),
-    //             );
-    //           }
-    //       ),
-    //     )
-    // );
+  _showCallDialog(EmployeeCall c){
+    if(projects.isEmpty || tasks.isEmpty || selectedUser==null)return;
+    EmployeeCall call = EmployeeCall(
+        projectId: projects.first.id,
+        projectName: projects.first.name,
+        taskId: tasks.first.id,
+        taskName: tasks.first.name,
+        start: DateTime.now().toString(),
+        end: DateTime.now().toString(),
+        userId: selectedUser.id
+    );
+    if(c != null){
+      call = EmployeeCall.fromJson(c.toJson());
+    }
+    TextEditingController _priority = TextEditingController(text: "${call.priority??''}");
+    TextEditingController _todo = TextEditingController(text: call.todo);
+    TextEditingController _note = TextEditingController(text: call.note);
+    String errorMessage;
+
+    showDialog(
+        context: context,
+        builder:(_)=> AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          insetPadding: EdgeInsets.zero,
+          content: StatefulBuilder(
+              builder: (BuildContext _context, StateSetter _setState){
+                return Container(
+                  width: MediaQuery.of(context).size.width-50,
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                            child: Text(
+                              S.of(context).dispatch,
+                              style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
+                            )
+                        ),
+                        SizedBox(height: 8,),
+                        Text(S.of(context).project,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black54),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
+                          clipBehavior: Clip.hardEdge,
+                          margin: EdgeInsets.only(top: 4),
+                          child: DropdownButton<Project>(
+                            items: projects.map((Project value) {
+                              return DropdownMenuItem<Project>(
+                                value: value,
+                                child: Text(
+                                  value.name,
+                                  style: TextStyle(fontSize: 12),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            value: projects.firstWhere((p) => p.id == call.projectId,orElse: ()=>null),
+                            isExpanded: true,
+                            isDense: true,
+                            underline: SizedBox(),
+                            onChanged: (v) {
+                              _setState((){ call.projectId = v.id; call.projectName = v.name; });
+                              FocusScope.of(context).requestFocus(FocusNode());
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 8,),
+                        Text(S.of(context).activity,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black54),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
+                          clipBehavior: Clip.hardEdge,
+                          margin: EdgeInsets.only(top: 4),
+                          child: DropdownButton<ScheduleTask>(
+                            items:tasks.map((ScheduleTask value) {
+                              return DropdownMenuItem<ScheduleTask>(
+                                value: value,
+                                child: Text(
+                                  value.name,
+                                  style: TextStyle(fontSize: 12),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                            value: tasks.firstWhere((t) => t.id == call.taskId,orElse: ()=>null),
+                            isExpanded: true,
+                            isDense: true,
+                            underline: SizedBox(),
+                            onChanged: (v) {
+                              _setState((){call.taskId = v.id; call.taskName = v.name;});
+                              FocusScope.of(context).requestFocus(FocusNode());
+                            },
+                          ),
+                        ),
+                        SizedBox(height: 8,),
+                        Text(S.of(context).priority,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                        TextField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                            contentPadding: EdgeInsets.all(8),
+                            isDense: true,
+                            errorText: errorMessage
+                          ),
+                          keyboardType: TextInputType.number,
+                          controller: _priority,
+                          onChanged: (v){
+                            call.priority = int.tryParse(v);
+                          },
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                            Text("${PunchDateUtils.getTimeString(call.start)}"),
+                            FlatButton(
+                                onPressed: ()async{
+                                  DateTime pickedTime = await _selectTime(call.start);
+                                  if(pickedTime!=null){
+                                    _setState(() { call.start = pickedTime.toString();});
+                                  }
+                                },
+                                shape: CircleBorder(),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: EdgeInsets.all(8),
+                                minWidth: 0,
+                                child: Icon(Icons.edit,color: Color(primaryColor))
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                            Text("${PunchDateUtils.getTimeString(call.end)}"),
+                            FlatButton(
+                                onPressed: ()async{
+                                  DateTime pickedTime = await _selectTime(call.end);
+                                  if(pickedTime!=null){
+                                    _setState(() { call.end = pickedTime.toString();});
+                                  }
+                                },
+                                shape: CircleBorder(),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: EdgeInsets.all(8),
+                                minWidth: 0,
+                                child: Icon(Icons.edit,color: Color(primaryColor))
+                            ),
+                          ],
+                        ),
+                        Text(S.of(context).todo,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                        TextField(
+                          maxLines: 2,
+                          minLines: 2,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 6,vertical: 2)
+                          ),
+                          controller: _todo,
+                          onChanged: (v){
+                            call.todo = v;
+                          },
+                        ),
+                        SizedBox(height: 4,),
+                        Text(S.of(context).notes,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                        TextField(
+                          maxLines: 2,
+                          minLines: 2,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 6,vertical: 2),
+                          ),
+                          controller: _note,
+                          onChanged: (v){
+                            call.note = v;
+                          },
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                                onPressed: (){
+                                  Navigator.of(_context).pop();
+                                },
+                                child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
+                            ),
+                            TextButton(
+                                onPressed: ()async{
+                                  if(call.priority == null){
+                                    _setState((){ errorMessage = S.of(context).selectPriority; });
+                                    return ;
+                                  }
+                                  Navigator.of(_context).pop();
+                                  setState(() {
+                                    if(c == null){
+                                      calls.add(call);
+                                      _call = call;
+                                    }else{
+                                      _call = c;
+                                    }
+                                  });
+                                  _addEditCall(call);
+                                },
+                                child: Text(S.of(context).save, style: TextStyle(color: Colors.green),)
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }
+          ),
+        )
+    );
   }
 
-  _showNewDialog(){
-    // if(projects.isEmpty || selectedUser==null)return;
-    // final schedule = WorkSchedule(
-    //   userId: selectedUser.id,
-    //   projectId: projects.first.id,
-    //   type: selectedUser.type=='call'?'call':'shop',
-    //   projectName: projects.first.name,
-    //   priority: 1,
-    //   note: '',
-    //   todo: '',
-    //   start: selectedDate.toString().substring(11, 19),
-    //   end: selectedDate.toString().substring(11, 19),
-    //   createdAt: selectedDate.toString(),
-    //   updatedAt: selectedDate.toString(),
-    // );
-    // showDialog(
-    //     context: context,
-    //     builder:(_)=> AlertDialog(
-    //       contentPadding: EdgeInsets.zero,
-    //       insetPadding: EdgeInsets.zero,
-    //       content: StatefulBuilder(
-    //           builder: (BuildContext _context, StateSetter _setState){
-    //             return Container(
-    //               width: MediaQuery.of(context).size.width-50,
-    //               padding: const EdgeInsets.all(16.0),
-    //               child: SingleChildScrollView(
-    //                 child: Column(
-    //                   mainAxisSize: MainAxisSize.min,
-    //                   crossAxisAlignment: CrossAxisAlignment.start,
-    //                   children: [
-    //                     Center(
-    //                         child: Text(
-    //                           S.of(context).scheduleRevision,
-    //                           style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
-    //                         )
-    //                     ),
-    //                     SizedBox(height: 8,),
-    //                     Text(S.of(context).project,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                     Container(
-    //                       decoration: BoxDecoration(
-    //                         border: Border.all(color: Colors.black54),
-    //                         borderRadius: BorderRadius.circular(30),
-    //                       ),
-    //                       padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-    //                       clipBehavior: Clip.hardEdge,
-    //                       margin: EdgeInsets.only(top: 4),
-    //                       child: DropdownButton<Project>(
-    //                         items: projects.map((Project value) {
-    //                           return DropdownMenuItem<Project>(
-    //                             value: value,
-    //                             child: Text(
-    //                               value.name,
-    //                               style: TextStyle(fontSize: 12),
-    //                               maxLines: 1,
-    //                               overflow: TextOverflow.ellipsis,
-    //                             ),
-    //                           );
-    //                         }).toList(),
-    //                         value: projects.firstWhere((p) => p.id==schedule.projectId,orElse: ()=>null),
-    //                         isExpanded: true,
-    //                         isDense: true,
-    //                         underline: SizedBox(),
-    //                         onChanged: (v) {
-    //                           _setState((){ schedule.projectId = v.id; schedule.projectName = v.name; });
-    //                           FocusScope.of(context).requestFocus(FocusNode());
-    //                         },
-    //                       ),
-    //                     ),
-    //                     SizedBox(height: 8,),
-    //                     Text(S.of(context).activity,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                     Container(
-    //                       decoration: BoxDecoration(
-    //                         border: Border.all(color: Colors.black54),
-    //                         borderRadius: BorderRadius.circular(30),
-    //                       ),
-    //                       padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-    //                       clipBehavior: Clip.hardEdge,
-    //                       margin: EdgeInsets.only(top: 4),
-    //                       child: DropdownButton<ScheduleTask>(
-    //                         items:tasks.map((ScheduleTask value) {
-    //                           return DropdownMenuItem<ScheduleTask>(
-    //                             value: value,
-    //                             child: Text(
-    //                               value.name,
-    //                               style: TextStyle(fontSize: 12),
-    //                               maxLines: 1,
-    //                               overflow: TextOverflow.ellipsis,
-    //                             ),
-    //                           );
-    //                         }).toList(),
-    //                         value: tasks.firstWhere((t) => t.id==schedule.taskId,orElse: ()=>null),
-    //                         isExpanded: true,
-    //                         isDense: true,
-    //                         underline: SizedBox(),
-    //                         onChanged: (v) {
-    //                           _setState((){schedule.taskId = v.id; schedule.taskName = v.name;});
-    //                           FocusScope.of(context).requestFocus(FocusNode());
-    //                         },
-    //                       ),
-    //                     ),
-    //                     Text(S.of(context).type, style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                     Row(
-    //                       children: [
-    //                         Radio(
-    //                           value: 'call',
-    //                           groupValue: schedule.type,
-    //                           onChanged: (v){
-    //                             if(['call_shop_daily','call_shop_tracking'].contains(selectedUser.type)){
-    //                               _setState((){schedule.type = v;});
-    //                             }
-    //                           },
-    //                         ),
-    //                         Text(S.of(context).call),
-    //                         SizedBox(width: 12,),
-    //                         Radio(
-    //                           value: 'shop',
-    //                           groupValue: schedule.type,
-    //                           onChanged: (v){
-    //                             if(['call_shop_daily','call_shop_tracking'].contains(selectedUser.type)){
-    //                               _setState((){schedule.type = v;});
-    //                             }
-    //                           },
-    //                         ),
-    //                         Text(S.of(context).shop),
-    //                       ],
-    //                     ),
-    //                     if(schedule.type=='call')
-    //                       Text(S.of(context).priority,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                     if(schedule.type=='call')
-    //                       Row(
-    //                         children: [
-    //                           Radio(
-    //                               value: 1,
-    //                               groupValue: schedule.priority,
-    //                               onChanged: (v){
-    //                                 _setState((){schedule.priority = v;});
-    //                               }
-    //                           ),
-    //                           Text('1'),
-    //                           SizedBox(width: 12,),
-    //                           Radio(
-    //                               value: 2,
-    //                               groupValue: schedule.priority,
-    //                               onChanged: (v){
-    //                                 _setState((){schedule.priority = v;});
-    //                               }
-    //                           ),
-    //                           Text('2'),
-    //                           SizedBox(width: 12,),
-    //                           Radio(
-    //                               value: 3,
-    //                               groupValue: schedule.priority,
-    //                               onChanged: (v){
-    //                                 _setState((){schedule.priority = v;});
-    //                               }
-    //                           ),
-    //                           Text('3'),
-    //                         ],
-    //                       ),
-    //                     if(schedule.type=='shop')
-    //                       Row(
-    //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                         children: [
-    //                           Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                           Text("${PunchDateUtils.get12TimeString(schedule.start)}"),
-    //                           FlatButton(
-    //                               onPressed: ()async{
-    //                                 DateTime pickedTime = await _selectTime(schedule.getStartTime().toString());
-    //                                 if(pickedTime!=null){
-    //                                   _setState(() { schedule.start = pickedTime.toString().substring(11, 19);});
-    //                                 }
-    //                               },
-    //                               shape: CircleBorder(),
-    //                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    //                               padding: EdgeInsets.all(8),
-    //                               minWidth: 0,
-    //                               child: Icon(Icons.edit,color: Color(primaryColor))
-    //                           ),
-    //                         ],
-    //                       ),
-    //                     if(schedule.type=='shop')
-    //                       Row(
-    //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    //                         children: [
-    //                           Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                           Text("${PunchDateUtils.get12TimeString(schedule.end)}"),
-    //                           FlatButton(
-    //                               onPressed: ()async{
-    //                                 DateTime pickedTime = await _selectTime(schedule.getEndTime().toString());
-    //                                 if(pickedTime!=null){
-    //                                   _setState(() { schedule.end = pickedTime.toString().substring(11, 19);});
-    //                                 }
-    //                               },
-    //                               shape: CircleBorder(),
-    //                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-    //                               padding: EdgeInsets.all(8),
-    //                               minWidth: 0,
-    //                               child: Icon(Icons.edit,color: Color(primaryColor))
-    //                           ),
-    //                         ],
-    //                       ),
-    //                     SizedBox(height: 8,),
-    //                     Text(S.of(context).todo,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                     TextField(
-    //                       maxLines: 2,
-    //                       minLines: 2,
-    //                       decoration: InputDecoration(
-    //                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-    //                         contentPadding: EdgeInsets.symmetric(horizontal: 6,vertical: 2)
-    //                       ),
-    //                       onChanged: (v){
-    //                         schedule.todo = v;
-    //                       },
-    //                     ),
-    //                     SizedBox(height: 4,),
-    //                     Text(S.of(context).notes,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-    //                     TextField(
-    //                       maxLines: 2,
-    //                       minLines: 2,
-    //                       decoration: InputDecoration(
-    //                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-    //                         contentPadding: EdgeInsets.symmetric(horizontal: 6,vertical: 2)
-    //                       ),
-    //                       onChanged: (v){
-    //                         schedule.note = v;
-    //                       },
-    //                     ),
-    //                     Row(
-    //                       mainAxisAlignment: MainAxisAlignment.end,
-    //                       children: [
-    //                         TextButton(
-    //                             onPressed: (){
-    //                               Navigator.of(_context).pop();
-    //                             },
-    //                             child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
-    //                         ),
-    //                         TextButton(
-    //                             onPressed: ()async{
-    //                               Navigator.of(_context).pop();
-    //                               setState(() {
-    //                                 schedules.add(schedule);
-    //                                 _schedule = schedule;
-    //                               });
-    //                               await schedule.addSchedule();
-    //                               _refreshController.requestRefresh();
-    //                             },
-    //                             child: Text(S.of(context).save, style: TextStyle(color: Colors.green),)
-    //                         ),
-    //                       ],
-    //                     )
-    //                   ],
-    //                 ),
-    //               ),
-    //             );
-    //           }
-    //       ),
-    //     )
-    // );
+  _addEditCall(EmployeeCall call)async{
+    final result = await call.addEditCall();
+    if(result != null) _showMessage(result);
+    _refreshController.requestRefresh();
   }
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    employees = context.watch<CompanyModel>().users;
+    employees = context.watch<CompanyModel>().users.where((u) => u.hasCall()).toList();
     projects = context.watch<WorkModel>().projects;
     tasks = context.watch<WorkModel>().tasks;
     if(selectedUser==null && employees.isNotEmpty){
@@ -722,7 +452,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: MaterialButton(
-                          onPressed: _showNewDialog,
+                          onPressed: ()=>_showCallDialog(null),
                           height: 40,
                           child: Text(S.of(context).addSchedule,style: TextStyle(color: Colors.white),),
                           color: Colors.black,
@@ -741,7 +471,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                               margin: EdgeInsets.all(3),
                               decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: selectedUser?.id==employee.id?Colors.red:Colors.transparent,width: 2)
+                                  border: Border.all(color: selectedUser?.id == employee.id ? Colors.red : Colors.transparent, width: 2)
                               ),
                               clipBehavior: Clip.hardEdge,
                               child: InkWell(

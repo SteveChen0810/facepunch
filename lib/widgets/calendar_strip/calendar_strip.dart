@@ -38,22 +38,18 @@ class CalendarStrip extends StatefulWidget {
     this.leftIcon,
   });
 
-  State<CalendarStrip> createState() =>
-      CalendarStripState(selectedDate, startDate, endDate);
+  State<CalendarStrip> createState() => CalendarStripState(selectedDate, startDate, endDate);
 }
 
-class CalendarStripState extends State<CalendarStrip>
-    with TickerProviderStateMixin {
-  DateTime currentDate = DateTime.utc(
-      DateTime.now().year, DateTime.now().month, DateTime.now().day);
+class CalendarStripState extends State<CalendarStrip> with TickerProviderStateMixin {
+  DateTime currentDate = DateTime.utc(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   DateTime selectedDate;
   String monthLabel;
   bool inBetweenMonths = false;
   DateTime rowStartingDate;
   double opacity = 0.0;
   DateTime lastDayOfMonth;
-  TextStyle selectedDateStyle =
-      TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white);
+  TextStyle selectedDateStyle = TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: Colors.white);
   bool isOnEndingWeek = false, isOnStartingWeek = false;
   bool doesDateRangeExists = false;
   DateTime today;
@@ -75,8 +71,7 @@ class CalendarStripState extends State<CalendarStrip>
 
   List<String> dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
-  CalendarStripState(
-      DateTime selectedDate, DateTime startDate, DateTime endDate) {
+  CalendarStripState(DateTime selectedDate, DateTime startDate, DateTime endDate) {
     today = getDateOnly(DateTime.now());
     lastDayOfMonth = PunchDateUtils.getLastDayOfMonth(currentDate);
     runPresetsAndExceptions(selectedDate, startDate, endDate);
@@ -335,8 +330,7 @@ class CalendarStripState extends State<CalendarStrip>
     List<Widget> currentWeekRow = [];
     for (var eachDay = 0; eachDay < 7; eachDay++) {
       var index = eachDay;
-      currentWeekRow.add(dateTileBuilder(
-          rowStartingDate.add(Duration(days: eachDay)), selectedDate, index));
+      currentWeekRow.add(dateTileBuilder(rowStartingDate.add(Duration(days: eachDay)), selectedDate, index));
     }
     monthLabel = getMonthLabel();
     return Column(
@@ -439,8 +433,7 @@ class SlideFadeTransition extends StatefulWidget {
   SlideFadeTransitionState createState() => SlideFadeTransitionState();
 }
 
-class SlideFadeTransitionState extends State<SlideFadeTransition>
-    with TickerProviderStateMixin {
+class SlideFadeTransitionState extends State<SlideFadeTransition> with TickerProviderStateMixin {
   AnimationController _animController;
   Animation<Offset> _animOffset;
   bool _disposed = false;

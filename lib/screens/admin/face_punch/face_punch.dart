@@ -325,7 +325,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     for(var c in cData){
       calls.add(EmployeeCall.fromJson(c));
     }
-    if(schedules.isEmpty){
+    if(schedules.isEmpty && calls.isEmpty){
       await showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",

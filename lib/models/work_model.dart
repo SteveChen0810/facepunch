@@ -38,60 +38,6 @@ class WorkModel with ChangeNotifier{
     }
   }
 
-  Future<String> submitRevision({WorkSchedule newSchedule, WorkSchedule oldSchedule, String description})async{
-    try{
-      var res = await http.post(
-        AppConst.sendTimeRevisionRequest,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({
-          'schedule_id':oldSchedule.id,
-          'new_value':newSchedule.toJson(),
-          'old_value':oldSchedule.toJson(),
-          'description':description
-        }),
-      );
-      print('[WorkSchedule.submitRevision]${res.body}');
-      if(res.statusCode==200){
-        return null;
-      }else{
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      print('[WorkModel.submitRevision]$e');
-      return e.toString();
-    }
-  }
-
-  Future<List<WorkSchedule>> getEmployeeSchedule({String date, int userId})async{
-    List<WorkSchedule> schedules = [];
-    try{
-      var res = await http.post(
-          AppConst.getEmployeeSchedule,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: {
-            'date':date,
-            'id':userId.toString()
-          }
-      );
-      print('[WorkModel.getEmployeeSchedule]${res.body}');
-      if(res.statusCode==200){
-        for(var json in jsonDecode(res.body))
-          schedules.add(WorkSchedule.fromJson(json));
-      }
-    }catch(e){
-      print('[WorkModel.getEmployeeSchedule]$e');
-    }
-    return schedules;
-  }
-
   Future<String> startShopTracking({String token,int projectId, int taskId})async{
     try{
       var res = await http.post(
@@ -240,6 +186,10 @@ class WorkHistory{
       'created_at':createdAt,
       'updated_at':updatedAt
     };
+  }
+
+  bool isEnd(){
+    return end != null && end.isNotEmpty;
   }
 }
 
@@ -539,7 +489,7 @@ class EmployeeCall{
       'end':end,
       'todo':todo,
       'note':note,
-      'worked':worked?1:0,
+      'worked':(worked == null || !worked)?1:0,
       'priority':priority,
       'created_at':createdAt,
       'updated_at':updatedAt
@@ -557,6 +507,7 @@ class EmployeeCall{
   DateTime getStartTime(){
     return DateTime.parse(start);
   }
+
   DateTime getEndTime(){
     return DateTime.parse(end);
   }
@@ -590,6 +541,46 @@ class EmployeeCall{
       print('[EmployeeCall.startSchedule]$e');
       return e.toString();
     }
+  }
+
+  Future<String> addEditCall()async{
+    try{
+      var res = await http.post(
+        AppConst.addEditCall,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode(toJson()),
+      );
+      print('[EmployeeCall.addEditCall]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[EmployeeCall.addEditCall]$e');
+      return e.toString();
+    }
+  }
+
+  Color color(){
+    List<Color> colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.teal,
+      Colors.amber,
+      Colors.brown,
+      Colors.cyan,
+      Colors.indigo,
+      Colors.orange,
+      Colors.pink,
+      Colors.purple,
+      Colors.teal,
+    ];
+    return colors[id%11];
   }
 }
 

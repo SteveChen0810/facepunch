@@ -28,7 +28,9 @@ class AppConst{
   static final String punchByAdmin= baseUrl+"punch-by-admin";
 
   static final String sendTimeRevisionRequest = baseUrl+"send-time-revision";
+  static final String addRevisionDescription = baseUrl+"add-revision-description";
   static final String getRevisionRequest = baseUrl+"get-time-revisions";
+  static final String getRevisionNotifications = baseUrl+"get-revision-notifications";
   static final String acceptRevision = baseUrl+"accept-revision";
   static final String declineRevision = baseUrl+"decline-revision";
   static final String deleteRevision = baseUrl+"delete-revision";
@@ -63,11 +65,13 @@ class AppConst{
 
   static final String getDailySchedule = baseUrl+"get-daily-schedule";
   static final String getEmployeeSchedule = baseUrl+"get-employee-schedule";
+  static final String getEmployeeCall = baseUrl+"get-employee-call";
   static final String deleteSchedule = baseUrl+"delete-schedule";
   static final String editSchedule = baseUrl+"edit-schedule";
   static final String addSchedule = baseUrl+"add-schedule";
   static final String editWork = baseUrl+"edit-work";
   static final String deleteWork = baseUrl+"delete-work";
+  static final String addEditCall = baseUrl+"add-edit-call";
 
 }
 

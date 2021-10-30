@@ -31,6 +31,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
     final width = MediaQuery.of(context).size.width;
     final user = context.watch<UserModel>().user;
     final settings = context.watch<CompanyModel>().myCompanySettings;
+
     return Container(
       child: Column(
         children: [
@@ -41,7 +42,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
             height: kToolbarHeight+MediaQuery.of(context).padding.top,
             alignment: Alignment.center,
             color: Color(primaryColor),
-            child: Text(S.of(context).document,style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
+            child: Text(S.of(context).document,style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),),
           ),
           Container(
             decoration: BoxDecoration(
@@ -85,13 +86,11 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                   child: Container(
                     child: Column(
                       children: [
-                        pdfError.isNotEmpty?
-                        Container(
+                        pdfError.isNotEmpty?Container(
                           alignment: Alignment.center,
                           height: 200,
                           child: Text(S.of(context).pdfNotGenerated),
-                        ):
-                        Padding(
+                        ):Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: SfPdfViewer.network(
                             user.pdfUrl(selectedDate),

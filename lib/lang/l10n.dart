@@ -1811,6 +1811,30 @@ class S {
       args: [],
     );
   }
+  String get incorrect{
+    return Intl.message(
+      'Incorrect',
+      name: 'incorrect',
+      desc: '',
+      args: [],
+    );
+  }
+  String get correct{
+    return Intl.message(
+      'Correct',
+      name: 'correct',
+      desc: '',
+      args: [],
+    );
+  }
+  String get selectPriority{
+    return Intl.message(
+      'Select Priority',
+      name: 'selectPriority',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

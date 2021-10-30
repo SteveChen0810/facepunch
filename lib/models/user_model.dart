@@ -1,4 +1,5 @@
 import 'package:facepunch/lang/l10n.dart';
+import 'package:facepunch/models/revision_model.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -469,6 +470,7 @@ class User {
   List<EmployeeBreak> breaks = [];
   List<WorkSchedule> schedules = [];
   List<EmployeeCall> calls = [];
+  List<Revision> revisions = [];
   Punch lastPunch;
   bool canNTCTracking = true;
   bool sendScheduleNotification = true;
@@ -627,7 +629,7 @@ class User {
   }
 
   List<Punch> getPunchesOfDate(DateTime date){
-    return punches.where((p) => isSameDatePunch(p.createdAt, date.toString())).toList();
+    return punches.where((p) => isSameDatePunch(p.createdAt, date.toString()) && p.isIn()).toList();
   }
 
   List<Punch> getPunchesOfWeek(DateTime startDate){
@@ -651,27 +653,26 @@ class User {
 
   double getHoursOfDate(DateTime date){
     List<Punch> punchesOfDate = getPunchesOfDate(date);
-    if(punchesOfDate.length<2)return 0.0;
     double hours = 0.0;
-    for(int i=0; i<punchesOfDate.length; i++ ){
-      if(punchesOfDate[i].punch=="In"){
-        if(i+1<punchesOfDate.length && punchesOfDate[i+1].punch=="Out"){
-          hours += DateTime.parse(punchesOfDate[i+1].createdAt).difference(DateTime.parse(punchesOfDate[i].createdAt)).inMinutes/60;
-        }else if(i+2<punchesOfDate.length && punchesOfDate[i+2].punch=="Out"){
-          hours += DateTime.parse(punchesOfDate[i+2].createdAt).difference(DateTime.parse(punchesOfDate[i].createdAt)).inMinutes/60;
-        }
+    punchesOfDate.forEach((punchIn) {
+      Punch punchOut = getPunchOut(punchIn);
+      if(punchOut != null){
+        hours += DateTime.parse(punchOut.createdAt).difference(DateTime.parse(punchIn.createdAt)).inMinutes/60;
       }
-    }
+    });
     return hours;
   }
 
   double getBreakTime(DateTime date){
     double hours = 0;
-    breaks.where((b) => isSameDatePunch(b.start, date.toString()))
-        .forEach((b) {
+    breaks.where((b) => isSameDatePunch(b.start, date.toString())).forEach((b) {
       hours += b.length/60;
     });
     return hours;
+  }
+
+  double calculateHoursOfDate(DateTime date){
+    return getHoursOfDate(date) - getBreakTime(date);
   }
 
   double getTotalHoursOfWeek(DateTime startDate){
@@ -681,8 +682,7 @@ class User {
     punchGroup.forEach((d, v) {
       DateTime date = DateTime.parse(d);
       if(date.isAfter(startDate) && date.isBefore(endDate)){
-        totalHours +=getHoursOfDate(date);
-        totalHours -=getBreakTime(date);
+        totalHours += calculateHoursOfDate(date);
       }
     });
     return totalHours;
@@ -856,6 +856,65 @@ class User {
       return e.toString();
     }
   }
+
+  Future<String> getRevisionNotifications()async{
+    try{
+      var res = await http.get(
+          AppConst.getRevisionNotifications,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+token
+          }
+      );
+      print('[User.getRevisionNotifications]${res.body}');
+      final body = jsonDecode(res.body);
+      if(res.statusCode==200){
+        revisions.clear();
+        for(var revision in body){
+          revisions.add(Revision.fromJson(revision));
+        }
+        return null;
+      }else{
+        return body['message']??'Something went wrong.';
+      }
+    }catch(e){
+      print('[User.getRevisionNotifications]$e');
+      return e.toString();
+    }
+  }
+
+  Future<String> getDailyCall(String date)async{
+    try{
+      var res = await http.post(
+          AppConst.getEmployeeCall,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer ${token??GlobalData.token}'
+          },
+          body: {
+            'date' : date,
+            'id' : id.toString()
+          }
+      );
+      print('[WorkModel.getDailyCall]${res.body}');
+      var body = jsonDecode(res.body);
+      if(res.statusCode == 200){
+        calls.clear();
+        for(var c in body){
+          calls.add(EmployeeCall.fromJson(c));
+        }
+        return null;
+      }else{
+        return body['message']??'Something went wrong.';
+      }
+    }catch(e){
+      print('[WorkModel.getDailyCall]$e');
+      return e.toString();
+    }
+  }
+
 }
 
 class Punch{

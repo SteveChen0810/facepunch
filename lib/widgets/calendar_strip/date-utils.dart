@@ -166,24 +166,39 @@ class PunchDateUtils {
     return date.add(Duration(days: DateTime.daysPerWeek - date.weekday-1));
   }
 
-  static String getDateString(DateTime date){
+  static String getDateString(date){
+    if(date is String){
+      return DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(DateTime.parse(date));
+    }
     return DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(date);
   }
 
-  static String inputDateString(DateTime date){
+  static String inputDateString(date){
+    if(date is String){
+      return DateFormat('dd/MM/y').format(DateTime.parse(date));
+    }
     return DateFormat('dd/MM/y').format(date);
   }
 
-  static String getTimeString(DateTime date){
+  static String getTimeString(date){
+    if(date is String){
+      return DateFormat("kk:mm").format(DateTime.parse(date));
+    }
     return DateFormat("kk:mm").format(date);
   }
 
-  static String getTimeSecondString(DateTime date){
+  static String getTimeSecondString(date){
+    if(date is String){
+      return DateFormat("kk:mm:ss").format(DateTime.parse(date));
+    }
     return DateFormat("kk:mm:ss").format(date);
   }
 
-  static String get12TimeString(String time){
-    if(time==null || time.isEmpty)return '--:--';
-    return DateFormat("hh:mm a").format(DateTime.parse(time));
+  static String get12TimeString(time){
+    if(time==null)return '--:--';
+    if(time is String){
+      return DateFormat("kk:mm:ss").format(DateTime.parse(time));
+    }
+    return DateFormat("hh:mm a").format(time);
   }
 }

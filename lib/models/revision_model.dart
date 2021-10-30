@@ -91,6 +91,61 @@ class RevisionModel with ChangeNotifier{
     }
   }
 
+  Future<String> sendScheduleRevision({WorkSchedule newSchedule, WorkSchedule oldSchedule, String description})async{
+    try{
+      var res = await http.post(
+        AppConst.sendTimeRevisionRequest,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({
+          'schedule_id':oldSchedule.id,
+          'new_value':newSchedule.toJson(),
+          'old_value':oldSchedule.toJson(),
+          'description':description
+        }),
+      );
+      print('[RevisionModel.sendScheduleRevision]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[RevisionModel.sendScheduleRevision]$e');
+      return e.toString();
+    }
+  }
+
+  Future<String> sendCallRevision({EmployeeCall newSchedule, EmployeeCall oldSchedule, String description})async{
+    try{
+      var res = await http.post(
+        AppConst.sendTimeRevisionRequest,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({
+          'call_id':oldSchedule.id,
+          'new_value':newSchedule.toJson(),
+          'old_value':oldSchedule.toJson(),
+          'description':description
+        }),
+      );
+      print('[RevisionModel.sendCallRevision]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[RevisionModel.sendCallRevision]$e');
+      return e.toString();
+    }
+  }
 }
 
 class Revision{
@@ -98,12 +153,18 @@ class Revision{
   int userId;
   int punchId;
   int workId;
+  int scheduleId;
+  int callId;
+  int breakId;
   String type;
   var oldValue;
   var newValue;
   User user;
   Punch punch;
   WorkHistory work;
+  WorkSchedule schedule;
+  EmployeeCall call;
+  EmployeeBreak employeeBreak;
   String status;
   String createdAt;
   String updatedAt;
@@ -131,14 +192,23 @@ class Revision{
       status = json['status'];
       oldValue = json['old_value'];
       newValue = json['new_value'];
-      if(json['user']!=null){
+      if(json['user'] != null){
         user = User.fromJson(json['user']);
       }
-      if(json['punch']!=null){
+      if(json['punch'] != null){
         punch = Punch.fromJson(json['punch']);
       }
-      if(json['work']!=null){
+      if(json['work'] != null){
         work = WorkHistory.fromJson(json['work']);
+      }
+      if(json['schedule'] != null){
+        schedule = WorkSchedule.fromJson(json['schedule']);
+      }
+      if(json['call'] != null){
+        call = EmployeeCall.fromJson(json['call']);
+      }
+      if(json['break'] != null){
+        employeeBreak = EmployeeBreak.fromJson(json['break']);
       }
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
@@ -161,5 +231,43 @@ class Revision{
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
+  }
+
+  bool isValid(){
+    if(newValue is String && oldValue is String) return newValue != oldValue;
+    bool valid = false;
+    if(newValue is Map && oldValue is Map){
+      newValue.forEach((key, value) {
+        print([key, value, oldValue[key]]);
+        if(oldValue[key] != value) valid = true;
+      });
+    }
+    return valid;
+  }
+
+  Future<String> addDescription(String description)async{
+    try{
+      var res = await http.post(
+        AppConst.addRevisionDescription,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({
+          'id': id,
+          'description': description
+        }),
+      );
+      print('[Revision.addDescription]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[Revision.addDescription]$e');
+      return e.toString();
+    }
   }
 }

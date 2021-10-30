@@ -85,7 +85,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Text(_description()),
+              Text(_description(), textAlign: TextAlign.center,),
               for(var call in calls)
                 Container(
                   margin: EdgeInsets.all(8),

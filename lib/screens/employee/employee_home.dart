@@ -10,6 +10,7 @@ import '../../models/company_model.dart';
 import '../../models/user_model.dart';
 import '../admin/nfc/nfc_scan.dart';
 import 'employee_document.dart';
+import 'employee_notification.dart';
 import 'employee_timesheet.dart';
 import '../../models/app_const.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +88,8 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             if(user.hasSchedule())
               EmployeeSchedule(),
             if(['sub_admin','manager'].contains(user.role))
-              EmployeeDispatch()
+              EmployeeDispatch(),
+            EmployeeNotification()
           ],
           controller: _pageController,
           physics: NeverScrollableScrollPhysics(),
@@ -126,6 +128,11 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 activeIcon: Image.asset("assets/images/dispatch.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
             ),
+          BottomNavigationBarItem(
+              icon: Image.asset("assets/images/dispatch.png",width: 30,color: Colors.black,),
+              activeIcon: Image.asset("assets/images/dispatch.png",width: 30,color: Color(primaryColor),),
+              label: S.of(context).nfc
+          ),
         ],
         showSelectedLabels: false,
         showUnselectedLabels: false,
