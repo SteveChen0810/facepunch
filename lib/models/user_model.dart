@@ -1,3 +1,4 @@
+import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -14,6 +15,7 @@ class UserModel with ChangeNotifier{
   final LocalStorage storage = LocalStorage('face_punch_user');
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String locale = 'en';
+  double yearTotalHours = 0;
 
   Future<User> getUserFromLocal()async{
     try{
@@ -247,7 +249,7 @@ class UserModel with ChangeNotifier{
     String result = 'Oops, Unknown Errors!';
     try{
       String deviceToken = await _firebaseMessaging.getToken();
-      print("[deviceToken] $deviceToken");
+      print("[UserModel.loginWithFace.deviceToken] $deviceToken");
       var res = await http.post(
           AppConst.loginWithFace,
           headers: {
@@ -301,110 +303,74 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> getUserPunches()async{
+  Future<String> getUserTimeSheetData(DateTime date)async{
     try{
-      var res = await http.get(
-          AppConst.getUserPunches,
+      var res = await http.post(
+          AppConst.getTimeSheetData,
           headers: {
             'Accept':'application/json',
-            'Content-Type':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
             'Authorization':'Bearer ${user.token}'
-          }
+          },
+        body: {'date': date.toString()}
       );
-      print("[UserModel.getUserPunches] ${res.body}");
+      print("[UserModel.getUserTimeSheetData] ${res.body}");
+      var body = jsonDecode(res.body);
       if(res.statusCode==200){
         List<Punch> punches = [];
-        for(var punch in jsonDecode(res.body)){
-          punches.add(Punch.fromJson(punch));
-        }
+        for(var punch in body['punches']) punches.add(Punch.fromJson(punch));
         user.punches = punches;
-        notifyListeners();
-        return null;
-      }else{
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      print("[UserModel.getUserPunches] $e");
-      return e.toString();
-    }
-  }
-
-  Future<String> getUserWorkHistory()async{
-    try{
-      var res = await http.get(
-          AppConst.getUserWorks,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer ${user.token}'
-          }
-      );
-      print("[UserModel.getUserWorkHistory] ${res.body}");
-      if(res.statusCode==200){
         List<WorkHistory> works = [];
-        for(var work in jsonDecode(res.body)){
-          works.add(WorkHistory.fromJson(work));
-        }
+        for(var work in body['works']) works.add(WorkHistory.fromJson(work));
         user.works = works;
+        List<EmployeeBreak> breaks = [];
+        for(var b in body['breaks']) breaks.add(EmployeeBreak.fromJson(b));
+        user.breaks = breaks;
         notifyListeners();
         return null;
       }else{
-        return jsonDecode(res.body)['message'];
+        return body['message']??'Something went wrong';
       }
     }catch(e){
-      print("[UserModel.getUserWorkHistory] $e");
-      return e.toString();
+      print("[UserModel.getUserTimeSheetData] $e");
+      return e.toString() ;
     }
   }
 
-  Future<List<Punch>> getEmployeePunches(int userId)async{
+  Future<String> getEmployeeTimeSheetData(DateTime date, User employee)async{
     try{
       var res = await http.post(
-          AppConst.getEmployeePunches,
+          AppConst.getTimeSheetData,
           headers: {
             'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+user.token
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer ${user.token}'
           },
-        body: jsonEncode({'user_id':userId}),
+        body: {'date': date.toString(),'user_id': employee.id.toString()}
       );
-      print("[UserModel.getEmployeePunches] ${res.body}");
+      print("[UserModel.getEmployeeTimeSheetData] ${res.body}");
+      var body = jsonDecode(res.body);
       if(res.statusCode==200){
         List<Punch> punches = [];
-        for(var punch in jsonDecode(res.body)){
-          punches.add(Punch.fromJson(punch));
-        }
-        return punches;
-      }
-    }catch(e){
-      print("[UserModel.getEmployeePunches] $e");
-    }
-    return [];
-  }
+        for(var punch in body['punches']) punches.add(Punch.fromJson(punch));
+        employee.punches = punches;
 
-  Future<List<WorkHistory>> getEmployeeWorks(int userId)async{
-    try{
-      var res = await http.post(
-          AppConst.getEmployeeWorks,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+user.token
-          },
-        body: jsonEncode({'user_id':userId}),
-      );
-      print("[UserModel.getEmployeeWorks] ${res.body}");
-      if(res.statusCode==200){
         List<WorkHistory> works = [];
-        for(var work in jsonDecode(res.body)){
-          works.add(WorkHistory.fromJson(work));
-        }
-        return works;
+        for(var work in body['works']) works.add(WorkHistory.fromJson(work));
+        employee.works = works;
+
+        List<EmployeeBreak> breaks = [];
+        for(var b in body['breaks']) breaks.add(EmployeeBreak.fromJson(b));
+        employee.breaks = breaks;
+        notifyListeners();
+        return null;
+      }else{
+        return body['message']??'Something went wrong';
       }
     }catch(e){
-      print("[UserModel.getEmployeeWorks] $e");
+      print("[UserModel.getEmployeeTimeSheetData] $e");
+      return e.toString() ;
     }
-    return [];
   }
 
   Future<String> notificationSetting()async{
@@ -441,48 +407,28 @@ class UserModel with ChangeNotifier{
     notifyListeners();
   }
 
-  Future<String> startWork({User employee, int taskId, int projectId})async{
+  Future<String> getYearTotalHours()async{
     try{
-      var res = await http.post(
-          AppConst.startWork,
+      var res = await http.get(
+          AppConst.getYearTotalHours,
           headers: {
             'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+employee.token
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer ${user.token}'
           },
-          body: jsonEncode({'task_id':taskId,'project_id':projectId})
       );
-      print("[UserModel.startWork] ${res.body}");
-      if(res.statusCode!=200){
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      print("[UserModel.startWork] $e");
-    }
-    return null;
-  }
-  Future punchOut({User employee, double longitude, double latitude})async{
-    try{
-      var res = await http.post(
-          AppConst.punchOut,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+employee.token
-          },
-          body: jsonEncode({
-            'longitude':longitude,
-            'latitude':latitude,
-          })
-      );
-      print("[UserModel.punchOut] ${res.body}");
+      print("[UserModel.getYearTotalHours] ${res.body}");
+      var body = jsonDecode(res.body);
       if(res.statusCode==200){
-        return Punch.fromJson(jsonDecode(res.body));
+        yearTotalHours = body['total'];
+        notifyListeners();
+        return null;
       }else{
-        return jsonDecode(res.body)['message'];
+        return body['message']??'Something went wrong';
       }
     }catch(e){
-      print("[UserModel.punchOut] $e");
+      print("[UserModel.getYearTotalHours] $e");
+      return e.toString() ;
     }
   }
 }
@@ -496,7 +442,6 @@ class User {
   String lastName;
   String phone;
   String pin;
-  String function;
   String start;
   String salary;
   String birthday;
@@ -521,6 +466,9 @@ class User {
   String updatedAt;
   List<Punch> punches = [];
   List<WorkHistory> works = [];
+  List<EmployeeBreak> breaks = [];
+  List<WorkSchedule> schedules = [];
+  List<EmployeeCall> calls = [];
   Punch lastPunch;
   bool canNTCTracking = true;
   bool sendScheduleNotification = true;
@@ -534,7 +482,6 @@ class User {
     this.lastName,
     this.phone,
     this.pin,
-    this.function,
     this.start,
     this.salary,
     this.birthday,
@@ -554,12 +501,10 @@ class User {
     this.employeeCode,
     this.token,
     this.nfc,
-    this.punches,
     this.lastPunch,
     this.lunchTime,
     this.createdAt,
     this.updatedAt,
-    this.works,
     this.canNTCTracking,
     this.sendScheduleNotification
   });
@@ -574,7 +519,6 @@ class User {
       lastName = json['last_name'];
       phone = json['phone'];
       pin = json['pin'];
-      function = json['function'];
       start = json['start'];
       salary = json['salary'];
       birthday = json['birthday'];
@@ -623,7 +567,6 @@ class User {
     data['last_name'] = this.lastName;
     data['phone'] = this.phone;
     data['pin'] = this.pin;
-    data['function'] = this.function;
     data['start'] = this.start;
     data['salary'] = this.salary;
     data['birthday'] = this.birthday;
@@ -695,10 +638,12 @@ class User {
   Map<String, List<Punch>> getPunchesGroupOfWeek(DateTime startDate){
     Map<String, List<Punch>> punchGroup = {};
     getPunchesOfWeek(startDate).forEach((p) {
-      if(punchGroup[getDateString(p.createdAt)]==null){
-        punchGroup[getDateString(p.createdAt)] = [p];
-      }else{
-        punchGroup[getDateString(p.createdAt)].add(p);
+      if(p.punch == "In"){
+        if(punchGroup[getDateString(p.createdAt)]==null){
+          punchGroup[getDateString(p.createdAt)] = [p];
+        }else{
+          punchGroup[getDateString(p.createdAt)].add(p);
+        }
       }
     });
     return punchGroup;
@@ -720,31 +665,24 @@ class User {
     return hours;
   }
 
-  double getLunchBreakTime(DateTime date){
-    List<Punch> punchesOfDate = getPunchesOfDate(date);
-    Punch lunch = punchesOfDate.firstWhere((p) => p.punch=="Lunch",orElse: ()=>null);
-    if(lunch==null)return 0;
-    return DateTime.parse(lunch.updatedAt).difference(DateTime.parse(lunch.createdAt)).inMinutes/60;
-  }
-
-  double getTotalHoursOfYear(){
-    Map<String, List<Punch>> punchGroup = getPunchesGroupByDate();
-    double totalHours = 0.0;
-    punchGroup.forEach((key, v) {
-      totalHours +=getHoursOfDate(DateTime.parse(key));
+  double getBreakTime(DateTime date){
+    double hours = 0;
+    breaks.where((b) => isSameDatePunch(b.start, date.toString()))
+        .forEach((b) {
+      hours += b.length/60;
     });
-    return totalHours;
+    return hours;
   }
 
   double getTotalHoursOfWeek(DateTime startDate){
     DateTime endDate = startDate.add(Duration(days: 6));
     Map<String, List<Punch>> punchGroup = getPunchesGroupByDate();
     double totalHours = 0.0;
-    punchGroup.forEach((key, v) {
-      DateTime date = DateTime.parse(key);
+    punchGroup.forEach((d, v) {
+      DateTime date = DateTime.parse(d);
       if(date.isAfter(startDate) && date.isBefore(endDate)){
         totalHours +=getHoursOfDate(date);
-        totalHours -=getLunchBreakTime(date);
+        totalHours -=getBreakTime(date);
       }
     });
     return totalHours;
@@ -758,6 +696,18 @@ class User {
   double getTotalHoursOfLastWeek(){
     DateTime startOfWeek = PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     return getTotalHoursOfWeek(startOfWeek.subtract(Duration(days: 7)));
+  }
+
+  Punch getPunchOut(Punch punchIn){
+    return punches.firstWhere((p) => (p.inId != null && p.inId == punchIn.id), orElse: ()=>null);
+  }
+
+  List<WorkHistory> worksOfPunch(Punch punch){
+    return works.where((w) => (w.punchId!=null && w.punchId == punch.id),).toList();
+  }
+
+  List<EmployeeBreak> breaksOfPunch(Punch punch){
+    return breaks.where((b) => (b.punchId!=null && b.punchId == punch.id),).toList();
   }
 
   Future<String> editPunch(int punchId, String value)async{
@@ -856,10 +806,17 @@ class User {
     return lastPunch!=null && lastPunch.punch=='In';
   }
 
-  bool isTracking(){
+  bool hasTracking(){
     return ['shop_tracking','call_shop_tracking'].contains(type);
   }
 
+  bool hasSchedule(){
+    return ['shop_daily','call_shop_daily'].contains(type);
+  }
+
+  bool hasCall(){
+    return ['call', 'call_shop_daily', 'call_shop_tracking'].contains(type);
+  }
 
   String pdfUrl(DateTime startDate){
     DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
@@ -868,25 +825,7 @@ class User {
     return Uri.encodeFull('https://facepunch.app/punch-pdfs/$companyId/$pdfLink');
   }
 
-  List<WorkHistory> worksOfPunch(Punch punchIn, Punch punchOut){
-    try{
-      final inTime = DateTime.parse(punchIn.createdAt);
-      final outTime = punchOut!=null?DateTime.parse(punchOut.createdAt):null;
-      return works.where((w){
-        final workTime = DateTime.parse(w.createdAt);
-        if(workTime.day != inTime.day || workTime.month !=inTime.month)return false;
-        if(workTime.isBefore(inTime))return false;
-        if(outTime!=null && workTime.isAfter(outTime))return false;
-        return true;
-      }).toList();
-    }catch(e){
-      print('[User.worksOfPunch] $e');
-    }
-    return [];
-  }
-
-  Future<List<WorkSchedule>> getDailySchedule(String date)async{
-    List<WorkSchedule> schedules = [];
+  Future<String> getDailySchedule(String date)async{
     try{
       var res = await http.post(
           AppConst.getDailySchedule,
@@ -895,25 +834,34 @@ class User {
             'Content-Type':'application/x-www-form-urlencoded',
             'Authorization':'Bearer '+token
           },
-          body: {
-            'date':date
-          }
+          body: {'date':date}
       );
       print('[WorkModel.getDailySchedule]${res.body}');
+      var body = jsonDecode(res.body);
       if(res.statusCode==200){
-        for(var json in jsonDecode(res.body))
-          schedules.add(WorkSchedule.fromJson(json));
+        schedules.clear();
+        calls.clear();
+        for(var s in body['schedules']){
+          schedules.add(WorkSchedule.fromJson(s));
+        }
+        for(var c in body['calls']){
+          calls.add(EmployeeCall.fromJson(c));
+        }
+        return null;
+      }else{
+        return body['message']??'Something went wrong.';
       }
     }catch(e){
       print('[WorkModel.getDailySchedule]$e');
+      return e.toString();
     }
-    return schedules;
   }
 }
 
 class Punch{
   int id;
   int userId;
+  int inId;
   String punch;
   double longitude;
   double latitude;
@@ -936,6 +884,7 @@ class Punch{
     try{
       id = json['id'];
       userId = json['user_id'];
+      inId = json['in_id'];
       punch = json['punch'];
       longitude = json['longitude']==null?null:double.parse(json['longitude'].toString());
       latitude = json['latitude']==null?null:double.parse(json['latitude'].toString());
@@ -955,9 +904,14 @@ class Punch{
     return punch == "Out";
   }
 
+  String title(BuildContext context){
+    return "${S.of(context).punch} $punch ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.parse(createdAt))}";
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data['id'] = this.id;
+    data['in_id'] = this.inId;
     data['user_id'] = this.userId;
     data['punch'] = this.punch;
     data['longitude'] = this.longitude;

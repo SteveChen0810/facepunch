@@ -21,10 +21,8 @@ class AppConst{
   static final String getCompanyEmployees = baseUrl+"get-company-employees";
   // static final String punchWithFace = baseUrl+"punch-with-face";
   static final String punchWithFace = baseUrl+"face-punch";
-  static final String getUserPunches = baseUrl+"get-user-punches";
-  static final String getUserWorks = baseUrl+"get-user-works";
-  static final String getEmployeePunches = baseUrl+"get-employee-punches";
-  static final String getEmployeeWorks = baseUrl+"get-employee-works";
+  static final String getTimeSheetData = baseUrl+"get-time-sheet-data";
+  static final String getYearTotalHours = baseUrl+"get-year-total-hours";
   static final String editPunch = baseUrl+"edit-punch";
   static final String deletePunch = baseUrl+"delete-punch";
   static final String punchByAdmin= baseUrl+"punch-by-admin";
@@ -55,14 +53,13 @@ class AppConst{
   static final String getCompanyHarvestStats = baseUrl+"get-company-harvest-stats";
   static final String getDateHarvestStats = baseUrl+"get-date-harvest-stats";
 
-  static final String startWork = baseUrl+"start-work";
   static final String startSchedule = baseUrl+"start-schedule";
   static final String endSchedule = baseUrl+"end-schedule";
-  static final String punchOut = baseUrl+"punch-out";
   static final String getProjectsAndTasks = baseUrl+"get-projects-tasks";
 
   static final String startCall = baseUrl+"start-call";
   static final String endCall = baseUrl+"end-call";
+  static final String startShopTracking = baseUrl+"start-shop-tracking";
 
   static final String getDailySchedule = baseUrl+"get-daily-schedule";
   static final String getEmployeeSchedule = baseUrl+"get-employee-schedule";

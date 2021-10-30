@@ -184,6 +184,6 @@ class PunchDateUtils {
 
   static String get12TimeString(String time){
     if(time==null || time.isEmpty)return '--:--';
-    return DateFormat("hh:mm a").format(DateTime.parse('2021-01-01 $time'));
+    return DateFormat("hh:mm a").format(DateTime.parse(time));
   }
 }

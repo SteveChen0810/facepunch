@@ -54,8 +54,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   }
 
   void _onRefresh() async{
-    widget.employee.punches = await context.read<UserModel>().getEmployeePunches(widget.employee.id);
-    widget.employee.works = await context.read<UserModel>().getEmployeeWorks(widget.employee.id);
+    await context.read<UserModel>().getEmployeeTimeSheetData(startOfWeek, widget.employee);
     selectedPunches = user.getPunchesGroupOfWeek(startOfWeek);
     _refreshController.refreshCompleted();
     if(mounted)setState(() {});
@@ -205,61 +204,59 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                     ],
                   )
           );
-          if(punches[i].punch=='In'){
-            final works = user.worksOfPunch(punches[i], (i+1)>=punches.length?null:punches[i+1]);
-            works.forEach((work) {
-              log.add(Slidable(
-                actionPane: SlidableDrawerActionPane(),
-                actionExtentRatio: 0.2,
-                child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
-                    width: MediaQuery.of(context).size.width,
-                    child: Text(
-                      workName(work),
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    )
+          final works = user.worksOfPunch(punches[i]);
+          works.forEach((work) {
+            log.add(Slidable(
+              actionPane: SlidableDrawerActionPane(),
+              actionExtentRatio: 0.2,
+              child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
+                  width: MediaQuery.of(context).size.width,
+                  child: Text(
+                    workName(work),
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  )
+              ),
+              secondaryActions: [
+                IconSlideAction(
+                  caption: S.of(context).edit,
+                  color: Colors.orange,
+                  iconWidget: Icon(Icons.edit,color: Colors.white,size: 20,),
+                  foregroundColor: Colors.white,
+                  onTap: ()async{
+                    final w = await showEditWorkDialog(WorkHistory.fromJson(work.toJson()));
+                    setState(() {
+                      if(w != null){
+                        user.works.removeWhere((ww) => ww.id==w.id);
+                        user.works.add(w);
+                      }
+                    });
+                  },
                 ),
-                secondaryActions: [
-                  IconSlideAction(
-                    caption: S.of(context).edit,
-                    color: Colors.orange,
-                    iconWidget: Icon(Icons.edit,color: Colors.white,size: 20,),
-                    foregroundColor: Colors.white,
-                    onTap: ()async{
-                      final w = await showEditWorkDialog(WorkHistory.fromJson(work.toJson()));
-                      setState(() {
-                        if(w != null){
-                          user.works.removeWhere((ww) => ww.id==w.id);
-                          user.works.add(w);
-                        }
-                      });
-                    },
-                  ),
-                  IconSlideAction(
-                    caption: S.of(context).delete,
-                    color: Colors.red,
-                    foregroundColor: Colors.white,
-                    iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
-                    onTap: ()async{
-                      String result = await user.deleteWork(work.id);
-                      setState(() {
-                        if(result==null){
-                          user.works.removeWhere((w) => w.id==work.id);
-                        }else{
-                          showMessage(result);
-                        }
-                      });
-                    },
-                  ),
-                ],
-              ));
-            });
-          }
+                IconSlideAction(
+                  caption: S.of(context).delete,
+                  color: Colors.red,
+                  foregroundColor: Colors.white,
+                  iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
+                  onTap: ()async{
+                    String result = await user.deleteWork(work.id);
+                    setState(() {
+                      if(result==null){
+                        user.works.removeWhere((w) => w.id==work.id);
+                      }else{
+                        showMessage(result);
+                      }
+                    });
+                  },
+                ),
+              ],
+            ));
+          });
         }
         if(punches.length>1){
           log.add(
               Text(
-                "Total ${user.getHoursOfDate(DateTime.parse(key)).toStringAsFixed(1)} Hours - ${user.getLunchBreakTime(DateTime.parse(key)).toStringAsFixed(1)} Hours for Lunch = ${(user.getHoursOfDate(DateTime.parse(key))- user.getLunchBreakTime(DateTime.parse(key))).toStringAsFixed(1)} Hours",
+                "Total ${user.getHoursOfDate(DateTime.parse(key)).toStringAsFixed(1)} Hours - ${user.getBreakTime(DateTime.parse(key)).toStringAsFixed(1)} Hours for Lunch = ${(user.getHoursOfDate(DateTime.parse(key))- user.getBreakTime(DateTime.parse(key))).toStringAsFixed(1)} Hours",
                 style: TextStyle(color: Color(primaryColor),fontWeight: FontWeight.bold,fontSize: 16),
               )
           );

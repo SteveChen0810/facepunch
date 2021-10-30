@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:facepunch/lang/l10n.dart';
+import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -36,7 +38,7 @@ class WorkModel with ChangeNotifier{
     }
   }
 
-  Future<String> submitRevision({WorkSchedule newSchedule, WorkSchedule oldSchedule})async{
+  Future<String> submitRevision({WorkSchedule newSchedule, WorkSchedule oldSchedule, String description})async{
     try{
       var res = await http.post(
         AppConst.sendTimeRevisionRequest,
@@ -48,7 +50,8 @@ class WorkModel with ChangeNotifier{
         body: jsonEncode({
           'schedule_id':oldSchedule.id,
           'new_value':newSchedule.toJson(),
-          'old_value':oldSchedule.toJson()
+          'old_value':oldSchedule.toJson(),
+          'description':description
         }),
       );
       print('[WorkSchedule.submitRevision]${res.body}');
@@ -88,6 +91,32 @@ class WorkModel with ChangeNotifier{
     }
     return schedules;
   }
+
+  Future<String> startShopTracking({String token,int projectId, int taskId})async{
+    try{
+      var res = await http.post(
+          AppConst.startShopTracking,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+token
+          },
+          body: {
+            'task_id': taskId.toString(),
+            'project_id': projectId.toString(),
+          }
+      );
+      print('[ScheduleTask.startShopTracking]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print('[ScheduleTask.startShopTracking]$e');
+      return e.toString();
+    }
+  }
 }
 
 class Project{
@@ -117,7 +146,6 @@ class ScheduleTask{
   String name;
   String code;
   int companyId;
-  int projectId;
 
   ScheduleTask.fromJson(Map<String, dynamic> json){
     try{
@@ -134,6 +162,7 @@ class ScheduleTask{
 class WorkHistory{
   int id;
   int userId;
+  int punchId;
   int taskId;
   int projectId;
   String start;
@@ -158,6 +187,7 @@ class WorkHistory{
     try{
       id = json['id'];
       userId = json['user_id'];
+      punchId = json['punch_id'];
       projectId = json['project_id'];
       taskId = json['task_id'];
       taskName = json['task_name'];
@@ -174,9 +204,8 @@ class WorkHistory{
   double workHour(){
     try{
       if(end==null || end.isEmpty)return 0.0;
-      final workDate = createdAt.split(' ')[0];
-      final startTime = DateTime.parse('$workDate $start');
-      final endTime = DateTime.parse('$workDate $end');
+      final startTime = DateTime.parse(start);
+      final endTime = DateTime.parse(end);
       return endTime.difference(startTime).inMinutes/60;
     }catch(e){
       print('[WorkHistory.workHour]$e');
@@ -185,19 +214,23 @@ class WorkHistory{
   }
 
   DateTime getStartTime(){
-    final workDate = createdAt.split(' ')[0];
-    return DateTime.parse('$workDate $start');
+    return DateTime.parse(start);
   }
 
   DateTime getEndTime(){
-    final workDate = createdAt.split(' ')[0];
-    return DateTime.parse('$workDate $end');
+    if(end==null || end.isEmpty) return null;
+    return DateTime.parse(end);
+  }
+
+  String title(){
+    return '${projectName??''} - ${taskName??''}: ${(workHour().toStringAsFixed(2))} h';
   }
 
   toJson(){
     return {
       'id':id,
       'user_id':userId,
+      'punch_id':punchId,
       'start':start,
       'end':end,
       'task_id' : taskId,
@@ -222,6 +255,7 @@ class WorkSchedule{
   String shift;
   String color;
   String noAvailable;
+  bool worked;
   String createdAt;
   String updatedAt;
 
@@ -254,6 +288,7 @@ class WorkSchedule{
       shift = json['shift'];
       noAvailable = json['no_available'];
       color = json['color'];
+      worked = json['worked'] == 1;
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -274,6 +309,7 @@ class WorkSchedule{
       'shift':shift,
       'no_available':noAvailable,
       'color':color,
+      'worked':worked,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
@@ -389,6 +425,7 @@ class WorkSchedule{
       return e.toString();
     }
   }
+
   Future<String> editSchedule()async{
     try{
       var res = await http.post(
@@ -411,6 +448,7 @@ class WorkSchedule{
       return e.toString();
     }
   }
+
   Future<String> addSchedule()async{
     try{
       var res = await http.post(
@@ -552,5 +590,51 @@ class EmployeeCall{
       print('[EmployeeCall.startSchedule]$e');
       return e.toString();
     }
+  }
+}
+
+class EmployeeBreak{
+  int id;
+  int userId;
+  int punchId;
+  String title;
+  String start;
+  int length;
+  bool calculate;
+  String createdAt;
+  String updatedAt;
+
+  EmployeeBreak.fromJson(Map<String, dynamic> json){
+    try{
+      id = json['id'];
+      userId = json['user_id'];
+      punchId = json['punch_id'];
+      title = json['title'];
+      start = json['start'];
+      length = json['length'];
+      calculate = json['calculate']==1;
+      createdAt = json['created_at'];
+      updatedAt = json['updated_at'];
+    }catch(e){
+      print('[EmployeeBreak.fromJson]$e');
+    }
+  }
+
+  String getTitle(BuildContext context){
+    return '$title ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.parse(createdAt))}, $length Minutes';
+  }
+
+  Map<String, dynamic> toJson(){
+    return {
+      'id':id,
+      'user_id':userId,
+      'punch_id':punchId,
+      'start':start,
+      'title':title,
+      'length':length,
+      'calculate':calculate?1:0,
+      'created_at':createdAt,
+      'updated_at':updatedAt
+    };
   }
 }

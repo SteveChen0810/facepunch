@@ -1723,6 +1723,94 @@ class S {
       args: [],
     );
   }
+  String get  startWorking{
+    return Intl.message(
+      'Start Working',
+      name: 'startWorking',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  selectCallSchedule{
+    return Intl.message(
+      'Select Call or Schedule',
+      name: 'selectCallSchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  breaks{
+    return Intl.message(
+      'Breaks',
+      name: 'breaks',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  incorrectBreakTime{
+    return Intl.message(
+      'Incorrect Break Time',
+      name: 'incorrectBreakTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  correctBreakTime{
+    return Intl.message(
+      'Correct Break Time',
+      name: 'correctBreakTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  length{
+    return Intl.message(
+      'length',
+      name: 'length',
+      desc: '',
+      args: [],
+    );
+  }
+  String get breakLengthCanNotBeZero{
+    return Intl.message(
+      'Break Length can not be 0.',
+      name: 'breakLengthCanNotBeZero',
+      desc: '',
+      args: [],
+    );
+  }
+  String get invalidBreakLength{
+    return Intl.message(
+      'Invalid Break Length',
+      name: 'invalidBreakLength',
+      desc: '',
+      args: [],
+    );
+  }
+  String get dailyTasks{
+    return Intl.message(
+      'Daily Tasks',
+      name: 'dailyTasks',
+      desc: '',
+      args: [],
+    );
+  }
+  String get schedules{
+    return Intl.message(
+      'Schedules',
+      name: 'schedules',
+      desc: '',
+      args: [],
+    );
+  }
+  String get calls{
+    return Intl.message(
+      'Calls',
+      name: 'calls',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

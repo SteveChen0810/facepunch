@@ -7,7 +7,7 @@ import 'app_const.dart';
 
 class RevisionModel with ChangeNotifier{
 
-  Future<String> sendPunchRevisionRequest({int punchId, String newValue, String oldValue})async{
+  Future<String> sendPunchRevisionRequest({int punchId, String newValue, String oldValue, String description})async{
     try{
       var res = await http.post(
           AppConst.sendTimeRevisionRequest,
@@ -20,21 +20,50 @@ class RevisionModel with ChangeNotifier{
             'punch_id':punchId.toString(),
             'new_value': newValue,
             'old_value': oldValue,
+            'description': description
           }
       );
-      print("[RevisionModel.sendTimeRevisionRequest] ${res.body}");
+      print("[RevisionModel.sendPunchRevisionRequest] ${res.body}");
       if(res.statusCode==200){
         return "A revision request has been sent.";
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[RevisionModel.sendTimeRevisionRequest] $e");
+      print("[RevisionModel.sendPunchRevisionRequest] $e");
       return e.toString();
     }
   }
 
-  Future<String> sendWorkRevisionRequest({WorkHistory newWork, WorkHistory oldWork})async{
+  Future<String> sendBreakRevisionRequest({EmployeeBreak newBreak, EmployeeBreak oldBreak, String description})async{
+    try{
+      var res = await http.post(
+          AppConst.sendTimeRevisionRequest,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: jsonEncode({
+            'break_id':oldBreak.id,
+            'new_value': newBreak.toJson(),
+            'old_value': oldBreak.toJson(),
+            'description': description
+          })
+      );
+      print("[RevisionModel.sendBreakRevisionRequest] ${res.body}");
+      if(res.statusCode==200){
+        return "A revision request has been sent.";
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[RevisionModel.sendBreakRevisionRequest] $e");
+      return e.toString();
+    }
+  }
+
+  Future<String> sendWorkRevisionRequest({WorkHistory newWork, WorkHistory oldWork, String description})async{
     try{
       var res = await http.post(
           AppConst.sendTimeRevisionRequest,
@@ -47,6 +76,7 @@ class RevisionModel with ChangeNotifier{
             'work_id': oldWork.id,
             'new_value': newWork.toJson(),
             'old_value': oldWork.toJson(),
+            'description': description
           })
       );
       print("[RevisionModel.sendWorkRevisionRequest] ${res.body}");

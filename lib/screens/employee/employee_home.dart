@@ -65,11 +65,11 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
     if(['sub_admin','manager'].contains(user.role)){
       await context.read<CompanyModel>().getCompanyUsers();
     }
+    await context.read<UserModel>().getYearTotalHours();
   }
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<CompanyModel>().myCompanySettings;
     final user = context.watch<UserModel>().user;
     if(user==null)return Container();
     return Scaffold(
@@ -84,7 +84,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             EmployeeDocument(),
             if(user.canNTCTracking)
               NFCScanPage(),
-            if(settings.hasTimeSheetSchedule)
+            if(user.hasSchedule())
               EmployeeSchedule(),
             if(['sub_admin','manager'].contains(user.role))
               EmployeeDispatch()
@@ -114,7 +114,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 activeIcon: Image.asset("assets/images/nfc.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
             ),
-          if(settings.hasTimeSheetSchedule)
+          if(user.hasSchedule())
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),

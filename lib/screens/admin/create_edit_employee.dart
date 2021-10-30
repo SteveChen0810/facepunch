@@ -33,13 +33,12 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   TextEditingController _postal = TextEditingController();
   TextEditingController _phone = TextEditingController();
   TextEditingController _employeeCode = TextEditingController();
-  TextEditingController _function = TextEditingController();
   TextEditingController _salary = TextEditingController();
   TextEditingController _nfc = TextEditingController();
 
 
   String _fNameError,_lNameError,_emailError,_passwordError,_addressError,
-      _postalError, _codeError,_functionError, _salaryError, _startDateError,_birthDayError;
+      _postalError, _codeError, _salaryError, _startDateError,_birthDayError;
   String country,state,city, language;
   int lunchTime = 30;
   DateTime _startDate;
@@ -62,7 +61,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         _postal = TextEditingController(text: widget.employee.postalCode);
         _phone = TextEditingController(text: widget.employee.phone);
         _employeeCode = TextEditingController(text: widget.employee.employeeCode);
-        _function = TextEditingController(text: widget.employee.function);
         _salary = TextEditingController(text: widget.employee.salary);
         _nfc = TextEditingController(text: widget.employee.nfc);
         country = widget.employee.country;
@@ -181,7 +179,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
 
   bool validator(){
     _fNameError=null;_lNameError=null;_emailError=null;_passwordError=null;_addressError=null;
-    _postalError=null;_codeError=null;_functionError=null;_salaryError=null;_startDateError=null;_birthDayError=null;
+    _postalError=null;_codeError=null;_salaryError=null;_startDateError=null;_birthDayError=null;
     if(_fName.text.isEmpty){
       _fNameError = S.of(context).firstNameIsRequired;
       return false;
@@ -219,7 +217,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         postalCode: _postal.text,
         phone: _phone.text,
         employeeCode: _employeeCode.text,
-        function: _function.text,
         start: _startDate!=null?_startDate.toString().split(" ").first:null,
         salary: _salary.text,
         birthday: _startDate!=null?_birthDay.toString().split(" ").first:null,
@@ -236,16 +233,14 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         sendScheduleNotification: widget.employee?.sendScheduleNotification,
         token: widget.employee?.token,
         lastPunch: widget.employee?.lastPunch,
-        punches: widget.employee?.punches,
         type: widget.employee?.type??'shop_daily',
         updatedAt: widget.employee?.updatedAt,
-        works: widget.employee?.works
       );
       String base64Image;
       if(_photoFile!=null){
         base64Image = base64Encode(_photoFile.readAsBytesSync());
       }
-      String result = await context.read<CompanyModel>().createEditEmployee(user,base64Image);
+      String result = await context.read<CompanyModel>().createEditEmployee(user, base64Image);
       if(result==null){
         showMessage(S.of(context).success);
         Future.delayed(Duration(seconds: 1)).whenComplete((){
@@ -546,24 +541,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
                 controller: _employeeCode,
-              ),
-              SizedBox(height: 4,),
-              TextField(
-                decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    enabledBorder: UnderlineInputBorder(),
-                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                    isDense: true,
-                    labelText: S.of(context).employeeFunction,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
-                    contentPadding: EdgeInsets.zero,
-                    errorText: _functionError
-                ),
-                enabled: !isLoading,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-                maxLines: 1,
-                controller: _function,
               ),
               SizedBox(height: 4,),
               TextField(

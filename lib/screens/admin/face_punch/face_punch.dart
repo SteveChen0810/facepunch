@@ -5,9 +5,8 @@ import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/screens/admin/face_punch/select_call.dart';
-import 'package:facepunch/screens/admin/face_punch/select_project.dart';
-import 'package:facepunch/screens/admin/face_punch/select_schedule.dart';
+import 'select_call_schedule.dart';
+import 'select_project_task.dart';
 import 'package:facepunch/widgets/dialogs.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock/wakelock.dart';
@@ -229,7 +228,11 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         }else if(employee.type == 'shop_daily'){
           await _punchShopDailyEmployee(employee, punch, result['schedules']);
         }else if(employee.type == 'shop_tracking'){
-          await _punchShopTrackingEmployee(employee, punch, result);
+          await _punchShopTrackingEmployee(employee, punch, result['projects'], result['tasks']);
+        }else if(employee.type == 'call_shop_daily'){
+          await _punchCallShopDailyEmployee(employee, punch, result['schedules'], result['calls']);
+        }else if(employee.type == 'call_shop_tracking'){
+          await _punchCallShopTrackingEmployee(employee, punch, result['calls'], result['projects'], result['tasks']);
         }
         await initDetectFace();
         setState(() {_photoPath="";});
@@ -246,9 +249,20 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       calls.add(EmployeeCall.fromJson(c));
     }
     if(calls.isEmpty){
-      await showWelcomeDialog(userName: employee.getFullName(), isPunchIn: punch.punch == "In", context: context);
+      await showWelcomeDialog(
+          userName: employee.getFullName(),
+          isPunchIn: punch.punch == "In",
+          context: context
+      );
     }else{
-      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectCallScreen(calls: calls, employee: employee, punch: punch,)));
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectCallScheduleScreen(
+            calls: calls,
+            employee: employee,
+            punch: punch,
+            schedules: [],
+          )
+      ));
     }
   }
 
@@ -258,14 +272,111 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       schedules.add(WorkSchedule.fromJson(s));
     }
     if(schedules.isEmpty){
-      await showWelcomeDialog(userName: employee.getFullName(), isPunchIn: punch.punch == "In", context: context);
+      await showWelcomeDialog(
+          userName: employee.getFullName(),
+          isPunchIn: punch.punch == "In",
+          context: context
+      );
     }else{
-      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectScheduleScreen(schedules: schedules, employee: employee, punch: punch,)));
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectCallScheduleScreen(
+            schedules: schedules,
+            employee: employee,
+            punch: punch,
+            calls: [],
+          )
+      ));
     }
   }
 
-  Future<void> _punchShopTrackingEmployee(User employee, Punch punch, data)async{
+  Future<void> _punchShopTrackingEmployee(User employee, Punch punch, pData, tData)async{
+    List<Project> projects = [];
+    for(var p in pData){
+      projects.add(Project.fromJson(p));
+    }
+    List<ScheduleTask> tasks = [];
+    for(var t in tData){
+      tasks.add(ScheduleTask.fromJson(t));
+    }
+    if(projects.isNotEmpty && tasks.isNotEmpty){
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectProjectTask(
+            employee: employee,
+            projects: projects,
+            tasks: tasks,
+            punch: punch
+          )
+      ));
+    }else{
+      await showWelcomeDialog(
+          userName: employee.getFullName(),
+          isPunchIn: punch.punch == "In",
+          context: context
+      );
+    }
+  }
 
+  Future<void> _punchCallShopDailyEmployee(User employee, Punch punch, sData, cData)async{
+    List<WorkSchedule> schedules = [];
+    for(var s in sData){
+      schedules.add(WorkSchedule.fromJson(s));
+    }
+    List<EmployeeCall> calls = [];
+    for(var c in cData){
+      calls.add(EmployeeCall.fromJson(c));
+    }
+    if(schedules.isEmpty){
+      await showWelcomeDialog(
+          userName: employee.getFullName(),
+          isPunchIn: punch.punch == "In",
+          context: context
+      );
+    }else{
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectCallScheduleScreen(
+            schedules: schedules,
+            employee: employee,
+            punch: punch,
+            calls: calls,
+          )
+      ));
+    }
+  }
+
+  Future<void> _punchCallShopTrackingEmployee(User employee, Punch punch, cData, pData, tData)async{
+    List<Project> projects = [];
+    for(var p in pData){
+      projects.add(Project.fromJson(p));
+    }
+    List<ScheduleTask> tasks = [];
+    for(var t in tData){
+      tasks.add(ScheduleTask.fromJson(t));
+    }
+    List<EmployeeCall> calls = [];
+    for(var c in cData){
+      calls.add(EmployeeCall.fromJson(c));
+    }
+    if(calls.isNotEmpty){
+      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectCallScheduleScreen(
+        schedules: [],
+        employee: employee,
+        punch: punch,
+        calls: [],
+      )));
+    }else if(projects.isNotEmpty && tasks.isNotEmpty){
+      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectProjectTask(
+          employee: employee,
+          projects: projects,
+          tasks: tasks,
+          punch: punch
+      )));
+    } else{
+      await showWelcomeDialog(
+          userName: employee.getFullName(),
+          isPunchIn: punch.punch == "In",
+          context: context
+      );
+    }
   }
 
   @override
