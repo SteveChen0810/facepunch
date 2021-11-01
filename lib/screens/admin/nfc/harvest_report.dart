@@ -270,7 +270,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                     child: isFetchingDateStats?SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                      child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
                     ):Icon(Icons.title),
                   ),
                 )

@@ -12,57 +12,87 @@ class HarvestModel extends ChangeNotifier{
   List<HContainer> containers = [];
   List<HTask> tasks = [];
 
-  Future getFields()async{
-    await getFieldsFromLocal();
-    await getFieldsFromServer();
+  Future<void> getHarvestData()async{
+    await getHarvestDataFromLocal();
+    await getHarvestDataFromServer();
   }
 
-  Future getFieldsFromServer()async{
+  Future<void> getHarvestDataFromLocal()async{
+    try {
+      final ready = await storage.ready;
+      if (ready) {
+        var tJson = storage.getItem('tasks');
+        if(tJson!=null){
+          tasks.clear();
+          for(var t in tJson){
+            tasks.add(HTask.fromJson(t));
+          }
+        }
+        var fJson = storage.getItem('fields');
+        if(fJson!=null){
+          fields.clear();
+          for(var f in fJson){
+            fields.add(Field.fromJson(f));
+          }
+        }
+
+        var cJson = storage.getItem('containers');
+        if(cJson!=null){
+          containers.clear();
+          for(var c in cJson){
+            containers.add(HContainer.fromJson(c));
+          }
+        }
+      }
+      notifyListeners();
+    } catch (err) {
+      print("[getHarvestDataFromLocal] $err");
+    }
+  }
+
+  Future<String> getHarvestDataFromServer()async{
     try{
       var res = await http.get(
-        AppConst.getAllFields,
+        AppConst.getHarvestData,
         headers: {
           'Accept':'application/json',
           'Content-Type':'application/json',
           'Authorization':'Bearer '+GlobalData.token
         },
       );
-      print('[getFieldsFromServer] ${res.body}');
+      print('[getHarvestDataFromServer] ${res.body}');
+      final body = jsonDecode(res.body);
       if(res.statusCode==200){
         fields.clear();
-        for(var json in jsonDecode(res.body)){
+        for(var json in body['fields']){
           fields.add(Field.fromJson(json));
         }
-        saveFieldsToLocal();
+        containers.clear();
+        for(var json in body['containers']){
+          containers.add(HContainer.fromJson(json));
+        }
+        tasks.clear();
+        for(var json in body['tasks']){
+          tasks.add(HTask.fromJson(json));
+        }
+        saveHarvestDataToLocal();
+        return null;
+      }else{
+        return body['message']??'Something want wrong.';
       }
     }catch(e){
-
+      print('[getHarvestDataFromServer] $e');
+      return e.toString();
     }
   }
 
-  Future<void> getFieldsFromLocal()async{
-    try {
-      final ready = await storage.ready;
-      if (ready) {
-        var json = storage.getItem('fields');
-        if(json!=null){
-          fields.clear();
-          for(var f in json){
-            fields.add(Field.fromJson(f));
-          }
-        }
-      }
-      notifyListeners();
-    } catch (err) {
-      print("[getFieldsFromLocal] $err");
-    }
-  }
-
-  Future<void> saveFieldsToLocal() async {
+  Future<void> saveHarvestDataToLocal() async {
     try {
       final ready = await storage.ready;
       if (ready) {
         await storage.setItem('fields', fields.map((v) => v.toJson()).toList());
+        await storage.setItem('containers', containers.map((v) => v.toJson()).toList());
+        await storage.setItem('tasks', tasks.map((v) => v.toJson()).toList());
       }
       notifyListeners();
     } catch (e) {
@@ -86,9 +116,8 @@ class HarvestModel extends ChangeNotifier{
         if(field.id==null){
           field = Field.fromJson(jsonDecode(res.body));
           fields.add(field);
-          notifyListeners();
+          saveHarvestDataToLocal();
         }
-        saveFieldsToLocal();
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -113,8 +142,8 @@ class HarvestModel extends ChangeNotifier{
       print('[HarvestModel.deleteField] ${res.body}');
       if(res.statusCode==200){
         fields.remove(field);
-        notifyListeners();
-        saveFieldsToLocal();
+        tasks.removeWhere((t) => t.fieldId == field.id);
+        saveHarvestDataToLocal();
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -122,64 +151,6 @@ class HarvestModel extends ChangeNotifier{
     }catch(e){
       print('[HarvestModel.deleteField] $e');
       return e.toString();
-    }
-  }
-
-  Future getContainers()async{
-    await getContainersFromLocal();
-    await getContainersFromServer();
-  }
-
-  Future getContainersFromServer()async{
-    try{
-      var res = await http.get(
-        AppConst.getAllContainers,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-      );
-      print('[getContainersFromServer] ${res.body}');
-      if(res.statusCode==200){
-        containers.clear();
-        for(var json in jsonDecode(res.body)){
-          containers.add(HContainer.fromJson(json));
-        }
-        saveContainersToLocal();
-      }
-    }catch(e){
-
-    }
-  }
-
-  Future<void> getContainersFromLocal()async{
-    try {
-      final ready = await storage.ready;
-      if (ready) {
-        var json = storage.getItem('containers');
-        if(json!=null){
-          containers.clear();
-          for(var c in json){
-            containers.add(HContainer.fromJson(c));
-          }
-        }
-      }
-      notifyListeners();
-    } catch (err) {
-      print("[getContainersFromLocal] $err");
-    }
-  }
-
-  Future<void> saveContainersToLocal() async {
-    try {
-      final ready = await storage.ready;
-      if (ready) {
-        await storage.setItem('containers', containers.map((v) => v.toJson()).toList());
-      }
-      notifyListeners();
-    } catch (e) {
-      print("[saveFieldsToLocal] $e");
     }
   }
 
@@ -196,12 +167,11 @@ class HarvestModel extends ChangeNotifier{
       );
       print('[HarvestModel.createOrUpdateContainer] ${res.body}');
       if(res.statusCode==200){
-        if(container.id==null){
+        if(container.id == null){
           container = HContainer.fromJson(jsonDecode(res.body));
           containers.add(container);
-          notifyListeners();
+          saveHarvestDataToLocal();
         }
-        saveContainersToLocal();
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -226,8 +196,8 @@ class HarvestModel extends ChangeNotifier{
       print('[HarvestModel.deleteContainer] ${res.body}');
       if(res.statusCode==200){
         containers.remove(container);
-        notifyListeners();
-        saveContainersToLocal();
+        tasks.removeWhere((t) => t.containerId == container.id);
+        saveHarvestDataToLocal();
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -235,65 +205,6 @@ class HarvestModel extends ChangeNotifier{
     }catch(e){
       print('[HarvestModel.deleteContainer] $e');
       return e.toString();
-    }
-  }
-
-
-  Future getHarvestTasks()async{
-    await getTasksFromLocal();
-    await getTasksFromServer();
-  }
-
-  Future getTasksFromServer()async{
-    try{
-      var res = await http.get(
-        AppConst.getAllTasks,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-      );
-      print('[getTasksFromServer] ${res.body}');
-      if(res.statusCode==200){
-        tasks.clear();
-        for(var json in jsonDecode(res.body)){
-          tasks.add(HTask.fromJson(json));
-        }
-        saveTasksToLocal();
-      }
-    }catch(e){
-
-    }
-  }
-
-  Future<void> getTasksFromLocal()async{
-    try {
-      final ready = await storage.ready;
-      if (ready) {
-        var json = storage.getItem('tasks');
-        if(json!=null){
-          tasks.clear();
-          for(var t in json){
-            tasks.add(HTask.fromJson(t));
-          }
-        }
-      }
-      notifyListeners();
-    } catch (err) {
-      print("[getTasksFromLocal] $err");
-    }
-  }
-
-  Future<void> saveTasksToLocal() async {
-    try {
-      final ready = await storage.ready;
-      if (ready) {
-        await storage.setItem('tasks', tasks.map((v) => v.toJson()).toList());
-      }
-      notifyListeners();
-    } catch (e) {
-      print("[saveTasksToLocal] $e");
     }
   }
 
@@ -311,7 +222,7 @@ class HarvestModel extends ChangeNotifier{
       print('[deleteTask]${res.body}');
       if(res.statusCode==200){
         tasks.remove(task);
-        await saveTasksToLocal();
+        saveHarvestDataToLocal();
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -340,7 +251,7 @@ class HarvestModel extends ChangeNotifier{
         newTask.container = task.container;
         newTask.field = task.field;
         tasks.add(newTask);
-        await saveTasksToLocal();
+        saveHarvestDataToLocal();
         notifyListeners();
       }else{
         return jsonDecode(res.body)['message'];
@@ -405,6 +316,7 @@ class HarvestModel extends ChangeNotifier{
     }
     return null;
   }
+
   Future deleteHarvest(int id)async{
     try{
       var res = await http.post(

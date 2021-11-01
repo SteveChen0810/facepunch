@@ -35,20 +35,16 @@ class AppConst{
   static final String declineRevision = baseUrl+"decline-revision";
   static final String deleteRevision = baseUrl+"delete-revision";
 
-  static final String createOrUpdateFiled = baseUrl+"update-create-field";
-  static final String getAllFields = baseUrl+"get-fields";
-  static final String deleteField = baseUrl+"delete-field";
+  static final String getHarvestData = baseUrl+"get-harvest-data";
+  static final String getHarvestsOfDate = baseUrl+"get-harvests-of-date";
 
-  static final String getAllContainers = baseUrl+"get-containers";
+  static final String createOrUpdateFiled = baseUrl+"update-create-field";
+  static final String deleteField = baseUrl+"delete-field";
   static final String createOrUpdateContainer = baseUrl+"update-create-container";
   static final String deleteContainer = baseUrl+"delete-container";
-
-  static final String getHarvestsOfDate = baseUrl+"get-harvests-of-date";
   static final String addHarvest = baseUrl+"add-harvest";
   static final String deleteHarvest = baseUrl+"delete-harvest";
-
   static final String createOrUpdateTask = baseUrl+"create-update-task";
-  static final String getAllTasks = baseUrl+"get-tasks";
   static final String deleteTask = baseUrl+"delete-task";
 
   static final String getEmployeeHarvestStats = baseUrl+"get-employee-harvest-stats";

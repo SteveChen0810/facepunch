@@ -56,9 +56,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   _fetchCompanyData()async{
     await context.read<WorkModel>().getProjectsAndTasks();
-    await context.read<HarvestModel>().getHarvestTasks();
-    await context.read<HarvestModel>().getFields();
-    await context.read<HarvestModel>().getContainers();
+    await context.read<HarvestModel>().getHarvestData();
   }
 
   Widget userItem(User user, double width){

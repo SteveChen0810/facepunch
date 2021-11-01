@@ -2,6 +2,7 @@ import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/models/harvest_model.dart';
+import 'package:facepunch/widgets/dialogs.dart';
 import 'package:facepunch/widgets/popover/cool_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -25,6 +26,10 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   Color mediumColor = Colors.yellow;
   Color highColor = Colors.green;
   CompanySettings companySettings;
+  List<Field> fields;
+  List<HContainer> containers;
+  Field selectedField;
+  HContainer selectedContainer;
 
   @override
   void initState() {
@@ -53,8 +58,11 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
       builder: (_context){
         return AlertDialog(
           title: Text(field==null?S.of(context).createNewField:S.of(context).updateField,textAlign: TextAlign.center,),
+          insetPadding: EdgeInsets.zero,
+          contentPadding: EdgeInsets.all(8),
           content:StatefulBuilder(
             builder: (_,setState)=>Container(
+              width: MediaQuery.of(context).size.width - 40,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -104,20 +112,17 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                   ),
                   SizedBox(height: 16,),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      RaisedButton(
+                      TextButton(
                         child: isSavingField
                         ?SizedBox(
-                          height: 28,
-                          width: 28,
-                          child: CircularProgressIndicator(backgroundColor: Colors.white,),
-                        ):Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2,),
+                        ):Text(S.of(context).save,
+                          style: TextStyle(color: Colors.green),
                         ),
-                        color: Color(primaryColor),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         onPressed: ()async{
                           try{
                             _fieldVarietyError = null; _fieldCropError = null; _fieldNameError = null;
@@ -153,16 +158,13 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           }
                         },
                       ),
-                      RaisedButton(
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                      TextButton(
+                        child: Text(S.of(context).close
+                          ,style: TextStyle(color: Colors.red),
                         ),
                         onPressed: ()async{
                           Navigator.pop(_context);
                         },
-                        color: Colors.red,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
                     ],
                   )
@@ -170,64 +172,6 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
               ),
             ),
           )
-        );
-      },
-    );
-  }
-
-  confirmDeleteFieldDialog(Field field){
-    bool isDeletingField = false;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_context){
-        return AlertDialog(
-            title: Text(S.of(context).deleteFieldConfirm,textAlign: TextAlign.center,),
-            content:StatefulBuilder(
-              builder: (_,setState)=>Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RaisedButton(
-                          child: isDeletingField
-                              ?SizedBox(
-                            height: 28,
-                            width: 28,
-                            child: CircularProgressIndicator(backgroundColor: Colors.white,),
-                          ):Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                          ),
-                          color: Color(primaryColor),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          onPressed: ()async{
-                            setState((){isDeletingField = true;});
-                            String result = await context.read<HarvestModel>().deleteField(field);
-                            setState((){isDeletingField = false;});
-                            Navigator.pop(_context);
-                            if(result!=null)showMessage(result);
-                          },
-                        ),
-                        RaisedButton(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
-                          ),
-                          onPressed: ()async{
-                            Navigator.pop(_context);
-                          },
-                          color: Colors.red,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            )
         );
       },
     );
@@ -255,8 +199,11 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
       builder: (_context){
         return AlertDialog(
             title: Text(container==null?S.of(context).createNewContainer:S.of(context).updateContainer,textAlign: TextAlign.center,),
+            insetPadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.all(8),
             content:StatefulBuilder(
               builder: (_,setState)=>Container(
+                width: MediaQuery.of(context).size.width - 40,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -276,20 +223,15 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                     ),
                     SizedBox(height: 16,),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        RaisedButton(
+                        TextButton(
                           child: isSavingContainer
                           ?SizedBox(
-                            height: 28,
-                            width: 28,
-                            child: CircularProgressIndicator(backgroundColor: Colors.white,),
-                          ):Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                          ),
-                          color: Color(primaryColor),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2,),
+                          ):Text(S.of(context).save, style: TextStyle(color: Colors.green),),
                           onPressed: ()async{
                             try{
                               _containerNameError = null;
@@ -315,74 +257,11 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             }
                           },
                         ),
-                        RaisedButton(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                          ),
+                        TextButton(
+                          child: Text(S.of(context).close, style: TextStyle(color: Colors.red),),
                           onPressed: ()async{
                             Navigator.pop(_context);
                           },
-                          color: Colors.red,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            )
-        );
-      },
-    );
-  }
-
-  confirmDeleteContainerDialog(HContainer container){
-    bool isDeletingContainer = false;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_context){
-        return AlertDialog(
-            title: Text(S.of(context).deleteContainerConfirm,textAlign: TextAlign.center,),
-            content:StatefulBuilder(
-              builder: (_,setState)=>Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RaisedButton(
-                          child: isDeletingContainer
-                              ?SizedBox(
-                            height: 28,
-                            width: 28,
-                            child: CircularProgressIndicator(backgroundColor: Colors.white,),
-                          ):Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                          ),
-                          color: Color(primaryColor),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          onPressed: ()async{
-                            setState((){isDeletingContainer = true;});
-                            String result = await context.read<HarvestModel>().deleteContainer(container);
-                            setState((){isDeletingContainer = false;});
-                            Navigator.pop(_context);
-                            if(result!=null)showMessage(result);
-                          },
-                        ),
-                        RaisedButton(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
-                          ),
-                          onPressed: ()async{
-                            Navigator.pop(_context);
-                          },
-                          color: Colors.red,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         ),
                       ],
                     )
@@ -465,10 +344,216 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
     return v;
   }
 
+  Widget _fieldItem(Field field){
+    Widget child = Container(
+      height: 70,
+      width: 70,
+      decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 1,
+
+            )
+          ]
+      ),
+      clipBehavior: Clip.hardEdge,
+      padding: EdgeInsets.all(2),
+      margin: EdgeInsets.all(2),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(field.name.substring(0, field.name.length>1?2:field.name.length).toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          FittedBox(
+              child: Text(field.crop, style: TextStyle(fontSize: 12),)
+          ),
+          FittedBox(
+              child: Text(field.cropVariety, style: TextStyle(fontSize: 12),)
+          )
+        ],
+      ),
+    );
+    if(selectedField == field){
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          child,
+          CircularProgressIndicator()
+        ],
+      );
+    }
+    return CupertinoPopoverButton(
+      popoverBoxShadow: [
+        BoxShadow(color: Colors.black54,blurRadius: 5.0)
+      ],
+      popoverWidth: 180,
+      popoverBuild: (_context){
+        return CupertinoPopoverMenuList(
+          children: <Widget>[
+            CupertinoPopoverMenuItem(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(S.of(context).editField,style: TextStyle(color: Colors.black87),),
+                    Icon(Icons.edit,color: Colors.black87,),
+                  ],
+                ),
+              ),
+              onTap: (){
+                Navigator.pop(_context);
+                showFieldDialog(field: field);
+                return true;
+              },
+            ),
+            CupertinoPopoverMenuItem(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(S.of(context).delete,style: TextStyle(color: Colors.red),),
+                    Icon(Icons.delete,color: Colors.red,),
+                  ],
+                ),
+              ),
+              onTap: (){
+                Navigator.pop(_context);
+                _deleteField(field);
+                return true;
+              },
+            )
+          ],
+        );
+      },
+      onTap: (){
+        return true;
+      },
+      child: child,
+    );
+  }
+
+  _deleteField(Field field)async{
+    if(await confirmDeleting(context, S.of(context).deleteFieldConfirm)){
+      setState(() { selectedField = field; });
+      String result = await context.read<HarvestModel>().deleteField(field);
+      if(result != null) showMessage(result);
+      if(mounted)setState(() {
+        selectedField = null;
+      });
+    }
+  }
+
+  Widget _containerItem(HContainer container){
+    Widget child = Container(
+      height: 70,
+      width: 70,
+      decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 1,
+
+            )
+          ]
+      ),
+      clipBehavior: Clip.hardEdge,
+      padding: EdgeInsets.all(2),
+      margin: EdgeInsets.all(2),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(container.name[0].toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          FittedBox(
+              child: Text('${container.name}',style: TextStyle(fontSize: 12),)
+          ),
+        ],
+      ),
+    );
+    if(selectedContainer == container){
+      return Stack(
+        alignment: Alignment.center,
+        children: [
+          child,
+          CircularProgressIndicator()
+        ],
+      );
+    }
+    return CupertinoPopoverButton(
+      popoverBoxShadow: [
+        BoxShadow(color: Colors.black54,blurRadius: 5.0)
+      ],
+      popoverWidth: 180,
+      popoverBuild: (_context){
+        return CupertinoPopoverMenuList(
+          children: <Widget>[
+            CupertinoPopoverMenuItem(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(S.of(context).editContainer,style: TextStyle(color: Colors.black87),),
+                    Icon(Icons.edit,color: Colors.black87,),
+                  ],
+                ),
+              ),
+              onTap: (){
+                Navigator.pop(_context);
+                showContainerDialog(container: container);
+                return true;
+              },
+            ),
+            CupertinoPopoverMenuItem(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(S.of(context).delete,style: TextStyle(color: Colors.red),),
+                    Icon(Icons.delete,color: Colors.red,),
+                  ],
+                ),
+              ),
+              onTap: (){
+                Navigator.pop(_context);
+                _deleteContainer(container);
+                return true;
+              },
+            )
+          ],
+        );
+      },
+      onTap: (){
+        return true;
+      },
+      child: child,
+    );
+  }
+
+  _deleteContainer(HContainer container)async{
+    if(await confirmDeleting(context, S.of(context).deleteContainerConfirm)){
+      setState(() { selectedContainer = container; });
+      String result = await context.read<HarvestModel>().deleteContainer(container);
+      if(result != null) showMessage(result);
+      if(mounted)setState(() {
+        selectedContainer = null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Field> fields = context.watch<HarvestModel>().fields;
-    List<HContainer> containers = context.watch<HarvestModel>().containers;
+    fields = context.watch<HarvestModel>().fields;
+    containers = context.watch<HarvestModel>().containers;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -488,86 +573,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     for(var field in fields)
-                      CupertinoPopoverButton(
-                        popoverBoxShadow: [
-                          BoxShadow(color: Colors.black54,blurRadius: 5.0)
-                        ],
-                        popoverWidth: 180,
-                        popoverBuild: (_context){
-                          return CupertinoPopoverMenuList(
-                            children: <Widget>[
-                              CupertinoPopoverMenuItem(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(S.of(context).editField,style: TextStyle(color: Colors.black87),),
-                                      Icon(Icons.edit,color: Colors.black87,),
-                                    ],
-                                  ),
-                                ),
-                                onTap: (){
-                                  Navigator.pop(_context);
-                                  showFieldDialog(field: field);
-                                  return true;
-                                },
-                              ),
-                              CupertinoPopoverMenuItem(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(S.of(context).delete,style: TextStyle(color: Colors.red),),
-                                      Icon(Icons.delete,color: Colors.red,),
-                                    ],
-                                  ),
-                                ),
-                                onTap: (){
-                                  Navigator.pop(_context);
-                                  confirmDeleteFieldDialog(field);
-                                  return true;
-                                },
-                              )
-                            ],
-                          );
-                        },
-                        onTap: (){
-                          return true;
-                        },
-                        child: Container(
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(primaryColor),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 1,
-                                  blurRadius: 1,
-                                  
-                                )
-                              ]
-                          ),
-                          clipBehavior: Clip.hardEdge,
-                          padding: EdgeInsets.all(2),
-                          margin: EdgeInsets.all(2),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(field.name.substring(0, field.name.length>1?2:field.name.length).toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-                              FittedBox(
-                                  child: Text(field.crop, style: TextStyle(fontSize: 12),)
-                              ),
-                              FittedBox(
-                                  child: Text(field.cropVariety, style: TextStyle(fontSize: 12),)
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
+                      _fieldItem(field),
                     Container(
                       height: 70,
                       width: 70,
@@ -603,84 +609,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     for(var container in containers)
-                      CupertinoPopoverButton(
-                        popoverBoxShadow: [
-                          BoxShadow(color: Colors.black54,blurRadius: 5.0)
-                        ],
-                        popoverWidth: 180,
-                        popoverBuild: (_context){
-                          return CupertinoPopoverMenuList(
-                            children: <Widget>[
-                              CupertinoPopoverMenuItem(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(S.of(context).editContainer,style: TextStyle(color: Colors.black87),),
-                                      Icon(Icons.edit,color: Colors.black87,),
-                                    ],
-                                  ),
-                                ),
-                                onTap: (){
-                                  Navigator.pop(_context);
-                                  showContainerDialog(container: container);
-                                  return true;
-                                },
-                              ),
-                              CupertinoPopoverMenuItem(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(S.of(context).delete,style: TextStyle(color: Colors.red),),
-                                      Icon(Icons.delete,color: Colors.red,),
-                                    ],
-                                  ),
-                                ),
-                                onTap: (){
-                                  Navigator.pop(_context);
-                                  confirmDeleteContainerDialog(container);
-                                  return true;
-                                },
-                              )
-                            ],
-                          );
-                        },
-                        onTap: (){
-                          return true;
-                        },
-                        child: Container(
-                          height: 70,
-                          width: 70,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(primaryColor),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 1,
-                                  blurRadius: 1,
-                                  
-                                )
-                              ]
-                          ),
-                          clipBehavior: Clip.hardEdge,
-                          padding: EdgeInsets.all(2),
-                          margin: EdgeInsets.all(2),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(container.name[0].toUpperCase(),style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-                              FittedBox(
-                                  child: Text('${container.name}',style: TextStyle(fontSize: 12),)
-                              ),
-                              SizedBox(height: 12,),
-                            ],
-                          ),
-                        ),
-                      ),
+                      _containerItem(container),
                     Container(
                       height: 70,
                       width: 70,
