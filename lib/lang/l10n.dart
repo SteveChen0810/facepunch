@@ -1835,6 +1835,30 @@ class S {
       args: [],
     );
   }
+  String get deletePunchConfirm{
+    return Intl.message(
+      'Are you sure to delete the punch?',
+      name: 'deletePunchConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deleteWorkConfirm{
+    return Intl.message(
+      'Are you sure to delete the work?',
+      name: 'deleteWorkConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deleteBreakConfirm{
+    return Intl.message(
+      'Are you sure to delete the break?',
+      name: 'deleteBreakConfirm',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

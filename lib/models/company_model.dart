@@ -360,6 +360,7 @@ class CompanySettings{
   bool hasTimeSheetRevision;
   bool hasTimeSheetSchedule;
   bool hasGeolocationPunch;
+  bool useOwnData;
 
   bool receivePunchNotification;
   bool receiveRevisionNotification;
@@ -402,6 +403,7 @@ class CompanySettings{
       hasTimeSheetRevision = json['has_time_sheet_revision']!=null && json['has_time_sheet_revision']=='1';
       hasTimeSheetSchedule = json['has_time_sheet_schedule']!=null && json['has_time_sheet_schedule']=='1';
       hasGeolocationPunch = json['has_geolocation_punch']!=null && json['has_geolocation_punch']=='1';
+      useOwnData = json['use_own_data']!=null && json['use_own_data']=='1';
     }catch(e){
       print('[CompanySettings.fromJson]$e');
     }
@@ -425,6 +427,7 @@ class CompanySettings{
     if(this.hasTimeSheetRevision!=null)data['has_time_sheet_revision'] = this.hasTimeSheetRevision?'1':'0';
     if(this.hasTimeSheetSchedule!=null)data['has_time_sheet_schedule'] = this.hasTimeSheetSchedule?'1':'0';
     if(this.hasGeolocationPunch!=null)data['has_geolocation_punch'] = this.hasGeolocationPunch?'1':'0';
+    if(this.useOwnData!=null)data['use_own_data'] = this.useOwnData?'1':'0';
 
     return data;
   }

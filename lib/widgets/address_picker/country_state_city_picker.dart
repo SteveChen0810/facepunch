@@ -11,7 +11,8 @@ class SelectState extends StatefulWidget {
   final String initCountry;
   final String initState;
   final String initCity;
-  const SelectState({Key key, this.initCountry,this.initState,this.initCity, this.onCountryChanged, this.onStateChanged, this.onCityChanged}): super(key:key);
+  final bool readOnly;
+  const SelectState({Key key, this.initCountry,this.initState,this.initCity, this.readOnly = false, this.onCountryChanged, this.onStateChanged, this.onCityChanged}): super(key:key);
 
   @override
   _SelectStateState createState() => _SelectStateState();
@@ -164,9 +165,10 @@ class _SelectStateState extends State<SelectState> {
                     );
                   }).toList(),
                   underline: Container(color: Colors.black,width: double.infinity,height: 1,),
-                  onChanged: (value) => _onSelectedCountry(value),
+                  onChanged: widget.readOnly ? null : (value) => _onSelectedCountry(value),
                   hint: Text(S.of(context).country),
                   value: _selectedCountry,
+                  disabledHint: Text('$_selectedCountry'),
                 ),
               ),
               Flexible(
@@ -180,8 +182,9 @@ class _SelectStateState extends State<SelectState> {
                   }).toList(),
                   underline: Container(color: Colors.black,width: double.infinity,height: 1,),
                   hint: Text(S.of(context).state),
-                  onChanged: (value) => _onSelectedState(value),
+                  onChanged: widget.readOnly? null : (value) => _onSelectedState(value),
                   value: _selectedState,
+                  disabledHint: _selectedState != null ? Text(_selectedState):null,
                 ),
               ),
             ],
@@ -196,8 +199,9 @@ class _SelectStateState extends State<SelectState> {
           }).toList(),
           hint: Text(S.of(context).city),
           underline: Container(color: Colors.black,width: double.infinity,height: 1,),
-          onChanged: (value) => _onSelectedCity(value),
+          onChanged: widget.readOnly? null : (value) => _onSelectedCity(value),
           value: _selectedCity,
+          disabledHint: _selectedCity != null ? Text(_selectedCity):null,
         ),
       ],
     );

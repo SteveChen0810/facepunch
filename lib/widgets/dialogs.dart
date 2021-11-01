@@ -283,3 +283,41 @@ showWelcomeDialog({String userName, bool isPunchIn, BuildContext context})async{
     },
   );
 }
+
+Future<bool> confirmDeleting(BuildContext context, String message)async{
+  bool allow = false;
+  await showDialog(
+    context: context,
+    builder:(_)=> AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      contentPadding: EdgeInsets.all(0),
+      content: Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(message,textAlign: TextAlign.center,),
+            SizedBox(height: 8,),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: ()async{
+            Navigator.pop(context);
+          },
+          child: Text(S.of(context).close,style: TextStyle(color: Colors.green),),
+        ),
+        TextButton(
+          onPressed: ()async{
+            allow = true;
+            Navigator.pop(context);
+          },
+          child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),),
+        ),
+      ],
+    ),
+  );
+  return allow;
+}

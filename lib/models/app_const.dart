@@ -71,6 +71,7 @@ class AppConst{
   static final String addSchedule = baseUrl+"add-schedule";
   static final String editWork = baseUrl+"edit-work";
   static final String deleteWork = baseUrl+"delete-work";
+  static final String deleteBreak = baseUrl+"delete-break";
   static final String addEditCall = baseUrl+"add-edit-call";
 
 }

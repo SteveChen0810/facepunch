@@ -443,6 +443,8 @@ class User {
   String lastName;
   String phone;
   String pin;
+  List<String> projects;
+  String employeeCode;
   String start;
   String salary;
   String birthday;
@@ -459,12 +461,14 @@ class User {
   String firebaseToken;
   String emailVerifyNumber;
   int companyId;
-  String employeeCode;
-  int lunchTime=0;
+  bool hasAutoBreak = true;
   String nfc;
-  String token;
+  bool canNTCTracking = true;
+  bool sendScheduleNotification = true;
   String createdAt;
   String updatedAt;
+  bool active = true;
+
   List<Punch> punches = [];
   List<WorkHistory> works = [];
   List<EmployeeBreak> breaks = [];
@@ -472,8 +476,7 @@ class User {
   List<EmployeeCall> calls = [];
   List<Revision> revisions = [];
   Punch lastPunch;
-  bool canNTCTracking = true;
-  bool sendScheduleNotification = true;
+  String token;
 
   User({
     this.id,
@@ -504,11 +507,13 @@ class User {
     this.token,
     this.nfc,
     this.lastPunch,
-    this.lunchTime,
     this.createdAt,
     this.updatedAt,
     this.canNTCTracking,
-    this.sendScheduleNotification
+    this.sendScheduleNotification,
+    this.active,
+    this.hasAutoBreak,
+    this.projects
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -548,12 +553,16 @@ class User {
       if(json['last_punch']!=null){
         lastPunch = Punch.fromJson(json['last_punch']);
       }
-      lunchTime = json['lunch_time'];
       nfc = json['nfc'];
-      canNTCTracking = json['can_nfc_tracking']!=null && json['can_nfc_tracking']==1;
-      sendScheduleNotification = json['send_schedule_notification']==1 && json['send_schedule_notification']==1;
+      canNTCTracking = json['can_nfc_tracking'] != null && json['can_nfc_tracking'] == 1;
+      sendScheduleNotification = json['send_schedule_notification'] != null && json['send_schedule_notification'] == 1;
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
+      if(json['projects'] != null){
+        projects = json['projects'].cast<String>();
+      }
+      hasAutoBreak = json['has_auto_break'] != null && json['has_auto_break'] == 1;
+      active = json['active'] != null && json['active'] == 1;
     }catch(e){
       print("[User.fromJson] $e");
     }
@@ -587,7 +596,6 @@ class User {
     data['company_id'] = this.companyId;
     data['employee_code'] = this.employeeCode;
     data['token'] = this.token;
-    data['lunch_time'] = this.lunchTime;
     data['nfc'] = this.nfc;
     if(this.canNTCTracking!=null){
       data['can_nfc_tracking'] = this.canNTCTracking?1:0;
@@ -597,6 +605,13 @@ class User {
     }
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['projects'] = this.projects;
+    if(this.hasAutoBreak != null){
+      data['has_auto_break'] = this.hasAutoBreak?1:0;
+    }
+    if(this.active != null){
+      data['active'] = this.active?1:0;
+    }
     return data;
   }
 
@@ -633,7 +648,7 @@ class User {
   }
 
   List<Punch> getPunchesOfWeek(DateTime startDate){
-    DateTime endDate = startDate.add(Duration(days: 6));
+    DateTime endDate = startDate.add(Duration(days: 7));
     return punches.where((p) => (DateTime.parse(p.createdAt).isAfter(startDate) && DateTime.parse(p.createdAt).isBefore(endDate))).toList();
   }
 
@@ -915,6 +930,28 @@ class User {
     }
   }
 
+  Future<String> deleteBreak(int breakId)async{
+    try{
+      var res = await http.post(
+        AppConst.deleteBreak,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'Authorization':'Bearer '+GlobalData.token
+        },
+        body: jsonEncode({'id':breakId}),
+      );
+      print("[User.deleteBreak] ${res.body}");
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[User.deleteBreak] $e");
+      return e.toString();
+    }
+  }
 }
 
 class Punch{

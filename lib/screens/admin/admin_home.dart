@@ -39,6 +39,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   User selectedUser;
   final AudioCache player = AudioCache();
   GlobalKey<AutoCompleteTextFieldState<String>> _searchKey = GlobalKey<AutoCompleteTextFieldState<String>>();
+  CompanySettings settings;
 
   void _onRefresh() async{
     await context.read<CompanyModel>().getCompanyUsers();
@@ -102,22 +103,23 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 return true;
               },
             ),
-            CupertinoPopoverMenuItem(
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(S.of(context).deleteEmployee,style: TextStyle(color: Colors.red),),
-                    Icon(Icons.delete,color: Colors.red,),
-                  ],
+            if(settings.useOwnData)
+              CupertinoPopoverMenuItem(
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(S.of(context).deleteEmployee,style: TextStyle(color: Colors.red),),
+                      Icon(Icons.delete,color: Colors.red,),
+                    ],
+                  ),
                 ),
-              ),
-              onTap: (){
-                deleteEmployee(user.id);
-                return true;
-              },
-            )
+                onTap: (){
+                  deleteEmployee(user.id);
+                  return true;
+                },
+              )
           ],
         );
       },
@@ -316,8 +318,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
     List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
     List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
     List<AppNotification> notifications  = context.watch<NotificationModel>().notifications.where((n) =>(n.seen!=null && !n.seen)).toList();
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    settings = context.watch<CompanyModel>().myCompanySettings;
     List<User> users = context.watch<CompanyModel>().users;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -346,7 +349,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
             children: [
               Expanded(
                 child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   child: Container(
                     padding: EdgeInsets.all(4),
                     child: Column(
@@ -490,22 +493,23 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                 ),
               ),
-              SizedBox(height: 8,),
-              Container(
-                width: width,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-                child: RaisedButton(
-                  onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateEditEmployee())),
-                  child: Text(S.of(context).createNewEmployee,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.white),),
-                  padding: EdgeInsets.all(10),
-                  color: Colors.black87,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                ),
-              )
+              if(settings.useOwnData)
+                Container(
+                  width: width,
+                  margin: EdgeInsets.only(top: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+                  child: RaisedButton(
+                    onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateEditEmployee())),
+                    child: Text(S.of(context).createNewEmployee,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.white),),
+                    padding: EdgeInsets.all(10),
+                    color: Colors.black87,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                )
             ],
           ),
         ),
