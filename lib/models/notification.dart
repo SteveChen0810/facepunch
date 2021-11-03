@@ -9,11 +9,8 @@ class NotificationModel with ChangeNotifier {
   final LocalStorage storage = LocalStorage('notifications');
   List<Revision> revisions = [];
 
-  NotificationModel(){
-    getNotificationFromServer();
-  }
 
-  getNotificationFromServer()async{
+  Future<void> getNotificationFromServer()async{
     try{
       var res = await http.get(
           AppConst.getRevisionRequest,

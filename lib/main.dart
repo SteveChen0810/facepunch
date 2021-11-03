@@ -27,7 +27,7 @@ Future<void> main() async {
             ChangeNotifierProvider(create: (_) => UserModel()),
             ChangeNotifierProvider(create: (_) => CompanyModel()),
             ChangeNotifierProvider(create: (_) => RevisionModel()),
-            ChangeNotifierProvider(create: (_) => NotificationModel(),lazy: false,),
+            ChangeNotifierProvider(create: (_) => NotificationModel()),
             ChangeNotifierProvider(create: (_) => HarvestModel()),
             ChangeNotifierProvider(create: (_) => WorkModel()),
           ],
