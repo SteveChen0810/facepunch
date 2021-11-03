@@ -119,17 +119,17 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),
-                label: S.of(context).nfc
+                label: S.of(context).schedule
             ),
           if(['sub_admin','manager'].contains(user.role))
             BottomNavigationBarItem(
-                icon: Image.asset("assets/images/dispatch.png",width: 30,color: Colors.black,),
-                activeIcon: Image.asset("assets/images/dispatch.png",width: 30,color: Color(primaryColor),),
-                label: S.of(context).nfc
+                icon: Image.asset("assets/images/ic_dispatch.png",width: 30,color: Colors.black,),
+                activeIcon: Image.asset("assets/images/ic_dispatch.png",width: 30,color: Color(primaryColor),),
+                label: S.of(context).dispatch
             ),
           BottomNavigationBarItem(
-              icon: Image.asset("assets/images/dispatch.png",width: 30,color: Colors.black,),
-              activeIcon: Image.asset("assets/images/dispatch.png",width: 30,color: Color(primaryColor),),
+              icon: Image.asset("assets/images/ic_revision.png", width: 30,color: Colors.black,),
+              activeIcon: Image.asset("assets/images/ic_revision.png", width: 30,color: Color(primaryColor),),
               label: S.of(context).nfc
           ),
         ],
@@ -137,6 +137,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
         showUnselectedLabels: false,
         currentIndex: index,
         elevation: 8,
+        type: BottomNavigationBarType.fixed,
         onTap: (i){
           _pageController.jumpToPage(i);
           setState(() {index = i;});

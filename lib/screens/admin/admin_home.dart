@@ -474,7 +474,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                               FlatButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
                                 shape: CircleBorder(),
-                                child: Icon(Icons.description_outlined,color: Color(primaryColor),size: 35,),
+                                child: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
                               ),
                             FlatButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting())),
