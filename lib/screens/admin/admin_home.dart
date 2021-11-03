@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/models/notification.dart';
+import 'package:facepunch/models/revision_model.dart';
 import 'package:facepunch/models/work_model.dart';
 import 'package:facepunch/screens/admin/employee_logs.dart';
 import 'package:facepunch/screens/admin/settings/admin_settings.dart';
@@ -275,13 +276,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   _onMessage(message){
     AppNotification newNotification = AppNotification.fromJsonFirebase(message);
-    context.read<NotificationModel>().addNotification(newNotification);
     player.play('sound/sound.mp3').catchError(print);
-    if(newNotification.revision!=null){
-      showRevisionNotificationDialog(newNotification,context,showMessage);
-    }else{
-      showNotificationDialog(newNotification,context,);
-    }
+    showNotificationDialog(newNotification, context,);
   }
 
   _manualPunch(User user)async{
@@ -315,7 +311,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     final width = MediaQuery.of(context).size.width;
     List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
     List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
-    List<AppNotification> notifications  = context.watch<NotificationModel>().notifications.where((n) =>(n.seen!=null && !n.seen)).toList();
+    List<Revision> revisions  = context.watch<NotificationModel>().revisions;
     settings = context.watch<CompanyModel>().myCompanySettings;
     List<User> users = context.watch<CompanyModel>().users;
 
@@ -462,7 +458,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                         color: Colors.red
                                       ),
                                       padding: EdgeInsets.all(4),
-                                      child: Text("${notifications.length}",style: TextStyle(color: Colors.white),),
+                                      child: Text("${revisions.length}", style: TextStyle(color: Colors.white),),
                                     )
                                   ],
                                 )

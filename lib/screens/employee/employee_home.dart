@@ -51,7 +51,6 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
       },
     );
     _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(sound: true, badge: true, alert: true));
-
   }
 
   _onMessage(message){
@@ -144,6 +143,8 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
         },
       ),
       backgroundColor: Color(0xFFf4f4f4),
+      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomPadding: true,
     );
   }
 }

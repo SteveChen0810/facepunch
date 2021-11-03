@@ -1859,6 +1859,14 @@ class S {
       args: [],
     );
   }
+  String get breakTime{
+    return Intl.message(
+      'Break Time',
+      name: 'breakTime',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

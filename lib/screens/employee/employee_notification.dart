@@ -2,6 +2,7 @@ import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/revision_model.dart';
 import 'package:facepunch/models/user_model.dart';
+import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +46,7 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
             _showRevisionDialog(revision);
           },
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -53,11 +55,11 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                   Text(revision.type.toUpperCase())
                 ],
               ),
+              Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.bold),),
               if(revision.newValue['project_id'] != revision.oldValue['project_id'])
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.bold),),
                     Row(
                       children: [
                         Text("  ${S.of(context).incorrect}: "),
@@ -72,11 +74,13 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     ),
                   ],
                 ),
+              if(revision.newValue['project_id'] == revision.oldValue['project_id'])
+                Text('  ${revision.oldValue['project_name']}'),
+              Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
               if(revision.newValue['task_id'] != revision.oldValue['task_id'])
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
                     Row(
                       children: [
                         Text("  ${S.of(context).incorrect}: "),
@@ -91,6 +95,8 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     ),
                   ],
                 ),
+              if(revision.newValue['task_id'] == revision.oldValue['task_id'])
+                Text("  ${revision.oldValue['task_name']}"),
               if(revision.newValue['start'] != revision.oldValue['start'])
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,13 +105,13 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     Row(
                       children: [
                         Text("  ${S.of(context).incorrect}: "),
-                        Expanded(child: Text(revision.oldValue['start'])),
+                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
                       ],
                     ),
                     Row(
                       children: [
                         Text("  ${S.of(context).correct}:    "),
-                        Expanded(child: Text(revision.newValue['start'])),
+                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['start']))),
                       ],
                     ),
                   ],
@@ -118,13 +124,13 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     Row(
                       children: [
                         Text("  ${S.of(context).incorrect}: "),
-                        Expanded(child: Text(revision.oldValue['end'])),
+                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
                       ],
                     ),
                     Row(
                       children: [
                         Text("  ${S.of(context).correct}:    "),
-                        Expanded(child: Text(revision.newValue['end'])),
+                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
                       ],
                     ),
                   ],

@@ -216,6 +216,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
         child: AlertDialog(
           contentPadding: EdgeInsets.zero,
           insetPadding: EdgeInsets.zero,
+          scrollable: true,
           content: StatefulBuilder(
               builder: (BuildContext _context, StateSetter _setState){
                 return Container(
@@ -312,6 +313,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           child: AlertDialog(
             contentPadding: EdgeInsets.zero,
             insetPadding: EdgeInsets.zero,
+            scrollable: true,
             content: StatefulBuilder(
                 builder: (BuildContext _context, StateSetter _setState){
                   return Container(
@@ -441,6 +443,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           child: AlertDialog(
             contentPadding: EdgeInsets.zero,
             insetPadding: EdgeInsets.zero,
+            scrollable: true,
             content: StatefulBuilder(
                 builder: (BuildContext _context, StateSetter _setState){
                   return Container(

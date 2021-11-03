@@ -239,6 +239,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
         builder:(_)=> AlertDialog(
           contentPadding: EdgeInsets.zero,
           insetPadding: EdgeInsets.zero,
+          scrollable: true,
           content: StatefulBuilder(
               builder: (BuildContext _context, StateSetter _setState){
                 return Container(
@@ -438,12 +439,14 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     final call = EmployeeCall.fromJson(c.toJson());
     String description = '';
     String errorMessage;
+    TextEditingController priority = TextEditingController(text: '${call.priority}');
 
     showDialog(
         context: context,
         builder:(_)=> AlertDialog(
           contentPadding: EdgeInsets.zero,
           insetPadding: EdgeInsets.zero,
+          scrollable: true,
           content: StatefulBuilder(
               builder: (BuildContext _context, StateSetter _setState){
                 return Container(
@@ -455,7 +458,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                     children: [
                       Center(
                           child: Text(
-                            "${S.of(context).schedule}",
+                            "${S.of(context).call}",
                             style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
                           )
                       ),
@@ -581,6 +584,21 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             isDense: true,
+                            labelText: S.of(context).priority,
+                            alignLabelWithHint: true,
+                            errorText: errorMessage
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (v){
+                          call.priority = int.tryParse(v);
+                        },
+                        controller: priority,
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
                             labelText: S.of(context).description,
                             alignLabelWithHint: true,
                             errorText: errorMessage
@@ -609,6 +627,10 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                                 }
                                 if(call.taskId == null){
                                   _setState(() { errorMessage = S.of(context).selectTask;});
+                                  return ;
+                                }
+                                if(call.priority == null){
+                                  _setState(() { errorMessage = S.of(context).selectPriority;});
                                   return ;
                                 }
                                 if(description.isNotEmpty){

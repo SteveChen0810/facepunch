@@ -166,6 +166,7 @@ class Revision{
   EmployeeCall call;
   EmployeeBreak employeeBreak;
   String status;
+  String description;
   String createdAt;
   String updatedAt;
 
@@ -179,6 +180,7 @@ class Revision{
     this.user,
     this.punch,
     this.status,
+    this.description,
     this.createdAt,
     this.updatedAt
   });
@@ -210,6 +212,7 @@ class Revision{
       if(json['break'] != null){
         employeeBreak = EmployeeBreak.fromJson(json['break']);
       }
+      description = json['description'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -228,6 +231,7 @@ class Revision{
     data['new_value'] = this.newValue;
     if(this.punch!=null)data['punch'] = this.punch.toJson();
     if(this.user!=null)data['user'] = this.user.toJson();
+    data['description'] = this.description;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
@@ -238,7 +242,6 @@ class Revision{
     bool valid = false;
     if(newValue is Map && oldValue is Map){
       newValue.forEach((key, value) {
-        print([key, value, oldValue[key]]);
         if(oldValue[key] != value) valid = true;
       });
     }
@@ -261,6 +264,7 @@ class Revision{
       );
       print('[Revision.addDescription]${res.body}');
       if(res.statusCode==200){
+        this.description = description;
         return null;
       }else{
         return jsonDecode(res.body)['message'];
@@ -269,5 +273,88 @@ class Revision{
       print('[Revision.addDescription]$e');
       return e.toString();
     }
+  }
+
+  Future<String> accept()async{
+    try{
+      var res = await http.post(
+          AppConst.acceptRevision,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: {
+            'id':id.toString()
+          }
+      );
+      print("[Revision.accept] ${res.body}");
+      if(res.statusCode==200){
+        status = "accepted";
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[Revision.acceptRevision] $e");
+      return e.toString();
+    }
+  }
+
+  Future<String> decline()async{
+    try{
+      var res = await http.post(
+          AppConst.declineRevision,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: {
+            'id':id.toString()
+          }
+      );
+      print("[Revision.decline] ${res.body}");
+      if(res.statusCode==200){
+        status = "declined";
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[Revision.decline] $e");
+      return e.toString();
+    }
+  }
+
+  Future<String> delete()async{
+    try{
+      var res = await http.post(
+          AppConst.deleteRevision,
+          headers: {
+            'Accept':'application/json',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Authorization':'Bearer '+GlobalData.token
+          },
+          body: {
+            'id':id.toString()
+          }
+      );
+      print("[Revision.delete] ${res.body}");
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      print("[Revision.delete] $e");
+      return e.toString();
+    }
+  }
+
+  Color statusColor(){
+    if(status == 'requested') return Colors.orange;
+    if(status == 'accepted') return Colors.green;
+    return Colors.red;
   }
 }

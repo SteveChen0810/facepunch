@@ -336,7 +336,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               child: isProfileUpdating?SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                                  child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
                               ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                               onPressed: updateUser,
                               color: Colors.red,
@@ -465,7 +465,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               child: isCompanyUpdating?SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                                  child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
                               ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                               onPressed: updateCompany,
                               color: Colors.red,
@@ -499,7 +499,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(),
+                                child: CircularProgressIndicator(strokeWidth: 2,),
                               )
                           ],
                         ),
@@ -523,7 +523,7 @@ class _AdminSettingState extends State<AdminSetting> {
                               SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(),
+                                child: CircularProgressIndicator(strokeWidth: 2,),
                               )
                           ],
                         ),
