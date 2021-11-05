@@ -480,7 +480,10 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                                   isDense: true,
                                   underline: SizedBox(),
                                   onChanged: (v) {
-                                    _setState((){ newWork.projectId = v.id; });
+                                    _setState((){
+                                      newWork.projectId = v.id;
+                                      newWork.projectName = v.name;
+                                    });
                                   },
                                 ),
                               ),
@@ -512,7 +515,10 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                                   isDense: true,
                                   underline: SizedBox(),
                                   onChanged: (v) {
-                                    _setState((){newWork.taskId = v.id;});
+                                    _setState((){
+                                      newWork.taskId = v.id;
+                                      newWork.taskName = v.name;
+                                    });
                                   },
                                 ),
                               ),

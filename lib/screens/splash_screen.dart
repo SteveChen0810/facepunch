@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/screens/home_page.dart';
+import 'package:facepunch/widgets/dialogs.dart';
 import '../models/company_model.dart';
 import '../models/user_model.dart';
 import '../screens/admin/admin_home.dart';
@@ -20,7 +23,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 2)).whenComplete(()async{
+    _init();
+  }
+
+  _init()async{
+    try{
+      final appVersions = await context.read<UserModel>().getAppVersions();
+      if(appVersions != null){
+        if(appVersions[Platform.isAndroid?'android':'ios'] > AppConst.currentVersion){
+          await checkAppVersionDialog(context, appVersions['force']);
+        }
+      }
       User user  = await context.read<UserModel>().getUserFromLocal();
       if(user==null){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
@@ -36,7 +49,10 @@ class _SplashScreenState extends State<SplashScreen> {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
         }
       }
-    });
+    }catch(e){
+      print("[SplashScreen._init]$e");
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+    }
   }
 
   @override

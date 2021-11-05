@@ -191,6 +191,13 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
+            if(revision.newValue['start'] == revision.oldValue['start'])
+              Row(
+                children: [
+                  Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
+                ],
+              ),
             if(revision.newValue['end'] != revision.oldValue['end'])
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,6 +215,13 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
                     ],
                   ),
+                ],
+              ),
+            if(revision.newValue['end'] == revision.oldValue['end'])
+              Row(
+                children: [
+                  Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
                 ],
               ),
           ],
@@ -331,6 +345,13 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
+            if(revision.newValue['priority'] == revision.oldValue['priority'])
+              Row(
+                children: [
+                  Text('${S.of(context).priority} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text('${revision.oldValue['priority']}')),
+                ],
+              ),
             if(revision.newValue['start'] != revision.oldValue['start'])
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,6 +371,13 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
+            if(revision.newValue['start'] == revision.oldValue['start'])
+              Row(
+                children: [
+                  Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
+                ],
+              ),
             if(revision.newValue['end'] != revision.oldValue['end'])
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,6 +395,13 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
                     ],
                   ),
+                ],
+              ),
+            if(revision.newValue['end'] == revision.oldValue['end'])
+              Row(
+                children: [
+                  Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
                 ],
               ),
           ],
@@ -437,6 +472,13 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
+            if(revision.newValue['start'] == revision.oldValue['start'])
+              Row(
+                children: [
+                  Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
+                ],
+              ),
             if(revision.newValue['end'] != revision.oldValue['end'])
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,6 +496,13 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
                     ],
                   ),
+                ],
+              ),
+            if(revision.newValue['end'] == revision.oldValue['end'])
+              Row(
+                children: [
+                  Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
                 ],
               ),
           ],

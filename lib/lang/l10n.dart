@@ -1867,6 +1867,22 @@ class S {
       args: [],
     );
   }
+  String get newVersionAvailable{
+    return Intl.message(
+      'New version is available now. Do you want to update?',
+      name: 'newVersionAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+  String get update{
+    return Intl.message(
+      'Update',
+      name: 'update',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -25,12 +25,15 @@ class UserModel with ChangeNotifier{
         var json = await storage.getItem('user');
         if(json!=null){
           user = User.fromJson(json);
-          if(user.language=='Spanish'){
-            locale = 'es';
-          }else if(user.language=='French'){
-            locale = 'fr';
+          user = await getUserInfoFromServer(user.token);
+          if(user != null){
+            if(user.language=='Spanish'){
+              locale = 'es';
+            }else if(user.language=='French'){
+              locale = 'fr';
+            }
+            GlobalData.token = user.token;
           }
-          GlobalData.token = user.token;
         }
       }
     }catch(e){
@@ -431,6 +434,45 @@ class UserModel with ChangeNotifier{
       print("[UserModel.getYearTotalHours] $e");
       return e.toString() ;
     }
+  }
+
+  Future<User> getUserInfoFromServer(String token)async{
+    try{
+      var res = await http.get(
+        AppConst.getUserInfo,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/x-www-form-urlencoded',
+          'Authorization':'Bearer $token'
+        },
+      );
+      print('[UserModel.getUserInfoFromServer]${res.body}');
+      if(res.statusCode == 200){
+       return User.fromJson(jsonDecode(res.body));
+      }
+    }catch(e){
+      print('[UserModel.getUserInfoFromServer]$e');
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>> getAppVersions()async{
+    try{
+      var res = await http.get(
+        AppConst.getAppVersions,
+        headers: {
+          'Accept':'application/json',
+          'Content-Type':'application/x-www-form-urlencoded',
+        },
+      );
+      print('[UserModel.getAppVersions]${res.body}');
+      if(res.statusCode == 200){
+        return jsonDecode(res.body);
+      }
+    }catch(e){
+      print('[UserModel.getAppVersions]$e');
+    }
+    return null;
   }
 }
 

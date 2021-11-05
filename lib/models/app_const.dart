@@ -11,6 +11,7 @@ class AppConst{
   static final String sendVerifyAgain = baseUrl+"send-verify-again";
   static final String recoverPassword = baseUrl+"recover-password";
   static final String notificationSetting = baseUrl+"notification-setting";
+  static final String getUserInfo = baseUrl+"get-user-info";
 
   static final String getMyCompany = baseUrl+"get-my-company";
   static final String getCompanySettings = baseUrl+"get-company-settings";
@@ -70,6 +71,9 @@ class AppConst{
   static final String deleteBreak = baseUrl+"delete-break";
   static final String addEditCall = baseUrl+"add-edit-call";
 
+  static final String getAppVersions = baseUrl+"get-app-versions";
+
+  static final int currentVersion = 32;
 }
 
 class GlobalData{

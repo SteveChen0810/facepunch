@@ -1,10 +1,11 @@
+import 'dart:io';
+
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/notification.dart';
 import '../models/app_const.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
-import 'calendar_strip/date-utils.dart';
-import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Future<bool> pinCodeCheckDialog(String pin, BuildContext context)async{
   bool result = false;
@@ -231,4 +232,44 @@ Future<bool> confirmDeleting(BuildContext context, String message)async{
     ),
   );
   return allow;
+}
+
+Future<void> checkAppVersionDialog(BuildContext context, bool isForce)async{
+  await showDialog(
+    context: context,
+    barrierDismissible: isForce,
+    builder:(_)=> AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      contentPadding: EdgeInsets.all(0),
+      content: Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(S.of(context).newVersionAvailable, textAlign: TextAlign.center,),
+            SizedBox(height: 8,),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: ()async{
+            if(Platform.isAndroid){
+              launch('https://apps.apple.com/us/app/face-punch-vision/id1556243840');
+            }else{
+              launch('https://apps.apple.com/us/app/face-punch-vision/id1556243840');
+            }
+          },
+          child: Text(S.of(context).update, style: TextStyle(color: Colors.green),),
+        ),
+        TextButton(
+          onPressed: isForce?null:()async{
+            Navigator.pop(context);
+          },
+          child: Text(S.of(context).close, style: TextStyle(color: isForce?Colors.grey:Colors.red),),
+        ),
+      ],
+    ),
+  );
 }
