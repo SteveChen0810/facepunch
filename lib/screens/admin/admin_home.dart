@@ -311,7 +311,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     final width = MediaQuery.of(context).size.width;
     List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
     List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
-    List<Revision> revisions  = context.watch<NotificationModel>().revisions;
+    List<Revision> revisions  = context.watch<NotificationModel>().revisions.where((r) => r.status == 'requested').toList();
     settings = context.watch<CompanyModel>().myCompanySettings;
     List<User> users = context.watch<CompanyModel>().users;
 

@@ -136,12 +136,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
                       Expanded(child: Text(revision.oldValue['project_name'])),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
                       Expanded(child: Text(revision.newValue['project_name'])),
@@ -157,12 +159,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
                       Expanded(child: Text(revision.oldValue['task_name'])),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
                       Expanded(child: Text(revision.newValue['task_name'])),
@@ -290,12 +294,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
                       Expanded(child: Text(revision.oldValue['project_name'])),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
                       Expanded(child: Text(revision.newValue['project_name'])),
@@ -311,12 +317,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
                       Expanded(child: Text(revision.oldValue['task_name'])),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
                       Expanded(child: Text(revision.newValue['task_name'])),
@@ -417,12 +425,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
                       Expanded(child: Text(revision.oldValue['project_name'])),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
                       Expanded(child: Text(revision.newValue['project_name'])),
@@ -438,12 +448,14 @@ class _NotificationPageState extends State<NotificationPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
                       Expanded(child: Text(revision.oldValue['task_name'])),
                     ],
                   ),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
                       Expanded(child: Text(revision.newValue['task_name'])),
