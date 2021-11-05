@@ -63,13 +63,12 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
   }
 
   Future cameraPermission()async{
-    final status = await Permission.camera.status;
+    var status = await Permission.camera.status;
     if(status.isGranted){
       setState(() {_isCameraAllowed = true;});
     }else{
-      Permission.camera.request().then((status){
-        if(status.isGranted){setState(() {_isCameraAllowed = true;});}
-      });
+      status = await Permission.camera.request();
+      if(status.isGranted){setState(() {_isCameraAllowed = true;});}
     }
   }
 
@@ -180,7 +179,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       XFile file = await cameraController.takePicture();
       print(file.path);
       setState(() {_photoPath = file.path;});
-      await punchWithFace(file.path);
+      await _punchWithFace(file.path);
       await File(file.path).delete().catchError(print);
     } on CameraException catch (e) {
       showMessage(e.toString());
@@ -210,8 +209,9 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
   }
 
 
-  punchWithFace(String path)async{
+  _punchWithFace(String path)async{
     try{
+      Tools.playSound();
       String base64Image = base64Encode(File(path).readAsBytesSync());
       var result = await context.read<UserModel>().punchWithFace(
           photo: base64Image,

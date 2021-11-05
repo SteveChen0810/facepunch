@@ -1,9 +1,9 @@
-import 'package:audioplayers/audio_cache.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/screens/admin/nfc/nfc_settings.dart';
 import 'package:facepunch/widgets/dialogs.dart';
+import 'package:facepunch/widgets/utils.dart';
 import 'package:facepunch/widgets/popover/cool_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,6 @@ class _NFCScanPageState extends State<NFCScanPage>{
   List<Harvest> harvests = [];
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   bool isLoading = false;
-  final AudioCache player = AudioCache();
   List<HTask> tasks;
 
   void _onRefresh() async{
@@ -232,7 +231,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     // await FlutterNfcReader.stop();
     FlutterNfcReader.read().then((NfcData data)async{
       if(data!=null){
-        player.play('sound/sound.mp3').catchError(print);
+        Tools.playSound();
         print([data.id,data.content]);
         if(data.id!=null && data.id.isNotEmpty){
           _addHarvest(data.id);

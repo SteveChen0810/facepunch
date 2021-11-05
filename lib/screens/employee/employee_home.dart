@@ -1,8 +1,8 @@
-import 'package:audioplayers/audio_cache.dart';
 import 'package:facepunch/models/notification.dart';
 import 'package:facepunch/models/work_model.dart';
 import 'package:facepunch/screens/employee/employee_dispatch.dart';
 import 'package:facepunch/widgets/dialogs.dart';
+import 'package:facepunch/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../../lang/l10n.dart';
@@ -28,7 +28,6 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   PageController _pageController = PageController(initialPage: 0);
   int index = 0;
-  final AudioCache player = AudioCache();
 
   @override
   void initState() {
@@ -54,8 +53,8 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   }
 
   _onMessage(message){
+    Tools.playSound();
     AppNotification newNotification = AppNotification.fromJsonFirebase(message);
-    player.play('sound/sound.mp3').catchError(print);
     showNotificationDialog(newNotification,context,);
   }
 

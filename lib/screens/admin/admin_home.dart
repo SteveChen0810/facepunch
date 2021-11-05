@@ -1,4 +1,3 @@
-import 'package:audioplayers/audio_cache.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/harvest_model.dart';
@@ -11,6 +10,7 @@ import 'package:facepunch/screens/admin/settings/notification_page.dart';
 import 'package:facepunch/widgets/autocomplete_textfield.dart';
 import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:facepunch/widgets/dialogs.dart';
+import 'package:facepunch/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../models/company_model.dart';
@@ -38,7 +38,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Position currentPosition;
   int loadingUser = 0;
   User selectedUser;
-  final AudioCache player = AudioCache();
   GlobalKey<AutoCompleteTextFieldState<String>> _searchKey = GlobalKey<AutoCompleteTextFieldState<String>>();
   CompanySettings settings;
 
@@ -277,7 +276,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   _onMessage(message){
     AppNotification newNotification = AppNotification.fromJsonFirebase(message);
-    player.play('sound/sound.mp3').catchError(print);
+    Tools.playSound();
     showNotificationDialog(newNotification, context,);
   }
 

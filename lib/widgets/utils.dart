@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
@@ -65,5 +66,18 @@ ImageRotation rotationIntToImageRotation(int rotation) {
     default:
       assert(rotation == 270);
       return ImageRotation.rotation270;
+  }
+}
+
+class Tools {
+  static Future<void> playSound()async{
+    try{
+      AssetsAudioPlayer().open(
+        Audio("assets/sound/sound.mp3"),
+        autoStart: true,
+      );
+    }catch(e){
+      print('[playSound]$e');
+    }
   }
 }

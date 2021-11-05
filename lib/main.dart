@@ -1,4 +1,4 @@
-import 'package:facepunch/models/harvest_model.dart';
+import 'models/harvest_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'lang/l10n.dart';
 import 'models/app_const.dart';
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Facepunch',
+      title: 'FacePunch',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         splashColor: Color(primaryColor),
