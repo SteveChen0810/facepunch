@@ -237,7 +237,7 @@ Future<bool> confirmDeleting(BuildContext context, String message)async{
 Future<void> checkAppVersionDialog(BuildContext context, bool isForce)async{
   await showDialog(
     context: context,
-    barrierDismissible: isForce,
+    barrierDismissible: !isForce,
     builder:(_)=> AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
       contentPadding: EdgeInsets.all(0),
@@ -256,7 +256,7 @@ Future<void> checkAppVersionDialog(BuildContext context, bool isForce)async{
         TextButton(
           onPressed: ()async{
             if(Platform.isAndroid){
-              launch('https://apps.apple.com/us/app/face-punch-vision/id1556243840');
+              launch('https://play.google.com/store/apps/details?id=com.golden.star.facepunch');
             }else{
               launch('https://apps.apple.com/us/app/face-punch-vision/id1556243840');
             }
