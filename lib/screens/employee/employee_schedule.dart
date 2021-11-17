@@ -251,7 +251,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                     children: [
                       Center(
                           child: Text(
-                            "${S.of(context).schedule}",
+                            "${S.of(context).scheduleRevision}",
                             style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
                           )
                       ),
@@ -439,7 +439,6 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     final call = EmployeeCall.fromJson(c.toJson());
     String description = '';
     String errorMessage;
-    TextEditingController priority = TextEditingController(text: '${call.priority}');
 
     showDialog(
         context: context,
@@ -458,7 +457,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                     children: [
                       Center(
                           child: Text(
-                            "${S.of(context).call}",
+                            "${S.of(context).callRevision}",
                             style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
                           )
                       ),
@@ -580,19 +579,47 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         ],
                       ),
                       SizedBox(height: 8,),
-                      TextField(
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                            labelText: S.of(context).priority,
-                            alignLabelWithHint: true,
-                            errorText: errorMessage
+                      Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(S.of(context).priority, style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                            Row(
+                              children: [
+                                Radio(
+                                  onChanged: (v){
+                                    _setState((){
+                                      call.priority = v;
+                                    });
+                                  },
+                                  value: 1,
+                                  groupValue: call.priority,
+                                ),
+                                Text("1  "),
+                                Radio(
+                                  onChanged: (v){
+                                    _setState((){
+                                      call.priority = v;
+                                    });
+                                  },
+                                  value: 2,
+                                  groupValue: call.priority,
+                                ),
+                                Text("2  "),
+                                Radio(
+                                  onChanged: (v){
+                                    _setState((){
+                                      call.priority = v;
+                                    });
+                                  },
+                                  value: 3,
+                                  groupValue: call.priority,
+                                ),
+                                Text("3"),
+                              ],
+                            ),
+                          ],
                         ),
-                        keyboardType: TextInputType.number,
-                        onChanged: (v){
-                          call.priority = int.tryParse(v);
-                        },
-                        controller: priority,
                       ),
                       SizedBox(height: 8,),
                       TextField(

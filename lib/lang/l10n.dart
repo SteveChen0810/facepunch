@@ -1883,6 +1883,22 @@ class S {
       args: [],
     );
   }
+  String get callRevision{
+    return Intl.message(
+      'Call Revision',
+      name: 'callRevision',
+      desc: '',
+      args: [],
+    );
+  }
+  String get addCall{
+    return Intl.message(
+      'Add Call',
+      name: 'addCall',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

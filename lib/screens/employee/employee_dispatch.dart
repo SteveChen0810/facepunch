@@ -149,17 +149,16 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
         projectName: projects.first.name,
         taskId: tasks.first.id,
         taskName: tasks.first.name,
-        start: DateTime.now().toString(),
-        end: DateTime.now().toString(),
-        userId: selectedUser.id
+        start: selectedDate.toString(),
+        end: selectedDate.toString(),
+        userId: selectedUser.id,
+        priority: 1,
     );
     if(c != null){
       call = EmployeeCall.fromJson(c.toJson());
     }
-    TextEditingController _priority = TextEditingController(text: "${call.priority??''}");
     TextEditingController _todo = TextEditingController(text: call.todo);
     TextEditingController _note = TextEditingController(text: call.note);
-    String errorMessage;
 
     showDialog(
         context: context,
@@ -247,19 +246,47 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                           ),
                         ),
                         SizedBox(height: 8,),
-                        Text(S.of(context).priority,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-                            contentPadding: EdgeInsets.all(8),
-                            isDense: true,
-                            errorText: errorMessage
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(S.of(context).priority, style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                              Row(
+                                children: [
+                                  Radio(
+                                    onChanged: (v){
+                                      _setState((){
+                                        call.priority = v;
+                                      });
+                                    },
+                                    value: 1,
+                                    groupValue: call.priority,
+                                  ),
+                                  Text("1  "),
+                                  Radio(
+                                    onChanged: (v){
+                                      _setState((){
+                                        call.priority = v;
+                                      });
+                                    },
+                                    value: 2,
+                                    groupValue: call.priority,
+                                  ),
+                                  Text("2  "),
+                                  Radio(
+                                    onChanged: (v){
+                                      _setState((){
+                                        call.priority = v;
+                                      });
+                                    },
+                                    value: 3,
+                                    groupValue: call.priority,
+                                  ),
+                                  Text("3"),
+                                ],
+                              ),
+                            ],
                           ),
-                          keyboardType: TextInputType.number,
-                          controller: _priority,
-                          onChanged: (v){
-                            call.priority = int.tryParse(v);
-                          },
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -339,10 +366,6 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                             ),
                             TextButton(
                                 onPressed: ()async{
-                                  if(call.priority == null){
-                                    _setState((){ errorMessage = S.of(context).selectPriority; });
-                                    return ;
-                                  }
                                   Navigator.of(_context).pop();
                                   setState(() {
                                     if(c == null){
@@ -373,6 +396,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     if(result != null) _showMessage(result);
     _refreshController.requestRefresh();
   }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -454,7 +478,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                         child: MaterialButton(
                           onPressed: ()=>_showCallDialog(null),
                           height: 40,
-                          child: Text(S.of(context).addSchedule,style: TextStyle(color: Colors.white),),
+                          child: Text(S.of(context).addCall, style: TextStyle(color: Colors.white),),
                           color: Colors.black,
                           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
