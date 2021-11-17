@@ -75,16 +75,16 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
     markers.clear();
     punchesOfDate.forEach((p) {
       if(p.latitude!=null && p.longitude!=null)
-      markers.add(
-          Marker(
-            markerId: MarkerId("punch_marker_${p.id}"),
-            position: LatLng(p.latitude, p.longitude),
-            icon: BitmapDescriptor.defaultMarkerWithHue(p.punch=="Out"?BitmapDescriptor.hueRed:BitmapDescriptor.hueGreen),
-            infoWindow: InfoWindow(title: "${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",
-                snippet: "${PunchDateUtils.getDateString(DateTime.parse(p.createdAt))}",
-            ),
-          )
-      );
+        markers.add(
+            Marker(
+              markerId: MarkerId("punch_marker_${p.id}"),
+              position: LatLng(p.latitude, p.longitude),
+              icon: BitmapDescriptor.defaultMarkerWithHue(p.punch=="Out"?BitmapDescriptor.hueRed:BitmapDescriptor.hueGreen),
+              infoWindow: InfoWindow(title: "${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",
+                  snippet: "${PunchDateUtils.getDateString(DateTime.parse(p.createdAt))}",
+              ),
+            )
+        );
     });
     setState(() { selectedDate = date;});
     if(punchesOfDate.isNotEmpty && punchesOfDate.last.latitude!=null && punchesOfDate.last.longitude!=null){
@@ -178,27 +178,28 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
             if(mounted)setState(() {});
           },
         ),
-        IconSlideAction(
-          caption: S.of(context).delete,
-          color: Colors.red,
-          foregroundColor: Colors.white,
-          iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
-          onTap: ()async{
-            if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
-              setState(() { selectedPunch = punch;});
-              String result = await user.deletePunch(punch.id);
-              if(result==null){
-                user.punches.removeWhere((p) => p.id == punch.id);
-                selectedPunches.values.forEach((ps) {
-                  ps.removeWhere((p) => p.id == punch.id);
-                });
-              }else{
-                showMessage(result);
+        if(punch.isIn())
+          IconSlideAction(
+            caption: S.of(context).delete,
+            color: Colors.red,
+            foregroundColor: Colors.white,
+            iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
+            onTap: ()async{
+              if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
+                setState(() { selectedPunch = punch;});
+                String result = await user.deletePunch(punch.id);
+                if(result==null){
+                  user.punches.removeWhere((p) => p.id == punch.id);
+                  selectedPunches.values.forEach((ps) {
+                    ps.removeWhere((p) => p.id == punch.id);
+                  });
+                }else{
+                  showMessage(result);
+                }
+                setState(() { selectedPunch = null;});
               }
-              setState(() { selectedPunch = null;});
-            }
-          },
-        ),
+            },
+          ),
       ],
     );
   }
