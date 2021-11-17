@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     bool isShowKeyBoard = MediaQuery.of(context).viewInsets.bottom != 0;
-    double imageSize = isShowKeyBoard?50:120;
+    double imageSize = isShowKeyBoard?60:120;
     double width = MediaQuery.of(context).size.width;
     double borderRadius = 16.0;
     double iconSize = 16.0;
@@ -72,155 +72,159 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       offset: Offset(0, 0),
     );
     String lang = context.watch<UserModel>().locale;
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        actions: [
-          PopupMenuButton(
-            itemBuilder: (_)=><PopupMenuItem<String>>[
-              PopupMenuItem<String>(
-                  child: Text('English'),
-                  value: 'en'
+    return SafeArea(
+      top: false,
+      maintainBottomViewPadding: true,
+      child: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          actions: [
+            PopupMenuButton(
+              itemBuilder: (_)=><PopupMenuItem<String>>[
+                PopupMenuItem<String>(
+                    child: Text('English'),
+                    value: 'en'
+                ),
+                PopupMenuItem<String>(
+                    child: Text('Spanish'),
+                    value: 'es'
+                ),
+                PopupMenuItem<String>(
+                    child: Text('French'),
+                    value: 'fr'
+                ),
+              ],
+              padding: EdgeInsets.zero,
+              onSelected: (l){
+                context.read<UserModel>().changeAppLanguage(l);
+              },
+              child: Container(
+                child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(8),
+                margin: EdgeInsets.only(right: 8),
               ),
-              PopupMenuItem<String>(
-                  child: Text('Spanish'),
-                  value: 'es'
-              ),
-              PopupMenuItem<String>(
-                  child: Text('French'),
-                  value: 'fr'
-              ),
-            ],
-            padding: EdgeInsets.zero,
-            onSelected: (l){
-              context.read<UserModel>().changeAppLanguage(l);
-            },
-            child: Container(
-              child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(8),
-              margin: EdgeInsets.only(right: 8),
             ),
-          ),
-        ],
-      ),
-      body: WillPopScope(
-        onWillPop: ()async{
-          return false;
-        },
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      width: imageSize,
-                      height: imageSize,
+          ],
+        ),
+        body: WillPopScope(
+          onWillPop: ()async{
+            return false;
+          },
+          child: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Image.asset(
+                        "assets/images/logo.png",
+                        width: imageSize,
+                        height: imageSize,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              if(!isShowKeyBoard)
-                Column(
-                  children: [
-                    Text("Welcome to Facepunch",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
-                    SizedBox(height: 4,),
-                    Text("THE BEST EMPLOYEE CLOCKING SYSTEM",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
-                    SizedBox(height: 4,),
-                  ],
+                if(!isShowKeyBoard)
+                  Column(
+                    children: [
+                      Text("Welcome to Facepunch",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                      SizedBox(height: 4,),
+                      Text("THE BEST EMPLOYEE CLOCKING SYSTEM",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+                      SizedBox(height: 4,),
+                    ],
+                  ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.vertical(top:  Radius.circular(20)),
+                    color: Colors.white
+                  ),
+                  height: MediaQuery.of(context).size.height*(isShowKeyBoard ? 0.5 : 0.6)-kBottomNavigationBarHeight,
+                  child: TabBarView(
+                    children: [
+                      EmployeeLogin(showMessage: _showMessage,),
+                      StartFacePunch(showMessage: _showMessage,),
+                      AdminSignIn(onLogin: onLogin,),
+                    ],
+                    controller: _tabController,
+                    physics: NeverScrollableScrollPhysics(),
+                  ),
                 ),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: Container(
+          height: kBottomNavigationBarHeight,
+          color: Colors.white,
+          alignment: Alignment.topCenter,
+          child: TabBar(
+            controller: _tabController,
+            onTap: (i){
+              setState(() { _pageIndex = i;});
+            },
+            indicatorPadding: EdgeInsets.zero,
+            labelPadding: EdgeInsets.zero,
+            tabs: [
               Container(
+                width: width/3-4,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top:  Radius.circular(20)),
-                  color: Colors.white
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                    color: _pageIndex == EMPLOYEE_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
+                    boxShadow: [shadow]
                 ),
-                height: MediaQuery.of(context).size.height*0.6-kBottomNavigationBarHeight,
-                child: TabBarView(
+                child: Column(
                   children: [
-                    EmployeeLogin(showMessage: _showMessage,),
-                    StartFacePunch(showMessage: _showMessage,),
-                    AdminSignIn(onLogin: onLogin,),
+                    Icon(Icons.keyboard_arrow_up,size: iconSize,),
+                    Text(S.of(context).employeeSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
                   ],
-                  controller: _tabController,
-                  physics: NeverScrollableScrollPhysics(),
                 ),
               ),
+              Container(
+                width: width/3-4,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                    color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white.withOpacity(0.8),
+                    boxShadow: [
+                      shadow,
+                    ]
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.keyboard_arrow_up, size: iconSize,),
+                    Text("Face\nPunch", style: _style, textAlign: TextAlign.center,)
+                  ],
+                ),
+              ),
+              Container(
+                width: width/3-4,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
+                    color: _pageIndex == ADMIN_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
+                    boxShadow: [shadow]
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.keyboard_arrow_up,size: iconSize,),
+                    Text(S.of(context).adminSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
+                  ],
+                ),
+              )
             ],
           ),
         ),
+        backgroundColor: Color(primaryColor),
+        extendBodyBehindAppBar: true,
       ),
-      bottomNavigationBar: Container(
-        height: kBottomNavigationBarHeight+10,
-        color: Colors.white,
-        alignment: Alignment.topCenter,
-        child: TabBar(
-          controller: _tabController,
-          onTap: (i){
-            setState(() { _pageIndex = i;});
-          },
-          indicatorPadding: EdgeInsets.zero,
-          labelPadding: EdgeInsets.zero,
-          tabs: [
-            Container(
-              width: width/3-4,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex == EMPLOYEE_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
-                  boxShadow: [shadow]
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                  Text(S.of(context).employeeSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
-                ],
-              ),
-            ),
-            Container(
-              width: width/3-4,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white.withOpacity(0.8),
-                  boxShadow: [
-                    shadow,
-                  ]
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.keyboard_arrow_up, size: iconSize,),
-                  Text("Face\nPunch", style: _style, textAlign: TextAlign.center,)
-                ],
-              ),
-            ),
-            Container(
-              width: width/3-4,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex == ADMIN_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
-                  boxShadow: [shadow]
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                  Text(S.of(context).adminSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-      backgroundColor: Color(primaryColor),
-      extendBodyBehindAppBar: true,
     );
   }
 }

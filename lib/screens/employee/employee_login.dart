@@ -62,13 +62,11 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   cameraPermission()async{
     var status = await Permission.camera.status;
     if(status.isGranted){
-      setState(() {
-        _isCameraAllowed = true;
-      });
+      if(mounted)setState(() {_isCameraAllowed = true;});
     }else{
       status = await Permission.camera.request();
       if(status.isGranted){
-        setState(() {_isCameraAllowed = true;});
+        if(mounted)setState(() {_isCameraAllowed = true;});
       }
     }
   }

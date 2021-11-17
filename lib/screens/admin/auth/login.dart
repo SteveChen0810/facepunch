@@ -68,93 +68,96 @@ class _AdminSignInState extends State<AdminSignIn> {
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.all(16),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Text(S.of(context).adminSignIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)),
-            SizedBox(height: 20,),
-            Text(S.of(context).email,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
-            TextField(
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: S.of(context).enterYourEmailAddress,
-                  isDense: true,
-                  suffixIconConstraints: BoxConstraints(maxHeight: 20),
-                  suffixIcon: Icon(Icons.email,color: Colors.black87,),
-                  errorText: _emailError
-              ),
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              enabled: !isLoading,
-            ),
-            SizedBox(height: 8,),
-            Text(S.of(context).password,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
-            TextField(
-              decoration: InputDecoration(
-                  border: UnderlineInputBorder(),
-                  enabledBorder: UnderlineInputBorder(),
-                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                  hintText: S.of(context).enterYourPassword,
-                  isDense: true,
-                  suffixIconConstraints: BoxConstraints(maxHeight: 20),
-                  suffixIcon: Icon(Icons.lock,color: Colors.black87,),
-                  errorText: _passwordError
-              ),
-              controller: _password,
-              enabled: !isLoading,
-              enableSuggestions: false,
-              keyboardType: TextInputType.number,
-              maxLength: 4,
-              obscureText: true,
-              autocorrect: false,
-            ),
-            Row(
-              children: [
-                Checkbox(
-                  value: isRememberMe,
-                  onChanged: (v){
-                    if(!isLoading)setState(() {isRememberMe = !isRememberMe;});
-                  },
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      child: GestureDetector(
+        onTap: ()=>FocusScope.of(context).requestFocus(FocusNode()),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(child: Text(S.of(context).adminSignIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)),
+              SizedBox(height: 20,),
+              Text(S.of(context).email,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
+              TextField(
+                decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    enabledBorder: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                    hintText: S.of(context).enterYourEmailAddress,
+                    isDense: true,
+                    suffixIconConstraints: BoxConstraints(maxHeight: 20),
+                    suffixIcon: Icon(Icons.email,color: Colors.black87,),
+                    errorText: _emailError
                 ),
-                InkWell(
-                    onTap: (){
+                controller: _email,
+                keyboardType: TextInputType.emailAddress,
+                enabled: !isLoading,
+              ),
+              SizedBox(height: 8,),
+              Text(S.of(context).password,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
+              TextField(
+                decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    enabledBorder: UnderlineInputBorder(),
+                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                    hintText: S.of(context).enterYourPassword,
+                    isDense: true,
+                    suffixIconConstraints: BoxConstraints(maxHeight: 20),
+                    suffixIcon: Icon(Icons.lock,color: Colors.black87,),
+                    errorText: _passwordError
+                ),
+                controller: _password,
+                enabled: !isLoading,
+                enableSuggestions: false,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                obscureText: true,
+                autocorrect: false,
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: isRememberMe,
+                    onChanged: (v){
                       if(!isLoading)setState(() {isRememberMe = !isRememberMe;});
                     },
-                    child: Text(S.of(context).rememberMe)
-                )
-              ],
-            ),
-            Center(
-              child: InkWell(
-                  onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>RecoveryPasswordScreen())),
-                  child: Text(S.of(context).cannotLogin,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,decoration: TextDecoration.underline,),)
-              ),
-            ),
-            SizedBox(height: 10,),
-            Center(
-              child: ButtonTheme(
-                minWidth: MediaQuery.of(context).size.width-40,
-                padding: EdgeInsets.all(8),
-                child: RaisedButton(
-                  child: isLoading?SizedBox(
-                      height: 28,
-                      width: 28,
-                      child: CircularProgressIndicator(backgroundColor: Colors.white,)
-                  ):Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(S.of(context).login.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  onPressed: loginWithEmail,
-                  color: Colors.black87,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  InkWell(
+                      onTap: (){
+                        if(!isLoading)setState(() {isRememberMe = !isRememberMe;});
+                      },
+                      child: Text(S.of(context).rememberMe)
+                  )
+                ],
+              ),
+              Center(
+                child: InkWell(
+                    onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>RecoveryPasswordScreen())),
+                    child: Text(S.of(context).cannotLogin,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,decoration: TextDecoration.underline,),)
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 10,),
+              Center(
+                child: ButtonTheme(
+                  minWidth: MediaQuery.of(context).size.width-40,
+                  padding: EdgeInsets.all(8),
+                  child: RaisedButton(
+                    child: isLoading?SizedBox(
+                        height: 28,
+                        width: 28,
+                        child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                    ):Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(S.of(context).login.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                    ),
+                    onPressed: loginWithEmail,
+                    color: Colors.black87,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
