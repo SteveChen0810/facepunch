@@ -1,39 +1,31 @@
+import 'base_model.dart';
 import 'user_model.dart';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'app_const.dart';
 import 'package:localstorage/localstorage.dart';
 
-class CompanyModel extends ChangeNotifier{
+class CompanyModel extends BaseProvider{
   final LocalStorage storage = LocalStorage('companies');
-  Company myCompany;
-  CompanySettings myCompanySettings;
+  Company? myCompany;
+  CompanySettings? myCompanySettings;
   List<User> users = [];
 
   Future<bool> getMyCompany(int companyId)async{
     await getCompanyFromLocal();
     await getCompanySettingsFromLocal();
-    if(myCompany==null || myCompany.id!=companyId || myCompanySettings==null){
+    if(myCompany?.id != companyId || myCompanySettings==null){
       await getCompanyFromServer();
       await getCompanySettingsFromServer();
     }else{
       getCompanyFromServer();
       getCompanySettingsFromServer();
     }
-    return myCompany!=null && myCompanySettings!=null;
+    return myCompany != null && myCompanySettings!=null;
   }
 
   getCompanyFromServer()async{
     try{
-      var res = await http.get(
-          AppConst.getMyCompany,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-      );
+      final res = await sendGetRequest(AppConst.getMyCompany, GlobalData.token);
       print("[CompanyModel.getCompanyFromServer] ${res.body}");
       if(res.statusCode==200){
         myCompany = Company.fromJson(jsonDecode(res.body));
@@ -44,15 +36,17 @@ class CompanyModel extends ChangeNotifier{
     }
     notifyListeners();
   }
+
   saveCompanyToLocal()async{
     try{
       bool storageReady = await storage.ready;
       if(storageReady)
-        await storage.setItem('my_company',myCompany.toJson());
+        await storage.setItem('my_company',myCompany?.toJson());
     }catch(e){
       print("[CompanyModel.saveCompanyToLocal] $e");
     }
   }
+
   getCompanyFromLocal()async{
     try{
       bool storageReady = await storage.ready;
@@ -68,26 +62,18 @@ class CompanyModel extends ChangeNotifier{
     notifyListeners();
   }
 
-  Future<String> createEditEmployee(User user,String photo)async{
-    String result = 'Oops, Unknown Errors!';
+  Future<String?> createEditEmployee(User user, String? photo)async{
+    String? result = 'Oops, Unknown Errors!';
     try{
-      user.companyId = myCompany.id;
+      user.companyId = myCompany?.id;
       var userData = user.toJson();
-      if(photo!=null){userData['photo'] = photo;}
-      var res = await http.post(
-          AppConst.addEditEmployee,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode(userData)
-      );
+      if(photo != null){ userData['photo'] = photo; }
+      final res = await sendPostRequest(AppConst.addEditEmployee, GlobalData.token, userData);
       print("[CompanyModel.createEditEmployee] ${res.body}");
       if(res.statusCode==200){
-        if(user.id!=null){
-          user = users.firstWhere((u) => u.id == user.id,orElse: ()=>null);
-          Punch punch = user.lastPunch;
+        if(user.id != null){
+          user = users.firstWhere((u) => u.id == user.id);
+          Punch? punch = user.lastPunch;
           users.removeWhere((u) => u.id == user.id);
           user = User.fromJson(jsonDecode(res.body));
           user.lastPunch = punch;
@@ -107,16 +93,9 @@ class CompanyModel extends ChangeNotifier{
     return result;
   }
 
-  Future<String> getCompanyUsers()async{
+  Future<String?> getCompanyUsers()async{
     try{
-      var res = await http.get(
-          AppConst.getCompanyEmployees,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-      );
+      var res = await sendGetRequest(AppConst.getCompanyEmployees, GlobalData.token);
       print("[CompanyModel.getCompanyUsers] ${res.body}");
       if(res.statusCode==200){
         users.clear();
@@ -136,15 +115,7 @@ class CompanyModel extends ChangeNotifier{
   Future<String> deleteEmployee(int userId)async{
     String result = 'Oops, Unknown Errors!';
     try{
-      var res = await http.post(
-        AppConst.deleteEmployee,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({'user_id':userId})
-      );
+      var res = await sendPostRequest( AppConst.deleteEmployee, GlobalData.token, {'user_id' : userId});
       print("[CompanyModel.deleteEmployee] ${res.body}");
       if(res.statusCode==200){
         users.removeWhere((u) => u.id==userId);
@@ -159,29 +130,23 @@ class CompanyModel extends ChangeNotifier{
     return result;
   }
 
-  Future<String> updateCompany({String name, String address1, String address2,
-    String country, String state, String city, String postalCode, String phone})async{
-    String result = 'Oops, Unknown Errors!';
+  Future<String?> updateCompany({required String name, required String address1, required String address2,
+    required String country, required String state, required String city, required String postalCode, required String phone})async{
+    String? result = 'Oops, Unknown Errors!';
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.updateCompany,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode(
-              {
-                'name':name,
-                'address1' : address1,
-                'address2' : address2,
-                'city' : city,
-                'country' : country,
-                'state' : state,
-                'postal_code' : postalCode,
-                'phone' : phone
-              }
-          )
+          GlobalData.token,
+          {
+            'name':name,
+            'address1' : address1,
+            'address2' : address2,
+            'city' : city,
+            'country' : country,
+            'state' : state,
+            'postal_code' : postalCode,
+            'phone' : phone
+          }
       );
       print("[CompanyModel.updateCompany] ${res.body}");
       if(res.statusCode==200){
@@ -197,16 +162,9 @@ class CompanyModel extends ChangeNotifier{
     return result;
   }
 
-  Future<String> getCompanySettingsFromServer()async{
+  Future<String?> getCompanySettingsFromServer()async{
     try{
-      var res = await http.get(
-          AppConst.getCompanySettings,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          }
-      );
+      var res = await sendGetRequest(AppConst.getCompanySettings, GlobalData.token);
       print("[CompanyModel.getCompanySettings] ${res.body}");
       if(res.statusCode==200){
         myCompanySettings = CompanySettings.fromJson(jsonDecode(res.body));
@@ -220,6 +178,7 @@ class CompanyModel extends ChangeNotifier{
       return e.toString();
     }
   }
+
   getCompanySettingsFromLocal()async{
     try{
       bool storageReady = await storage.ready;
@@ -235,28 +194,21 @@ class CompanyModel extends ChangeNotifier{
     }
     notifyListeners();
   }
+
   saveCompanySettingsToLocal()async{
     try{
       bool storageReady = await storage.ready;
       if(storageReady)
-        await storage.setItem('company_settings', myCompanySettings.toJson());
+        await storage.setItem('company_settings', myCompanySettings?.toJson());
       notifyListeners();
     }catch(e){
       print("[CompanyModel.saveCompanySettingsToLocal] $e");
     }
   }
 
-  Future<String> updateCompanySetting(CompanySettings settings)async{
+  Future<String?> updateCompanySetting(CompanySettings settings)async{
     try{
-      var res = await http.post(
-          AppConst.updateCompanySettings,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode(settings.toJson())
-      );
+      var res = await sendPostRequest(AppConst.updateCompanySettings, GlobalData.token, settings.toJson());
       print("[CompanyModel.updateCompanySetting] ${res.body}");
       if(res.statusCode==200){
         myCompanySettings = settings;
@@ -271,22 +223,19 @@ class CompanyModel extends ChangeNotifier{
     }
   }
 
-  Future<String> punchByAdmin({int userId,String action,double longitude,double latitude, String punchTime})async{
+  Future<String?> punchByAdmin({required int userId, required String action, required String punchTime,
+    double? longitude, double? latitude})async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.punchByAdmin,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode({
+          GlobalData.token,
+          {
             'user_id':userId,
             'action':action,
             'longitude':longitude,
             'latitude':latitude,
             'punch_time':punchTime,
-          })
+          }
       );
       print("[CompanyModel.punchByAdmin] ${res.body}");
       if(res.statusCode==200){
@@ -305,12 +254,12 @@ class CompanyModel extends ChangeNotifier{
 }
 
 class Company {
-  int id;
-  int adminId;
-  String name;
-  int plan;
-  String createdAt;
-  String updatedAt;
+  int? id;
+  int? adminId;
+  String? name;
+  int? plan;
+  String? createdAt;
+  String? updatedAt;
 
   Company({
     this.id,
@@ -347,23 +296,23 @@ class Company {
 }
 
 class CompanySettings{
-  String lowValue;
-  String lowColor;
-  String mediumColor;
-  String highValue;
-  String highColor;
-  String lastUpdated;
-  String reportTime;
-  bool hasNFCHarvest;
-  bool hasNFCReport;
-  bool hasHarvestReport;
-  bool hasTimeSheetRevision;
-  bool hasTimeSheetSchedule;
-  bool hasGeolocationPunch;
-  bool useOwnData;
+  String? lowValue;
+  String? lowColor;
+  String? mediumColor;
+  String? highValue;
+  String? highColor;
+  String? lastUpdated;
+  String? reportTime;
+  bool? hasNFCHarvest;
+  bool? hasNFCReport;
+  bool? hasHarvestReport;
+  bool? hasTimeSheetRevision;
+  bool? hasTimeSheetSchedule;
+  bool? hasGeolocationPunch;
+  bool? useOwnData;
 
-  bool receivePunchNotification;
-  bool receiveRevisionNotification;
+  bool? receivePunchNotification;
+  bool? receiveRevisionNotification;
 
 
 
@@ -411,23 +360,23 @@ class CompanySettings{
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if(this.lowValue!=null)data['low_value'] = this.lowValue;
-    if(this.lowColor!=null)data['low_color'] = this.lowColor;
-    if(this.mediumColor!=null)data['medium_color'] = this.mediumColor;
-    if(this.highValue!=null)data['high_value'] = this.highValue;
-    if(this.highColor!=null)data['high_color'] = this.highColor;
-    if(this.reportTime!=null)data['report_time'] = this.reportTime;
-    if(this.lastUpdated!=null)data['last_updated'] = this.lastUpdated;
-    if(this.receivePunchNotification!=null)data['receive_punch_notification'] = this.receivePunchNotification?'1':'0';
-    if(this.receiveRevisionNotification!=null)data['receive_revision_notification'] = this.receiveRevisionNotification?'1':'0';
+    if(this.lowValue != null)data['low_value'] = this.lowValue;
+    if(this.lowColor != null)data['low_color'] = this.lowColor;
+    if(this.mediumColor != null)data['medium_color'] = this.mediumColor;
+    if(this.highValue != null)data['high_value'] = this.highValue;
+    if(this.highColor != null)data['high_color'] = this.highColor;
+    if(this.reportTime != null)data['report_time'] = this.reportTime;
+    if(this.lastUpdated != null)data['last_updated'] = this.lastUpdated;
+    if(this.receivePunchNotification != null)data['receive_punch_notification'] = this.receivePunchNotification!?'1':'0';
+    if(this.receiveRevisionNotification != null)data['receive_revision_notification'] = this.receiveRevisionNotification!?'1':'0';
 
-    if(this.hasNFCHarvest!=null)data['has_nfc_harvest'] = this.hasNFCHarvest?'1':'0';
-    if(this.hasNFCReport!=null)data['has_nfc_report'] = this.hasNFCReport?'1':'0';
-    if(this.hasHarvestReport!=null)data['has_harvest_report'] = this.hasHarvestReport?'1':'0';
-    if(this.hasTimeSheetRevision!=null)data['has_time_sheet_revision'] = this.hasTimeSheetRevision?'1':'0';
-    if(this.hasTimeSheetSchedule!=null)data['has_time_sheet_schedule'] = this.hasTimeSheetSchedule?'1':'0';
-    if(this.hasGeolocationPunch!=null)data['has_geolocation_punch'] = this.hasGeolocationPunch?'1':'0';
-    if(this.useOwnData!=null)data['use_own_data'] = this.useOwnData?'1':'0';
+    if(this.hasNFCHarvest != null)data['has_nfc_harvest'] = this.hasNFCHarvest!?'1':'0';
+    if(this.hasNFCReport != null)data['has_nfc_report'] = this.hasNFCReport!?'1':'0';
+    if(this.hasHarvestReport != null)data['has_harvest_report'] = this.hasHarvestReport!?'1':'0';
+    if(this.hasTimeSheetRevision != null)data['has_time_sheet_revision'] = this.hasTimeSheetRevision!?'1':'0';
+    if(this.hasTimeSheetSchedule != null)data['has_time_sheet_schedule'] = this.hasTimeSheetSchedule!?'1':'0';
+    if(this.hasGeolocationPunch != null)data['has_geolocation_punch'] = this.hasGeolocationPunch!?'1':'0';
+    if(this.useOwnData != null)data['use_own_data'] = this.useOwnData!?'1':'0';
 
     return data;
   }

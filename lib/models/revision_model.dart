@@ -1,26 +1,23 @@
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'base_model.dart';
+import 'user_model.dart';
+import 'work_model.dart';
 import 'dart:convert';
 import 'app_const.dart';
 
-class RevisionModel with ChangeNotifier{
+class RevisionModel extends BaseModel {
 
-  Future<String> sendPunchRevisionRequest({int punchId, String newValue, String oldValue, String description})async{
+  Future<String?> sendPunchRevisionRequest({required int punchId, required String newValue,
+    required String oldValue, required String description})async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.sendTimeRevisionRequest,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: {
-            'punch_id':punchId.toString(),
-            'new_value': newValue,
-            'old_value': oldValue,
-            'description': description
+          GlobalData.token,
+          {
+            'punch_id' : punchId.toString(),
+            'new_value' : newValue,
+            'old_value' : oldValue,
+            'description' : description
           }
       );
       print("[RevisionModel.sendPunchRevisionRequest] ${res.body}");
@@ -35,21 +32,17 @@ class RevisionModel with ChangeNotifier{
     }
   }
 
-  Future<String> sendBreakRevisionRequest({EmployeeBreak newBreak, EmployeeBreak oldBreak, String description})async{
+  Future<String?> sendBreakRevisionRequest({required EmployeeBreak newBreak, required EmployeeBreak oldBreak, required String description})async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.sendTimeRevisionRequest,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode({
+          GlobalData.token,
+          {
             'break_id':oldBreak.id,
             'new_value': newBreak.toJson(),
             'old_value': oldBreak.toJson(),
             'description': description
-          })
+          }
       );
       print("[RevisionModel.sendBreakRevisionRequest] ${res.body}");
       if(res.statusCode==200){
@@ -63,21 +56,17 @@ class RevisionModel with ChangeNotifier{
     }
   }
 
-  Future<String> sendWorkRevisionRequest({WorkHistory newWork, WorkHistory oldWork, String description})async{
+  Future<String?> sendWorkRevisionRequest({required WorkHistory newWork, required WorkHistory oldWork, required String description})async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.sendTimeRevisionRequest,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: jsonEncode({
-            'work_id': oldWork.id,
-            'new_value': newWork.toJson(),
-            'old_value': oldWork.toJson(),
-            'description': description
-          })
+          GlobalData.token,
+          {
+          'work_id': oldWork.id,
+          'new_value': newWork.toJson(),
+          'old_value': oldWork.toJson(),
+          'description': description
+          }
       );
       print("[RevisionModel.sendWorkRevisionRequest] ${res.body}");
       if(res.statusCode==200){
@@ -91,21 +80,17 @@ class RevisionModel with ChangeNotifier{
     }
   }
 
-  Future<String> sendScheduleRevision({WorkSchedule newSchedule, WorkSchedule oldSchedule, String description})async{
+  Future<String?> sendScheduleRevision({required WorkSchedule newSchedule, required WorkSchedule oldSchedule, required String description})async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.sendTimeRevisionRequest,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({
+        GlobalData.token,
+        {
           'schedule_id':oldSchedule.id,
           'new_value':newSchedule.toJson(),
           'old_value':oldSchedule.toJson(),
           'description':description
-        }),
+        },
       );
       print('[RevisionModel.sendScheduleRevision]${res.body}');
       if(res.statusCode==200){
@@ -119,21 +104,17 @@ class RevisionModel with ChangeNotifier{
     }
   }
 
-  Future<String> sendCallRevision({EmployeeCall newSchedule, EmployeeCall oldSchedule, String description})async{
+  Future<String?> sendCallRevision({required EmployeeCall newSchedule, required EmployeeCall oldSchedule, required String description})async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.sendTimeRevisionRequest,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({
+        GlobalData.token,
+        {
           'call_id':oldSchedule.id,
           'new_value':newSchedule.toJson(),
           'old_value':oldSchedule.toJson(),
           'description':description
-        }),
+        },
       );
       print('[RevisionModel.sendCallRevision]${res.body}');
       if(res.statusCode==200){
@@ -148,27 +129,27 @@ class RevisionModel with ChangeNotifier{
   }
 }
 
-class Revision{
-  int id;
-  int userId;
-  int punchId;
-  int workId;
-  int scheduleId;
-  int callId;
-  int breakId;
-  String type;
+class Revision extends BaseModel{
+  int? id;
+  int? userId;
+  int? punchId;
+  int? workId;
+  int? scheduleId;
+  int? callId;
+  int? breakId;
+  String? type;
   var oldValue;
   var newValue;
-  User user;
-  Punch punch;
-  WorkHistory work;
-  WorkSchedule schedule;
-  EmployeeCall call;
-  EmployeeBreak employeeBreak;
-  String status;
-  String description;
-  String createdAt;
-  String updatedAt;
+  User? user;
+  Punch? punch;
+  WorkHistory? work;
+  WorkSchedule? schedule;
+  EmployeeCall? call;
+  EmployeeBreak? employeeBreak;
+  String? status;
+  String? description;
+  String? createdAt;
+  String? updatedAt;
 
   Revision({
     this.id,
@@ -229,8 +210,8 @@ class Revision{
     data['status'] = this.status;
     data['old_value'] = this.oldValue;
     data['new_value'] = this.newValue;
-    if(this.punch!=null)data['punch'] = this.punch.toJson();
-    if(this.user!=null)data['user'] = this.user.toJson();
+    data['punch'] = this.punch?.toJson();
+    data['user'] = this.user?.toJson();
     data['description'] = this.description;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
@@ -248,19 +229,15 @@ class Revision{
     return valid;
   }
 
-  Future<String> addDescription(String description)async{
+  Future<String?> addDescription(String description)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.addRevisionDescription,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({
+        GlobalData.token,
+        {
           'id': id,
           'description': description
-        }),
+        },
       );
       print('[Revision.addDescription]${res.body}');
       if(res.statusCode==200){
@@ -275,18 +252,12 @@ class Revision{
     }
   }
 
-  Future<String> accept()async{
+  Future<String?> accept()async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.acceptRevision,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: {
-            'id':id.toString()
-          }
+          GlobalData.token,
+          {'id':id.toString()}
       );
       print("[Revision.accept] ${res.body}");
       if(res.statusCode==200){
@@ -301,18 +272,12 @@ class Revision{
     }
   }
 
-  Future<String> decline()async{
+  Future<String?> decline()async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.declineRevision,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: {
-            'id':id.toString()
-          }
+          GlobalData.token,
+          { 'id':id.toString() }
       );
       print("[Revision.decline] ${res.body}");
       if(res.statusCode==200){
@@ -327,18 +292,12 @@ class Revision{
     }
   }
 
-  Future<String> delete()async{
+  Future<String?> delete()async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.deleteRevision,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          },
-          body: {
-            'id':id.toString()
-          }
+          GlobalData.token,
+          { 'id':id.toString() }
       );
       print("[Revision.delete] ${res.body}");
       if(res.statusCode==200){

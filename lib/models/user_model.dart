@@ -1,38 +1,38 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
+import '/lang/l10n.dart';
+import 'base_model.dart';
+import 'revision_model.dart';
+import '/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'app_const.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'package:collection/collection.dart';
 import 'work_model.dart';
 
 
-class UserModel with ChangeNotifier{
-  User user;
+class UserModel extends BaseProvider{
+  User? user;
   final LocalStorage storage = LocalStorage('face_punch_user');
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   String locale = 'en';
   double yearTotalHours = 0;
 
-  Future<User> getUserFromLocal()async{
+  Future<User?> getUserFromLocal()async{
     try{
       bool storageReady = await storage.ready;
       if(storageReady){
         var json = await storage.getItem('user');
         if(json!=null){
           user = User.fromJson(json);
-          user = await getUserInfoFromServer(user.token);
+          user = await getUserInfoFromServer(user!.token!);
           if(user != null){
-            if(user.language=='Spanish'){
+            if(user?.language == 'Spanish'){
               locale = 'es';
-            }else if(user.language=='French'){
+            }else if(user?.language=='French'){
               locale = 'fr';
             }
-            GlobalData.token = user.token;
+            GlobalData.token = user!.token!;
           }
         }
       }
@@ -47,10 +47,10 @@ class UserModel with ChangeNotifier{
     try{
       bool storageReady = await storage.ready;
       if(storageReady)
-        await storage.setItem('user', user.toJson());
-      if(user.language=='Spanish'){
+        await storage.setItem('user', user?.toJson());
+      if(user?.language=='Spanish'){
         locale = 'es';
-      }else if(user.language=='French'){
+      }else if(user?.language=='French'){
         locale = 'fr';
       }else{
         locale = 'en';
@@ -61,30 +61,27 @@ class UserModel with ChangeNotifier{
     }
   }
 
-  Future<String> adminLogin({String email,String password, bool isRememberMe})async{
-    String result = 'Oops, Unknown Errors!';
+  Future<String?> adminLogin(String email, String password, bool isRememberMe)async{
+    String? result = 'Oops, Unknown Errors!';
     try{
-      String deviceToken = await _firebaseMessaging.getToken();
-      var res = await http.post(
+      String? deviceToken = await _firebaseMessaging.getToken();
+      var res = await sendPostRequest(
           AppConst.adminLogin,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-          },
-          body: {
+          null,
+          {
             'email':email,
             'password':password,
             'firebase_token': deviceToken??''
           }
       );
       print("[UserModel.adminLogin] ${res.body}");
-      if(res.statusCode==200){
+      if(res.statusCode == 200){
         user = User.fromJson(jsonDecode(res.body));
-        GlobalData.token = user.token;
+        GlobalData.token = user!.token!;
         if(isRememberMe)await saveUserToLocal();
-        result = null;
+        return null;
       }else{
-        result =  jsonDecode(res.body)['message'].toString();
+        return jsonDecode(res.body)['message'];
       }
     }catch(e){
       print("[UserModel.adminLogin] $e");
@@ -92,17 +89,14 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> adminRegister(String email,String password,String fName,String lName)async{
+  Future<String?> adminRegister(String email,String password,String fName,String lName)async{
     String result = 'Oops, Unknown Errors!';
     try{
-      String deviceToken  = await _firebaseMessaging.getToken();
-      var res = await http.post(
+      String? deviceToken  = await _firebaseMessaging.getToken();
+      var res = await sendPostRequest(
           AppConst.adminRegister,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-          },
-          body: {
+          null,
+          {
             'email':email,
             'password':password,
             'first_name':fName,
@@ -113,11 +107,11 @@ class UserModel with ChangeNotifier{
       print("[UserModel.adminRegister] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
-        GlobalData.token = user.token;
+        GlobalData.token = user!.token!;
         await saveUserToLocal();
-        result =  null;
+        return null;
       }else{
-        result =  jsonDecode(res.body)['message'].toString();
+        return jsonDecode(res.body)['message'];
       }
     }catch(e){
       print("[UserModel.adminRegister] $e");
@@ -137,17 +131,12 @@ class UserModel with ChangeNotifier{
     }
   }
 
-  Future<String> recoverPassword(String email)async{
+  Future<String?> recoverPassword(String email)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.recoverPassword,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-          },
-          body: {
-            'email':email
-          }
+          null,
+          { 'email':email }
       );
       print("[UserModel.recoverPassword] ${res.body}");
       if(res.statusCode==200){
@@ -161,29 +150,25 @@ class UserModel with ChangeNotifier{
     }
   }
 
-  Future<String> verifyEmailAddress(String number)async{
+  Future<String?> verifyEmailAddress(String number)async{
     String result = 'Oops, Unknown Errors!';
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.emailVerify,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+user.token
-          },
-          body: {
-            'email' : user.email,
+          user?.token,
+          {
+            'email' : user?.email,
             'verify_number' : number,
           }
       );
       print("[UserModel.verifyEmailAddress] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
-        GlobalData.token = user.token;
+        GlobalData.token = user!.token!;
         await saveUserToLocal();
-        result = null;
+        return null;
       }else{
-        result =  jsonDecode(res.body)['message'].toString();
+        return jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
       print("[UserModel.verifyEmailAddress] $e");
@@ -191,22 +176,18 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> sendVerifyEmailAgain()async{
+  Future<String?> sendVerifyEmailAgain()async{
     String result = 'Oops, Unknown Errors!';
     try{
-      var res = await http.get(
+      var res = await sendGetRequest(
           AppConst.sendVerifyAgain,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+user.token
-          }
+          user?.token
       );
       print("[UserModel.sendVerifyEmailAgain] ${res.body}");
       if(res.statusCode==200){
-        user.emailVerifyNumber = jsonDecode(res.body)['number'];
+        user?.emailVerifyNumber = jsonDecode(res.body)['number'];
         await saveUserToLocal();
-        result = null;
+        return null;
       }else{
         result =  jsonDecode(res.body)['message'].toString();
       }
@@ -216,17 +197,13 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> updateAdmin({String email, String newPassword, String oldPassword, String fName, String lName})async{
+  Future<String?> updateAdmin({required String email, String? newPassword, String? oldPassword, required String fName, required String lName})async{
     String result = 'Oops, Unknown Errors!';
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.updateAdmin,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+user.token
-          },
-          body: {
+          user?.token,
+          {
             'email':email,
             'new_password' : newPassword,
             'old_password' : oldPassword,
@@ -237,11 +214,11 @@ class UserModel with ChangeNotifier{
       print("[UserModel.updateUser] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
-        GlobalData.token = user.token;
+        GlobalData.token = user!.token!;
         await saveUserToLocal();
-        result =  null;
+        return null;
       }else{
-        result =  jsonDecode(res.body)['message'].toString();
+        return jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
       print("[UserModel.updateUser] $e");
@@ -249,18 +226,15 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> loginWithFace(String photo)async{
+  Future<String?> loginWithFace(String photo)async{
     String result = 'Oops, Unknown Errors!';
     try{
-      String deviceToken = await _firebaseMessaging.getToken();
+      String? deviceToken = await _firebaseMessaging.getToken();
       print("[UserModel.loginWithFace.deviceToken] $deviceToken");
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.loginWithFace,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-          },
-          body: {
+          null,
+          {
             'photo':photo,
             'firebase_token': deviceToken??''
           }
@@ -268,11 +242,11 @@ class UserModel with ChangeNotifier{
       print("[UserModel.loginWithFace] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
-        GlobalData.token = user.token;
+        GlobalData.token = user!.token!;
         await saveUserToLocal();
-        result = null;
+        return null;
       }else{
-        result = jsonDecode(res.body)['message'];
+        return jsonDecode(res.body)['message'];
       }
     }catch(e){
       print("[UserModel.loginWithFace] $e");
@@ -280,20 +254,17 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<dynamic> punchWithFace({String photo,double longitude, double latitude})async{
+  Future<dynamic> punchWithFace({required String photo, double? longitude, double? latitude})async{
     String result = 'Oops, Unknown Errors!';
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.punchWithFace,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-          },
-          body: jsonEncode({
+          null,
+          {
             'photo':photo,
             'longitude':longitude,
             'latitude':latitude
-          })
+          }
       );
       print("[UserModel.punchWithFace] ${res.body}");
       if(res.statusCode==200){
@@ -307,29 +278,25 @@ class UserModel with ChangeNotifier{
     return result;
   }
 
-  Future<String> getUserTimeSheetData(DateTime date)async{
+  Future<String?> getUserTimeSheetData(DateTime date)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.getTimeSheetData,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer ${user.token}'
-          },
-        body: {'date': date.toString()}
+          user?.token,
+          {'date': date.toString()}
       );
       print("[UserModel.getUserTimeSheetData] ${res.body}");
       var body = jsonDecode(res.body);
       if(res.statusCode==200){
         List<Punch> punches = [];
         for(var punch in body['punches']) punches.add(Punch.fromJson(punch));
-        user.punches = punches;
+        user?.punches = punches;
         List<WorkHistory> works = [];
         for(var work in body['works']) works.add(WorkHistory.fromJson(work));
-        user.works = works;
+        user?.works = works;
         List<EmployeeBreak> breaks = [];
         for(var b in body['breaks']) breaks.add(EmployeeBreak.fromJson(b));
-        user.breaks = breaks;
+        user?.breaks = breaks;
         notifyListeners();
         return null;
       }else{
@@ -341,16 +308,12 @@ class UserModel with ChangeNotifier{
     }
   }
 
-  Future<String> getEmployeeTimeSheetData(DateTime date, User employee)async{
+  Future<String?> getEmployeeTimeSheetData(DateTime date, User employee)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.getTimeSheetData,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer ${user.token}'
-          },
-        body: {'date': date.toString(),'user_id': employee.id.toString()}
+          user?.token,
+          {'date': date.toString(),'user_id': employee.id.toString()}
       );
       print("[UserModel.getEmployeeTimeSheetData] ${res.body}");
       var body = jsonDecode(res.body);
@@ -377,24 +340,20 @@ class UserModel with ChangeNotifier{
     }
   }
 
-  Future<String> notificationSetting()async{
+  Future<String?> notificationSetting()async{
     try{
-      String token = "disabled";
-      if(user.firebaseToken==null || user.firebaseToken=="disabled"){
+      String? token = "disabled";
+      if(user?.firebaseToken == null || user?.firebaseToken == "disabled"){
         token = await _firebaseMessaging.getToken();
       }
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.notificationSetting,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+user.token
-        },
-        body: jsonEncode({'token':token}),
+        user?.token,
+        {'token':token},
       );
       print("[UserModel.notificationSetting] ${res.body}");
       if(res.statusCode==200){
-        user.firebaseToken = token;
+        user?.firebaseToken = token;
         saveUserToLocal();
         return null;
       }else{
@@ -411,15 +370,11 @@ class UserModel with ChangeNotifier{
     notifyListeners();
   }
 
-  Future<String> getYearTotalHours()async{
+  Future<String?> getYearTotalHours()async{
     try{
-      var res = await http.get(
+      var res = await sendGetRequest(
           AppConst.getYearTotalHours,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer ${user.token}'
-          },
+          user?.token,
       );
       print("[UserModel.getYearTotalHours] ${res.body}");
       var body = jsonDecode(res.body);
@@ -436,16 +391,9 @@ class UserModel with ChangeNotifier{
     }
   }
 
-  Future<User> getUserInfoFromServer(String token)async{
+  Future<User?> getUserInfoFromServer(String token)async{
     try{
-      var res = await http.get(
-        AppConst.getUserInfo,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/x-www-form-urlencoded',
-          'Authorization':'Bearer $token'
-        },
-      );
+      var res = await sendGetRequest( AppConst.getUserInfo, token);
       print('[UserModel.getUserInfoFromServer]${res.body}');
       if(res.statusCode == 200){
        return User.fromJson(jsonDecode(res.body));
@@ -456,15 +404,9 @@ class UserModel with ChangeNotifier{
     return null;
   }
 
-  Future<Map<String, dynamic>> getAppVersions()async{
+  Future<Map<String, dynamic>?> getAppVersions()async{
     try{
-      var res = await http.get(
-        AppConst.getAppVersions,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/x-www-form-urlencoded',
-        },
-      );
+      var res = await sendGetRequest( AppConst.getAppVersions, null);
       print('[UserModel.getAppVersions]${res.body}');
       if(res.statusCode == 200){
         return jsonDecode(res.body);
@@ -476,40 +418,40 @@ class UserModel with ChangeNotifier{
   }
 }
 
-class User {
-  int id;
-  String name;
-  String email;
-  String emailVerifiedAt;
-  String firstName;
-  String lastName;
-  String phone;
-  String pin;
-  List<String> projects;
-  String employeeCode;
-  String start;
-  String salary;
-  String birthday;
-  String address1;
-  String address2;
-  String city;
-  String country;
-  String state;
-  String postalCode;
-  String language;
-  String avatar;
-  String role;
-  String type;
-  String firebaseToken;
-  String emailVerifyNumber;
-  int companyId;
-  bool hasAutoBreak = true;
-  String nfc;
-  bool canNTCTracking = true;
-  bool sendScheduleNotification = true;
-  String createdAt;
-  String updatedAt;
-  bool active = true;
+class User extends BaseModel{
+  int? id;
+  String? name;
+  String? email;
+  String? emailVerifiedAt;
+  String? firstName;
+  String? lastName;
+  String? phone;
+  String? pin;
+  List<String>? projects;
+  String? employeeCode;
+  String? start;
+  String? salary;
+  String? birthday;
+  String? address1;
+  String? address2;
+  String? city;
+  String? country;
+  String? state;
+  String? postalCode;
+  String? language;
+  String? avatar;
+  String? role;
+  String? type;
+  String? firebaseToken;
+  String? emailVerifyNumber;
+  int? companyId;
+  bool? hasAutoBreak = true;
+  String? nfc;
+  bool? canNTCTracking = true;
+  bool? sendScheduleNotification = true;
+  String? createdAt;
+  String? updatedAt;
+  bool? active = true;
 
   List<Punch> punches = [];
   List<WorkHistory> works = [];
@@ -517,8 +459,8 @@ class User {
   List<WorkSchedule> schedules = [];
   List<EmployeeCall> calls = [];
   List<Revision> revisions = [];
-  Punch lastPunch;
-  String token;
+  Punch? lastPunch;
+  String? token;
 
   User({
     this.id,
@@ -546,7 +488,6 @@ class User {
     this.emailVerifyNumber,
     this.companyId,
     this.employeeCode,
-    this.token,
     this.nfc,
     this.lastPunch,
     this.createdAt,
@@ -640,19 +581,19 @@ class User {
     data['token'] = this.token;
     data['nfc'] = this.nfc;
     if(this.canNTCTracking!=null){
-      data['can_nfc_tracking'] = this.canNTCTracking?1:0;
+      data['can_nfc_tracking'] = this.canNTCTracking!?1:0;
     }
     if(this.sendScheduleNotification!=null){
-      data['send_schedule_notification'] = this.sendScheduleNotification?1:0;
+      data['send_schedule_notification'] = this.sendScheduleNotification!?1:0;
     }
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['projects'] = this.projects;
     if(this.hasAutoBreak != null){
-      data['has_auto_break'] = this.hasAutoBreak?1:0;
+      data['has_auto_break'] = this.hasAutoBreak!?1:0;
     }
     if(this.active != null){
-      data['active'] = this.active?1:0;
+      data['active'] = this.active!?1:0;
     }
     return data;
   }
@@ -661,8 +602,8 @@ class User {
     return '$firstName $lastName';
   }
 
-  Punch getTodayPunch(){
-    return punches.lastWhere((p) =>isSameDatePunch(p.createdAt, DateTime.now().toString()),orElse: ()=>null);
+  Punch? getTodayPunch(){
+    return punches.lastWhereOrNull((p) =>(p.createdAt != null && isSameDatePunch(p.createdAt!, DateTime.now().toString())));
   }
 
   bool isSameDatePunch(String punchDate, String date){
@@ -676,32 +617,34 @@ class User {
   Map<String, List<Punch>> getPunchesGroupByDate(){
     Map<String, List<Punch>> punchGroup = {};
     punches.forEach((p) {
-      if(punchGroup[getDateString(p.createdAt)]==null){
-        punchGroup[getDateString(p.createdAt)] = [p];
-      }else{
-        punchGroup[getDateString(p.createdAt)].add(p);
+      if(p.createdAt != null){
+        if(punchGroup[getDateString(p.createdAt!)] == null){
+          punchGroup[getDateString(p.createdAt!)] = [p];
+        }else{
+          punchGroup[getDateString(p.createdAt!)]!.add(p);
+        }
       }
     });
     return punchGroup;
   }
 
   List<Punch> getPunchesOfDate(DateTime date){
-    return punches.where((p) => isSameDatePunch(p.createdAt, date.toString()) && p.isIn()).toList();
+    return punches.where((p) =>p.createdAt != null && isSameDatePunch(p.createdAt!, date.toString()) && p.isIn()).toList();
   }
 
   List<Punch> getPunchesOfWeek(DateTime startDate){
     DateTime endDate = startDate.add(Duration(days: 7));
-    return punches.where((p) => (DateTime.parse(p.createdAt).isAfter(startDate) && DateTime.parse(p.createdAt).isBefore(endDate))).toList();
+    return punches.where((p) => (p.createdAt != null && DateTime.parse(p.createdAt!).isAfter(startDate) && DateTime.parse(p.createdAt!).isBefore(endDate))).toList();
   }
 
   Map<String, List<Punch>> getPunchesGroupOfWeek(DateTime startDate){
     Map<String, List<Punch>> punchGroup = {};
     getPunchesOfWeek(startDate).forEach((p) {
-      if(p.punch == "In"){
-        if(punchGroup[getDateString(p.createdAt)]==null){
-          punchGroup[getDateString(p.createdAt)] = [p];
+      if(p.punch == "In" && p.createdAt != null){
+        if(punchGroup[getDateString(p.createdAt!)]==null){
+          punchGroup[getDateString(p.createdAt!)] = [p];
         }else{
-          punchGroup[getDateString(p.createdAt)].add(p);
+          punchGroup[getDateString(p.createdAt!)]!.add(p);
         }
       }
     });
@@ -712,9 +655,9 @@ class User {
     List<Punch> punchesOfDate = getPunchesOfDate(date);
     double hours = 0.0;
     punchesOfDate.forEach((punchIn) {
-      Punch punchOut = getPunchOut(punchIn);
-      if(punchOut != null){
-        hours += DateTime.parse(punchOut.createdAt).difference(DateTime.parse(punchIn.createdAt)).inMinutes/60;
+      Punch? punchOut = getPunchOut(punchIn);
+      if(punchOut != null && punchOut.createdAt != null){
+        hours += DateTime.parse(punchOut.createdAt!).difference(DateTime.parse(punchIn.createdAt!)).inMinutes/60;
       }
     });
     return hours;
@@ -722,8 +665,10 @@ class User {
 
   double getBreakTime(DateTime date){
     double hours = 0;
-    breaks.where((b) => isSameDatePunch(b.start, date.toString())).forEach((b) {
-      hours += b.length/60;
+    breaks.where((b) => b.start != null && isSameDatePunch(b.start!, date.toString())).forEach((b) {
+      if(b.length != null){
+        hours += b.length!/60;
+      }
     });
     return hours;
   }
@@ -755,28 +700,24 @@ class User {
     return getTotalHoursOfWeek(startOfWeek.subtract(Duration(days: 7)));
   }
 
-  Punch getPunchOut(Punch punchIn){
-    return punches.firstWhere((p) => (p.inId != null && p.inId == punchIn.id), orElse: ()=>null);
+  Punch? getPunchOut(Punch punchIn){
+    return punches.firstWhereOrNull((p) => (p.inId != null && p.inId == punchIn.id));
   }
 
   List<WorkHistory> worksOfPunch(Punch punch){
-    return works.where((w) => (w.punchId!=null && w.punchId == punch.id),).toList();
+    return works.where((w) => (w.punchId != null && w.punchId == punch.id),).toList();
   }
 
   List<EmployeeBreak> breaksOfPunch(Punch punch){
     return breaks.where((b) => (b.punchId!=null && b.punchId == punch.id),).toList();
   }
 
-  Future<String> editPunch(int punchId, String value)async{
+  Future<String?> editPunch(int punchId, String value)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.editPunch,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({'punch_id':punchId,'value':value}),
+        GlobalData.token,
+        {'punch_id':punchId,'value':value},
       );
       print("[User.editPunch] ${res.body}");
       if(res.statusCode==200){
@@ -790,16 +731,12 @@ class User {
     }
   }
 
-  Future<String> deletePunch(int punchId)async{
+  Future<String?> deletePunch(int punchId)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.deletePunch,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({'punch_id':punchId}),
+        GlobalData.token,
+        {'punch_id':punchId},
       );
       print("[User.deletePunch] ${res.body}");
       if(res.statusCode==200){
@@ -813,16 +750,12 @@ class User {
     }
   }
 
-  Future<String> editWork(WorkHistory work)async{
+  Future<String?> editWork(WorkHistory work)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.editWork,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode(work.toJson()),
+        GlobalData.token,
+        work.toJson(),
       );
       print("[User.editWork] ${res.body}");
       if(res.statusCode==200){
@@ -836,16 +769,12 @@ class User {
     }
   }
 
-  Future<String> deleteWork(int workId)async{
+  Future<String?> deleteWork(int workId)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.deleteWork,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({'id':workId}),
+        GlobalData.token,
+        {'id':workId},
       );
       print("[User.deleteWork] ${res.body}");
       if(res.statusCode==200){
@@ -860,7 +789,7 @@ class User {
   }
 
   bool isPunchIn(){
-    return lastPunch!=null && lastPunch.punch=='In';
+    return lastPunch != null && lastPunch?.punch=='In';
   }
 
   bool hasTracking(){
@@ -875,23 +804,18 @@ class User {
     return ['call', 'call_shop_daily', 'call_shop_tracking'].contains(type);
   }
 
-  String pdfUrl(DateTime startDate){
+  String pdfUrl(DateTime? startDate){
     DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";
-    print(pdfLink);
     return Uri.encodeFull('${AppConst.domainURL}punch-pdfs/$companyId/$pdfLink');
   }
 
-  Future<String> getDailySchedule(String date)async{
+  Future<String?> getDailySchedule(String date)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.getDailySchedule,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+token
-          },
-          body: {'date':date}
+          token,
+          {'date':date}
       );
       print('[WorkModel.getDailySchedule]${res.body}');
       var body = jsonDecode(res.body);
@@ -914,15 +838,11 @@ class User {
     }
   }
 
-  Future<String> getRevisionNotifications()async{
+  Future<String?> getRevisionNotifications()async{
     try{
-      var res = await http.get(
+      var res = await sendGetRequest(
           AppConst.getRevisionNotifications,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/json',
-            'Authorization':'Bearer '+token
-          }
+          token
       );
       print('[User.getRevisionNotifications]${res.body}');
       final body = jsonDecode(res.body);
@@ -941,16 +861,12 @@ class User {
     }
   }
 
-  Future<String> getDailyCall(String date)async{
+  Future<String?> getDailyCall(String date)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
           AppConst.getEmployeeCall,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer ${token??GlobalData.token}'
-          },
-          body: {
+          token??GlobalData.token,
+          {
             'date' : date,
             'id' : id.toString()
           }
@@ -972,16 +888,12 @@ class User {
     }
   }
 
-  Future<String> deleteBreak(int breakId)async{
+  Future<String?> deleteBreak(int breakId)async{
     try{
-      var res = await http.post(
+      var res = await sendPostRequest(
         AppConst.deleteBreak,
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'Authorization':'Bearer '+GlobalData.token
-        },
-        body: jsonEncode({'id':breakId}),
+        GlobalData.token,
+        {'id':breakId},
       );
       print("[User.deleteBreak] ${res.body}");
       if(res.statusCode==200){
@@ -1013,15 +925,15 @@ class User {
 }
 
 class Punch{
-  int id;
-  int userId;
-  int inId;
-  String punch;
-  double longitude;
-  double latitude;
-  String createdAt;
-  String updatedAt;
-  int paid;
+  int? id;
+  int? userId;
+  int? inId;
+  String? punch;
+  double? longitude;
+  double? latitude;
+  String? createdAt;
+  String? updatedAt;
+  int? paid;
 
   Punch({
     this.id,
@@ -1059,7 +971,10 @@ class Punch{
   }
 
   String title(BuildContext context){
-    return "${S.of(context).punch} $punch ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.parse(createdAt))}";
+    if(createdAt == null){
+      return "${S.of(context).punch} $punch ${S.of(context).at} --:--";
+    }
+    return "${S.of(context).punch} $punch ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.parse(createdAt!))}";
   }
 
   Map<String, dynamic> toJson() {

@@ -1,24 +1,19 @@
 import 'dart:convert';
+import 'base_model.dart';
 import 'package:localstorage/localstorage.dart';
-import 'package:flutter/material.dart';
 import 'revision_model.dart';
-import 'package:http/http.dart' as http;
 import 'app_const.dart';
 
-class NotificationModel with ChangeNotifier {
+class NotificationModel extends BaseProvider {
   final LocalStorage storage = LocalStorage('notifications');
   List<Revision> revisions = [];
 
 
   Future<void> getNotificationFromServer()async{
     try{
-      var res = await http.get(
+      var res = await sendGetRequest(
           AppConst.getRevisionRequest,
-          headers: {
-            'Accept':'application/json',
-            'Content-Type':'application/x-www-form-urlencoded',
-            'Authorization':'Bearer '+GlobalData.token
-          }
+          GlobalData.token
       );
       print("[NotificationModel.getNotificationFromServer] ${res.body}");
       final body = jsonDecode(res.body);
@@ -41,11 +36,11 @@ class NotificationModel with ChangeNotifier {
 }
 
 class AppNotification {
-  String body;
-  String title;
-  bool seen;
-  String date;
-  String type;
+  String? body;
+  String? title;
+  bool? seen;
+  String? date;
+  String? type;
 
   AppNotification({
     this.body,

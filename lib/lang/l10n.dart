@@ -15,7 +15,7 @@ class S {
   } 
 
   static S of(BuildContext context) {
-    return Localizations.of<S>(context, S);
+    return Localizations.of<S>(context, S)!;
   }
 
   String get timeSheetSystemForEmployee {
