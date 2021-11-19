@@ -241,15 +241,20 @@ Future<void> checkAppVersionDialog(BuildContext context, bool isForce)async{
     builder:(_)=> AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
       contentPadding: EdgeInsets.all(0),
-      content: Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(S.of(context).newVersionAvailable, textAlign: TextAlign.center,),
-            SizedBox(height: 8,),
-          ],
+      content: WillPopScope(
+        onWillPop: ()async{
+          return !isForce;
+        },
+        child: Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(S.of(context).newVersionAvailable, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500), textAlign: TextAlign.center,),
+              SizedBox(height: 8,),
+            ],
+          ),
         ),
       ),
       actions: [
