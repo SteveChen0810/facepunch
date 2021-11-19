@@ -205,7 +205,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         avatar: widget.employee?.avatar,
         firstName: _fName.text,
         lastName: _lName.text,
-        email: _email.text.isNotEmpty?_email.text:'${_fName.text}${_lName.text}@${context.read<CompanyModel>().myCompany.name}.com'.toLowerCase().replaceAll(' ', ''),
+        email: _email.text,
         pin: _password.text,
         address1: _address1.text,
         address2: _address2.text,

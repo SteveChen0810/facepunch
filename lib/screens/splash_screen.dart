@@ -40,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }else{
         bool result = await context.read<CompanyModel>().getMyCompany(user.companyId);
         if(result){
-          if(user.role=="admin"){
+          if(user.isAdmin()){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
           }else{
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));

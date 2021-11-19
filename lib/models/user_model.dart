@@ -994,6 +994,22 @@ class User {
       return e.toString();
     }
   }
+
+  bool isAdmin(){
+    return role == 'admin';
+  }
+
+  bool isManager(){
+    return role == 'manager';
+  }
+
+  bool isSubAdmin(){
+    return role == 'sub_admin';
+  }
+
+  bool canManageDispatch(){
+    return role != 'employee';
+  }
 }
 
 class Punch{

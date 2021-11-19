@@ -73,7 +73,7 @@ class AppConst{
 
   static final String getAppVersions = baseUrl+"get-app-versions";
 
-  static final int currentVersion = 32;
+  static final int currentVersion = 33;
 }
 
 class GlobalData{

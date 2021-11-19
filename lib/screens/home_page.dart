@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if(result==null){
       User user = context.read<UserModel>().user;
       await context.read<CompanyModel>().getMyCompany(user.companyId);
-      if(user.role=="admin"){
+      if(user.isAdmin()){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
       }else{
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));

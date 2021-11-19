@@ -61,7 +61,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   _fetchData()async{
     await context.read<WorkModel>().getProjectsAndTasks();
     final user = context.read<UserModel>().user;
-    if(['sub_admin','manager'].contains(user.role)){
+    if(user.canManageDispatch()){
       await context.read<CompanyModel>().getCompanyUsers();
     }
     await context.read<UserModel>().getYearTotalHours();
@@ -85,7 +85,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
               NFCScanPage(),
             if(user.hasSchedule())
               EmployeeSchedule(),
-            if(['sub_admin','manager'].contains(user.role))
+            if(user.canManageDispatch())
               EmployeeDispatch(),
             EmployeeNotification()
           ],
@@ -120,7 +120,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).schedule
             ),
-          if(['sub_admin','manager'].contains(user.role))
+          if(user.canManageDispatch())
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_dispatch.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/ic_dispatch.png",width: 30,color: Color(primaryColor),),
