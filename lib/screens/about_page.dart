@@ -1,5 +1,5 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
 import 'package:flutter/material.dart';
 
 class AboutPage extends StatefulWidget {

@@ -10,4 +10,3 @@ part 'utils/screen_util.dart';
 part 'utils/scroll_utils.dart';
 part 'widgets/popover/cupertino_popover.dart';
 part 'widgets/popover/cupertino_popover_menu_item.dart';
-part 'widgets/utils/paint_event.dart';

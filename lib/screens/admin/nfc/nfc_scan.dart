@@ -1,16 +1,18 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/harvest_model.dart';
-import 'package:facepunch/screens/admin/nfc/nfc_settings.dart';
-import 'package:facepunch/widgets/dialogs.dart';
-import 'package:facepunch/widgets/utils.dart';
-import 'package:facepunch/widgets/popover/cool_ui.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:nfc_manager/nfc_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:collection/collection.dart';
+
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/harvest_model.dart';
+import '/screens/admin/nfc/nfc_settings.dart';
+import '/widgets/dialogs.dart';
+import '/widgets/utils.dart';
+import '/widgets/popover/cool_ui.dart';
+
 
 class NFCScanPage extends StatefulWidget{
 
@@ -19,15 +21,15 @@ class NFCScanPage extends StatefulWidget{
 }
 
 class _NFCScanPageState extends State<NFCScanPage>{
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   bool isBigNFCImage = true;
   DateTime selectedDate = DateTime.now();
-  HTask selectedTask;
-  HTask _deletingTask;
+  HTask? selectedTask;
+  HTask? _deletingTask;
   List<Harvest> harvests = [];
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   bool isLoading = false;
-  List<HTask> tasks;
+  List<HTask> tasks = [];
 
   void _onRefresh() async{
     harvests = await context.read<HarvestModel>().getHarvestsOfDate(selectedDate.toString());
@@ -43,30 +45,30 @@ class _NFCScanPageState extends State<NFCScanPage>{
 
   @override
   void dispose() {
-    FlutterNfcReader.stop().catchError(print);
+    NfcManager.instance.stopSession();
     super.dispose();
   }
 
-  showHarvestTaskDialog({HTask task}){
+  showHarvestTaskDialog(HTask? task){
     List<HContainer> containers = context.read<HarvestModel>().containers;
     if(containers.isEmpty){
-      showMessage(S.of(context).addContainers);
+      Tools.showErrorMessage(context, S.of(context).addContainers);
       return null;
     }
     List<Field> fields = context.read<HarvestModel>().fields;
     if(fields.isEmpty){
-      showMessage(S.of(context).addFields);
+      Tools.showErrorMessage(context, S.of(context).addFields);
       return null;
     }
     HContainer selectedContainer;
     Field selectedField;
     bool isUpdating = false;
-    if(task==null){
+    if(task == null){
       selectedContainer = containers[0];
       selectedField = fields[0];
     }else{
-      selectedContainer = task.container;
-      selectedField = task.field;
+      selectedContainer = task.container!;
+      selectedField = task.field!;
     }
     showDialog(
       context: context,
@@ -98,13 +100,15 @@ class _NFCScanPageState extends State<NFCScanPage>{
                             child: Text('${value.name}, ${value.crop} , ${value.cropVariety}',style: TextStyle(fontSize: 18),),
                           );
                         }).toList(),
-                        value: fields.firstWhere((f) => f.id == selectedField.id,orElse: ()=>null),
+                        value: fields.firstWhereOrNull((f) => f.id == selectedField.id),
                         isExpanded: true,
                         isDense: true,
                         underline: SizedBox(),
                         onChanged: (f) {
                           setState((){
-                            selectedField = f;
+                            if(f != null){
+                              selectedField = f;
+                            }
                           });
                         },
                       ),
@@ -122,16 +126,18 @@ class _NFCScanPageState extends State<NFCScanPage>{
                         items: containers.map((HContainer value) {
                           return new DropdownMenuItem<HContainer>(
                             value: value,
-                            child: new Text(value.name,style: TextStyle(fontSize: 18),),
+                            child: new Text('${value.name}',style: TextStyle(fontSize: 18),),
                           );
                         }).toList(),
                         isExpanded: true,
                         isDense: true,
                         underline: SizedBox(),
-                        value: containers.firstWhere((c) =>c.id == selectedContainer.id,orElse: ()=>null),
+                        value: containers.firstWhereOrNull((c) =>c.id == selectedContainer.id),
                         onChanged: (c) {
                           setState((){
-                            selectedContainer = c;
+                            if(c != null){
+                              selectedContainer = c;
+                            }
                           });
                         },
                       ),
@@ -146,17 +152,17 @@ class _NFCScanPageState extends State<NFCScanPage>{
                               :Text(S.of(context).save, style: TextStyle(color: Colors.green),),
                           onPressed: ()async{
                             if(!isUpdating){
-                              if(task!=null){
-                                task.field = selectedField;
-                                task.container = selectedContainer;
+                              if(task != null){
+                                task!.field = selectedField;
+                                task!.container = selectedContainer;
                               }else{
                                 task = HTask(field: selectedField,container: selectedContainer, containerId: selectedContainer.id,fieldId: selectedField.id);
                               }
                               setState((){isUpdating = true;});
-                              String result = await context.read<HarvestModel>().createOrUpdateTask(task);
+                              String? result = await context.read<HarvestModel>().createOrUpdateTask(task!);
                               setState((){isUpdating = false;});
-                              if(result!=null){
-                                showMessage(result);
+                              if(result != null){
+                                Tools.showErrorMessage(context, result);
                               }
                               Navigator.pop(_context);
                             }
@@ -179,20 +185,8 @@ class _NFCScanPageState extends State<NFCScanPage>{
     );
   }
 
-  showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
-  }
-
   _selectHarvestDate() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
         initialDatePickerMode: DatePickerMode.day,
@@ -208,40 +202,38 @@ class _NFCScanPageState extends State<NFCScanPage>{
     try{
       if(!mounted)return;
       setState(() {isLoading=true;});
-      var result = await context.read<HarvestModel>().addHarvest(task: selectedTask, date: selectedDate.toString(),nfc: nfc);
+      var result = await context.read<HarvestModel>().addHarvest(task: selectedTask!, date: selectedDate.toString(),nfc: nfc);
       setState(() {isLoading=false;});
-      if(result!=null){
+      if(result != null){
         if(result is Harvest){
           harvests.insert(0, result);
           if(mounted)setState(() {});
         }else{
-          showMessage(result.toString());
+          Tools.showErrorMessage(context, result.toString());
         }
       }
       _startNfcRead();
     }catch(e){
       print('[_addHarvest]$e');
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
       setState(() {isLoading=false;});
     }
   }
 
   _startNfcRead()async{
-    if(isLoading)return;
-    // await FlutterNfcReader.stop();
-    FlutterNfcReader.read().then((NfcData data)async{
-      if(data!=null){
+    if(isLoading) return;
+    NfcManager.instance.startSession(
+      onDiscovered: (NfcTag tag) async {
         Tools.playSound();
-        print([data.id,data.content]);
-        if(data.id!=null && data.id.isNotEmpty){
-          _addHarvest(data.id);
-        }else if(data.content!=null && data.content.isNotEmpty){
-          _addHarvest(data.content);
-        }
-      }
-    }).catchError((e){
-      showMessage(e.message);
-    });
+        print(tag.data);
+        print(tag.handle);
+        NfcManager.instance.stopSession();
+      },
+      alertMessage: 'NFC Scanned!',
+      onError: (NfcError error)async{
+        Tools.showErrorMessage(context, error.message);
+      },
+    );
   }
 
   _deleteHarvestTask(HTask task)async{
@@ -249,12 +241,12 @@ class _NFCScanPageState extends State<NFCScanPage>{
       setState(() {
         _deletingTask = task;
       });
-      String result = await context.read<HarvestModel>().deleteTask(task);
+      String? result = await context.read<HarvestModel>().deleteTask(task);
       if(result != null){
-        showMessage(result);
+        Tools.showErrorMessage(context, result);
       }
       if(mounted)setState(() {
-        if(selectedTask==task) selectedTask = null;
+        if(selectedTask == task) selectedTask = null;
         _deletingTask = null;
       });
     }
@@ -279,18 +271,18 @@ class _NFCScanPageState extends State<NFCScanPage>{
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(task.field.name.substring(0, task.field.name.length>1?2:task.field.name.length).toUpperCase(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+              Text('${task.field?.shortName()}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: FittedBox(child: Text(task.field.crop,),),
+                child: FittedBox(child: Text('${task.field?.crop}',),),
               ),
-              Text(task.container.name[0].toUpperCase(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+              Text('${task.container?.shortName()}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
             ],
           ),
         ),
       ),
     );
-    if(_deletingTask != null && _deletingTask.id == task.id){
+    if(_deletingTask != null && _deletingTask?.id == task.id){
       return Stack(
         alignment: Alignment.center,
         children: [
@@ -320,7 +312,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
               ),
               onTap: (){
                 Navigator.pop(_context);
-                showHarvestTaskDialog(task: task);
+                showHarvestTaskDialog(task);
                 return true;
               },
             ),
@@ -355,19 +347,16 @@ class _NFCScanPageState extends State<NFCScanPage>{
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     tasks = context.watch<HarvestModel>().tasks;
+
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(S.of(context).harvestTracking),
         backgroundColor: Color(primaryColor),
         centerTitle: true,
         actions: [
-          FlatButton(
+          TextButton(
             onPressed: ()=>Navigator.push(context,MaterialPageRoute(builder: (context)=>NFCSettingPage())),
-            shape: CircleBorder(),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             child: Icon(Icons.settings,color: Colors.white,size: 30,),
-            minWidth: 0,
           )
         ],
       ),
@@ -378,18 +367,14 @@ class _NFCScanPageState extends State<NFCScanPage>{
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     setState(() {
                       selectedDate = selectedDate.subtract(Duration(days: 1));
                     });
                     _refreshController.requestRefresh();
                   },
-                  shape: CircleBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   child: Icon(Icons.arrow_back_ios_outlined,color: Colors.black,size: 30,),
-                  padding: EdgeInsets.all(4),
-                  minWidth: 0,
                 ),
                 SizedBox(width: 10,),
                 MaterialButton(
@@ -400,18 +385,14 @@ class _NFCScanPageState extends State<NFCScanPage>{
                   child: Text(selectedDate.toString().split(' ')[0],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
                 ),
                 SizedBox(width: 10,),
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     setState(() {
                       selectedDate = selectedDate.add(Duration(days: 1));
                     });
                     _refreshController.requestRefresh();
                   },
-                  shape: CircleBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   child: Icon(Icons.arrow_forward_ios_outlined,color: Colors.black,size: 30,),
-                  padding: EdgeInsets.all(4),
-                  minWidth: 0,
                 ),
               ],
             ),
@@ -437,7 +418,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: MaterialButton(
-                    onPressed: (){showHarvestTaskDialog();},
+                    onPressed: (){showHarvestTaskDialog(null);},
                     height: 70,
                     minWidth: 0,
                     shape: CircleBorder(),
@@ -496,22 +477,25 @@ class _NFCScanPageState extends State<NFCScanPage>{
                       children: [
                         for(var harvest in harvests)
                           Slidable(
-                            actionPane: SlidableDrawerActionPane(),
-                            actionExtentRatio: 0.15,
-                            secondaryActions: <Widget>[
-                              IconSlideAction(
-                                caption: S.of(context).delete,
-                                color: Colors.red,
-                                foregroundColor: Colors.white,
-                                iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
-                                onTap: ()async{
-                                  setState(() {harvests.remove(harvest);});
-                                  context.read<HarvestModel>().deleteHarvest(harvest.id).then((value){
-                                    if(mounted && value!=null && (value is String))showMessage(value);
-                                  });
-                                },
-                              ),
-                            ],
+                            endActionPane: ActionPane(
+                              motion: ScrollMotion(),
+                              children: [
+                                SlidableAction(
+                                  label: S.of(context).delete,
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.delete,
+                                  onPressed: (c)async{
+                                    setState(() {harvests.remove(harvest);});
+                                    context.read<HarvestModel>().deleteHarvest(harvest.id).then((message){
+                                      if(mounted && message!=null && (message is String)){
+                                        Tools.showErrorMessage(context, message);
+                                      }
+                                    });
+                                  },
+                                )
+                              ],
+                            ),
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 6),
                               decoration: BoxDecoration(
@@ -522,19 +506,19 @@ class _NFCScanPageState extends State<NFCScanPage>{
                                 children: [
                                   Expanded(
                                       flex: 1,
-                                      child: Text(harvest.user.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                      child: Text('${harvest.user?.name}', style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                                   ),
                                   Expanded(
                                       flex: 1,
-                                      child: Text(harvest.field.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                      child: Text('${harvest.field?.name}', style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                                   ),
                                   Expanded(
                                       flex: 1,
-                                      child: Text(harvest.container.name,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                      child: Text('${harvest.container?.name}', style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                                   ),
                                   Expanded(
                                       flex: 1,
-                                      child: Text(harvest.quantity.toString(),style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                                      child: Text('${harvest.quantity}', style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
                                   ),
                                 ],
                               ),

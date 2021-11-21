@@ -1,8 +1,10 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
 import 'package:flutter/material.dart';
+
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import '/widgets/utils.dart';
 
 class SelectCallScheduleScreen extends StatefulWidget{
 
@@ -10,7 +12,7 @@ class SelectCallScheduleScreen extends StatefulWidget{
   final List<EmployeeCall> calls;
   final User employee;
   final Punch punch;
-  SelectCallScheduleScreen({this.schedules, this.employee, this.punch, this.calls});
+  SelectCallScheduleScreen({required this.schedules, required this.employee, required this.punch, required this.calls});
 
   @override
   _SelectCallScheduleScreenState createState() => _SelectCallScheduleScreenState();
@@ -20,12 +22,12 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoading = false;
-  List<WorkSchedule> schedules;
-  List<EmployeeCall> calls;
-  User employee;
-  Punch punch;
-  WorkSchedule selectedSchedule;
-  EmployeeCall selectedCall;
+  late List<WorkSchedule> schedules;
+  late List<EmployeeCall> calls;
+  late User employee;
+  late Punch punch;
+  WorkSchedule? selectedSchedule;
+  EmployeeCall? selectedCall;
 
   @override
   void initState() {
@@ -34,18 +36,6 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
     calls = widget.calls;
     employee = widget.employee;
     punch = widget.punch;
-  }
-
-  _showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
   }
 
   String _title(){
@@ -136,7 +126,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text(call.projectName),
+                                    child: Text('${call.projectName}'),
                                   ),
                                 ],
                               ),
@@ -148,7 +138,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text(call.taskName),
+                                    child: Text('${call.taskName}'),
                                   ),
                                 ],
                               ),
@@ -158,12 +148,12 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                         Text('${S.of(context).todo} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          child: Text(call.todo),
+                          child: Text('${call.todo}'),
                         ),
                         Text('${S.of(context).note} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          child: Text(call.note),
+                          child: Text('${call.note}'),
                         ),
                       ],
                     ),
@@ -203,7 +193,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                             Row(
                               children: [
                                 Text('${S.of(context).shift} : '),
-                                Text(schedule.shift.toUpperCase(), style: TextStyle(fontWeight: FontWeight.bold),),
+                                Text('${schedule.shift?.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold),),
                               ],
                             ),
                           ],
@@ -217,7 +207,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text(schedule.projectName),
+                                    child: Text('${schedule.projectName}'),
                                   ),
                                 ],
                               ),
@@ -229,7 +219,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text(schedule.taskName),
+                                    child: Text('${schedule.taskName}'),
                                   ),
                                 ],
                               ),
@@ -251,15 +241,15 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
           onPressed: (selectedSchedule==null && selectedCall == null)?null:()async{
             if(!isLoading){
               setState(() { isLoading = true; });
-              String message;
+              String? message;
               if(selectedCall != null){
-                message = await selectedCall.startCall(employee.token);
+                message = await selectedCall!.startCall(employee.token);
               }else{
-                message = await selectedSchedule.startSchedule(employee.token);
+                message = await selectedSchedule!.startSchedule(employee.token);
               }
               setState(() { isLoading = false; });
               if(message != null){
-                _showMessage(message);
+                Tools.showErrorMessage(context, message);
               }else{
                 Navigator.pop(context);
               }

@@ -1,30 +1,32 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/harvest_model.dart';
-import 'package:facepunch/models/notification.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/screens/admin/employee_logs.dart';
-import 'package:facepunch/screens/admin/settings/admin_settings.dart';
-import 'package:facepunch/screens/admin/settings/notification_page.dart';
-import 'package:facepunch/widgets/autocomplete_textfield.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
-import 'package:facepunch/widgets/dialogs.dart';
-import 'package:facepunch/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../models/company_model.dart';
-import '../../widgets/popover/cool_ui.dart';
-import '../home_page.dart';
-import 'create_edit_employee.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import '../../models/app_const.dart';
-import '../../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:collection/collection.dart';
 
+import '/lang/l10n.dart';
+import '/models/harvest_model.dart';
+import '/models/notification.dart';
+import '/models/revision_model.dart';
+import '/models/work_model.dart';
+import '/models/app_const.dart';
+import '/models/user_model.dart';
+import '/models/company_model.dart';
+import '/screens/admin/employee_logs.dart';
+import '/screens/admin/settings/admin_settings.dart';
+import '/screens/admin/settings/notification_page.dart';
+import '../home_page.dart';
+
+import '/widgets/autocomplete_textfield.dart';
+import '/widgets/calendar_strip/date-utils.dart';
+import '/widgets/dialogs.dart';
+import '/widgets/utils.dart';
+import '/widgets/popover/cool_ui.dart';
 import 'nfc/harvest_report.dart';
 import 'nfc/nfc_scan.dart';
+import 'create_edit_employee.dart';
 
 class AdminHomePage extends StatefulWidget {
 
@@ -35,11 +37,11 @@ class AdminHomePage extends StatefulWidget {
 class _AdminHomePageState extends State<AdminHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   RefreshController _refreshController = RefreshController(initialRefresh: true);
-  Position currentPosition;
-  int loadingUser = 0;
-  User selectedUser;
+  Position? currentPosition;
+  int? loadingUser = 0;
+  User? selectedUser;
   GlobalKey<AutoCompleteTextFieldState<String>> _searchKey = GlobalKey<AutoCompleteTextFieldState<String>>();
-  CompanySettings settings;
+  CompanySettings? settings;
 
   void _onRefresh() async{
     await context.read<CompanyModel>().getCompanyUsers();
@@ -102,7 +104,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 return true;
               },
             ),
-            if(settings.useOwnData)
+            if(settings!.useOwnData??false)
               CupertinoPopoverMenuItem(
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
@@ -115,7 +117,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                 ),
                 onTap: (){
-                  deleteEmployee(user.id);
+                  if(user.id != null)deleteEmployee(user.id!);
                   return true;
                 },
               )
@@ -146,17 +148,19 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),
                 fit: BoxFit.cover,
               ),
-              if(user.lastPunch!=null)
-              Positioned(
-                  bottom: 0,
-                  child: Container(
-                      width: width/5,
-                      color: Colors.black.withOpacity(0.5),
-                      alignment: Alignment.topCenter,
-                      padding: EdgeInsets.only(bottom: 3),
-                      child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch.createdAt))}",style: TextStyle(color: Colors.white,),)
-                  )
-              ),
+              if(user.lastPunch != null)
+                Positioned(
+                    bottom: 0,
+                    child: Container(
+                        width: width/5,
+                        color: Colors.black.withOpacity(0.5),
+                        alignment: Alignment.topCenter,
+                        padding: EdgeInsets.only(bottom: 3),
+                        child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch!.createdAt!))}",
+                          style: TextStyle(color: Colors.white,),
+                        )
+                    )
+                ),
               if(user.id==loadingUser)
                 Center(child: CircularProgressIndicator()),
             ],
@@ -183,7 +187,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        RaisedButton(
+                        TextButton(
                           child: isDeletingField?SizedBox(
                             height: 28,
                             width: 28,
@@ -192,17 +196,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
                             padding: const EdgeInsets.all(4.0),
                             child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
-                          color: Color(primaryColor),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           onPressed: ()async{
                             setState((){isDeletingField = true;});
-                            String result = await context.read<CompanyModel>().deleteEmployee(userId);
+                            String? result = await context.read<CompanyModel>().deleteEmployee(userId);
                             setState((){isDeletingField = false;});
                             Navigator.pop(_context);
-                            if(result!=null)showMessage(result);
+                            if(result != null)Tools.showErrorMessage(context, result);
                           },
                         ),
-                        RaisedButton(
+                        TextButton(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
@@ -210,8 +212,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
                           onPressed: ()async{
                             Navigator.pop(_context);
                           },
-                          color: Colors.red,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         ),
                       ],
                     )
@@ -224,33 +224,21 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
-  }
-
   showEmployeeLog(User user)async{
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>EmployeeLogs(employee: user,latitude: currentPosition?.latitude,longitude: currentPosition?.longitude,)));
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>EmployeeLogs(employee: user, latitude: currentPosition?.latitude, longitude: currentPosition?.longitude,)));
   }
 
   _determinePosition() async {
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
-      showMessage(S.of(context).locationPermissionDenied);
+      Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
     }
     if (permission == LocationPermission.denied) {
       await showLocationPermissionDialog(context);
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
-        showMessage(S.of(context).locationPermissionDenied);
+        Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
         return null;
       }
     }
@@ -258,47 +246,54 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   initFireBaseNotification(){
-    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        _onMessage(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        _onMessage(message);
-      },
-      onResume: (Map<String, dynamic> message) async {
-        _onMessage(message);
-      },
-    );
-    _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(sound: true, badge: true, alert: true));
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _onMessage(message);
+    });
 
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      _onMessage(message);
+    });
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message){
+          if(message != null)_onMessage(message);
+    });
+    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 
-  _onMessage(message){
-    AppNotification newNotification = AppNotification.fromJsonFirebase(message);
-    Tools.playSound();
-    showNotificationDialog(newNotification, context,);
+  _onMessage(RemoteMessage message){
+    try{
+      AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
+      Tools.playSound();
+      showNotificationDialog(newNotification, context,);
+    }catch(e){
+      print('[_onMessage]$e');
+    }
   }
 
   _manualPunch(User user)async{
     try{
-      final TimeOfDay picked = await showTimePicker(
+      final TimeOfDay? picked = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(DateTime.now()),
         helpText: 'Confirm Punch Time'
       );
       if(picked==null)return;
       DateTime now = DateTime.now();
-      setState(() {loadingUser=user.id;});
-      String result = await context.read<CompanyModel>().punchByAdmin(
+      setState(() { loadingUser = user.id; });
+      String? result = await context.read<CompanyModel>().punchByAdmin(
           userId: user.id,
           action: user.isPunchIn()?'Out':'In',
-          latitude: currentPosition.latitude,
-        longitude: currentPosition.longitude,
-        punchTime: DateTime(now.year,now.month,now.day,picked.hour,picked.minute,0,0).toString()
+          latitude: currentPosition?.latitude,
+          longitude: currentPosition?.longitude,
+          punchTime: DateTime(now.year, now.month, now.day, picked.hour, picked.minute, 0, 0).toString()
       );
-      setState(() {loadingUser=0;});
-      if(result!=null)showMessage(result);
+      setState(() { loadingUser=0; });
+      if(result != null)Tools.showErrorMessage(context, result);
     }catch(e){
       print('[_manualPunch]$e');
       setState(() {loadingUser=0;});
@@ -360,9 +355,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
                               clearOnSubmit: false,
                               textSubmitted: (v)async{
                                 setState(() {
-                                  selectedUser = users.firstWhere((u) => u.getFullName()==v,orElse: ()=>null);
+                                  selectedUser = users.firstWhereOrNull((u) => u.getFullName()==v);
                                 });
-                                print(v);
                               },
                               minLength: 1,
                               keyboardType: TextInputType.name,
@@ -446,9 +440,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationPage())),
-                                shape: CircleBorder(),
                                 child: Stack(
                                   children: [
                                     Icon(Icons.notifications,color: Color(primaryColor),size: 35,),
@@ -463,21 +456,18 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   ],
                                 )
                             ),
-                            if(settings.hasNFCHarvest)
-                              FlatButton(
+                            if(settings!.hasNFCHarvest??false)
+                              TextButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NFCScanPage())),
-                                shape: CircleBorder(),
                                 child: Image.asset('assets/images/nfc.png',color: Color(primaryColor),height: 40,),
                               ),
-                            if(settings.hasNFCReport)
-                              FlatButton(
+                            if(settings!.hasNFCReport??false)
+                              TextButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
-                                shape: CircleBorder(),
                                 child: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
                               ),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting())),
-                                shape: CircleBorder(),
                                 child: Icon(Icons.settings,color: Color(primaryColor),size: 35,),
                             )
                           ],
@@ -487,7 +477,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                 ),
               ),
-              if(settings.useOwnData)
+              if(settings!.useOwnData??false)
                 Container(
                   width: width,
                   margin: EdgeInsets.only(top: 8),
@@ -496,7 +486,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                     borderRadius: BorderRadius.circular(40),
                   ),
                   padding: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
-                  child: RaisedButton(
+                  child: MaterialButton(
                     onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateEditEmployee())),
                     child: Text(S.of(context).createNewEmployee,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: Colors.white),),
                     padding: EdgeInsets.all(10),
@@ -509,7 +499,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
         ),
       ),
       backgroundColor: Color(primaryColor),
-      resizeToAvoidBottomPadding: false,
       resizeToAvoidBottomInset: false,
     );
   }

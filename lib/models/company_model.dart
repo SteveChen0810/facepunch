@@ -10,17 +10,17 @@ class CompanyModel extends BaseProvider{
   CompanySettings? myCompanySettings;
   List<User> users = [];
 
-  Future<bool> getMyCompany(int companyId)async{
+  Future<bool> getMyCompany(int? companyId)async{
     await getCompanyFromLocal();
     await getCompanySettingsFromLocal();
-    if(myCompany?.id != companyId || myCompanySettings==null){
+    if(myCompany?.id != companyId || myCompanySettings == null){
       await getCompanyFromServer();
       await getCompanySettingsFromServer();
     }else{
       getCompanyFromServer();
       getCompanySettingsFromServer();
     }
-    return myCompany != null && myCompanySettings!=null;
+    return myCompany != null && myCompanySettings != null;
   }
 
   getCompanyFromServer()async{
@@ -112,7 +112,7 @@ class CompanyModel extends BaseProvider{
     }
   }
 
-  Future<String> deleteEmployee(int userId)async{
+  Future<String?> deleteEmployee(int userId)async{
     String result = 'Oops, Unknown Errors!';
     try{
       var res = await sendPostRequest( AppConst.deleteEmployee, GlobalData.token, {'user_id' : userId});
@@ -130,8 +130,8 @@ class CompanyModel extends BaseProvider{
     return result;
   }
 
-  Future<String?> updateCompany({required String name, required String address1, required String address2,
-    required String country, required String state, required String city, required String postalCode, required String phone})async{
+  Future<String?> updateCompany({required String name, String? address1, String? address2,
+    String? country, String? state, String? city, String? postalCode, String? phone})async{
     String? result = 'Oops, Unknown Errors!';
     try{
       var res = await sendPostRequest(
@@ -223,7 +223,7 @@ class CompanyModel extends BaseProvider{
     }
   }
 
-  Future<String?> punchByAdmin({required int userId, required String action, required String punchTime,
+  Future<String?> punchByAdmin({int? userId, required String action, required String punchTime,
     double? longitude, double? latitude})async{
     try{
       var res = await sendPostRequest(

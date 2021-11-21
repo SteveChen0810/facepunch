@@ -493,6 +493,7 @@ class User extends BaseModel{
     this.createdAt,
     this.updatedAt,
     this.canNTCTracking,
+    this.token,
     this.sendScheduleNotification,
     this.active,
     this.hasAutoBreak,
@@ -712,7 +713,7 @@ class User extends BaseModel{
     return breaks.where((b) => (b.punchId!=null && b.punchId == punch.id),).toList();
   }
 
-  Future<String?> editPunch(int punchId, String value)async{
+  Future<String?> editPunch(int? punchId, String value)async{
     try{
       var res = await sendPostRequest(
         AppConst.editPunch,
@@ -731,7 +732,7 @@ class User extends BaseModel{
     }
   }
 
-  Future<String?> deletePunch(int punchId)async{
+  Future<String?> deletePunch(int? punchId)async{
     try{
       var res = await sendPostRequest(
         AppConst.deletePunch,
@@ -769,7 +770,7 @@ class User extends BaseModel{
     }
   }
 
-  Future<String?> deleteWork(int workId)async{
+  Future<String?> deleteWork(int? workId)async{
     try{
       var res = await sendPostRequest(
         AppConst.deleteWork,
@@ -808,6 +809,14 @@ class User extends BaseModel{
     DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";
     return Uri.encodeFull('${AppConst.domainURL}punch-pdfs/$companyId/$pdfLink');
+  }
+
+  String harvestReportUrl(){
+    return Uri.encodeFull('${AppConst.domainURL}harvest-reports/$companyId/Harvest_Report_${DateTime.now().toString().split(' ')[0]}.png');
+  }
+
+  String avatarUrl(){
+    return Uri.encodeFull('${AppConst.domainURL}images/user_avatars/$avatar');
   }
 
   Future<String?> getDailySchedule(String date)async{
@@ -888,7 +897,7 @@ class User extends BaseModel{
     }
   }
 
-  Future<String?> deleteBreak(int breakId)async{
+  Future<String?> deleteBreak(int? breakId)async{
     try{
       var res = await sendPostRequest(
         AppConst.deleteBreak,
@@ -989,6 +998,11 @@ class Punch{
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
+  }
+
+  String getTime(){
+    if(createdAt != null)return '--:--';
+    return PunchDateUtils.getTimeString(DateTime.parse(createdAt!));
   }
 }
 

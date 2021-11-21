@@ -1,12 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/screens/home_page.dart';
-import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
+import 'package:facepunch/widgets/project_picker.dart';
+import 'package:facepunch/widgets/task_picker.dart';
+import 'package:facepunch/widgets/utils.dart';
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/revision_model.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import '/screens/home_page.dart';
+import '/widgets/calendar_strip/calendar_strip.dart';
+import '/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -21,27 +24,27 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   DateTime startDate = DateTime.parse("${DateTime.now().year}-01-01");
   DateTime endDate = DateTime.parse("${DateTime.now().year}-12-31");
   DateTime selectedDate = DateTime.now();
-  User user;
+  User? user;
   DateTime startOfWeek = PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
   Map<String, List<Punch>> selectedPunches = {};
-  RefreshController _refreshController;
-  List<Project> projects;
-  List<ScheduleTask> tasks;
+  late RefreshController _refreshController;
+  List<Project> projects = [];
+  List<ScheduleTask> tasks = [];
 
   @override
   void initState() {
     super.initState();
     user = context.read<UserModel>().user;
-    if(user.punches==null || user.punches.isEmpty){
+    if(user?.punches == null || user!.punches.isEmpty){
       _refreshController = RefreshController(initialRefresh: true);
     }else{
       _refreshController = RefreshController(initialRefresh: false);
-      selectedPunches = user.getPunchesGroupOfWeek(startOfWeek);
+      selectedPunches = user!.getPunchesGroupOfWeek(startOfWeek);
     }
   }
 
   onSelect(date) {
-    List<Punch> punchesOfDate = user.getPunchesOfDate(date);
+    List<Punch> punchesOfDate = user!.getPunchesOfDate(date);
     selectedPunches = {'${date.toString()}':punchesOfDate};
     setState(() { selectedDate = date;});
   }
@@ -68,7 +71,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           margin: EdgeInsets.symmetric(vertical: 4),
           child: Text(date.day.toString(), style: normalStyle, maxLines: 1,)
       ),
-      Text("${user.calculateHoursOfDate(date).toStringAsFixed(2)}", style: TextStyle(fontSize: 12),),
+      Text("${user!.calculateHoursOfDate(date).toStringAsFixed(2)}", style: TextStyle(fontSize: 12),),
     ];
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
@@ -116,7 +119,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                 ),
               )
           );
-          final works = user.worksOfPunch(punchIn);
+          final works = user!.worksOfPunch(punchIn);
           works.forEach((work) {
             punchDetail.add(InkWell(
               onTap: (){
@@ -132,7 +135,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
               ),
             ));
           });
-          final breaks = user.breaksOfPunch(punchIn);
+          final breaks = user!.breaksOfPunch(punchIn);
           breaks.forEach((b) {
             punchDetail.add(InkWell(
               onTap: (){_showBreakRevisionDialog(b);},
@@ -147,7 +150,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
             ));
           });
 
-          Punch punchOut = user.getPunchOut(punchIn);
+          Punch? punchOut = user!.getPunchOut(punchIn);
           if(punchOut != null){
             punchDetail.add(
                 InkWell(
@@ -169,7 +172,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 
         punchDetail.add(
             Text(
-              "${S.of(context).total}: ${user.getHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} - ${user.getBreakTime(DateTime.parse(date)).toStringAsFixed(2)} (${S.of(context).breaks}) = ${user.calculateHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} h",
+              "${S.of(context).total}: ${user!.getHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} - ${user!.getBreakTime(DateTime.parse(date)).toStringAsFixed(2)} (${S.of(context).breaks}) = ${user!.calculateHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} h",
               style: TextStyle(color: Color(primaryColor), fontWeight: FontWeight.bold, fontSize: 16),
             )
         );
@@ -202,9 +205,10 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   }
 
   _showPunchRevisionDialog(Punch punch){
-    String correctTime = punch.createdAt;
+    if(punch.createdAt == null) return;
+    String correctTime = punch.createdAt!;
     String description = '';
-    String errorMessage;
+    String? errorMessage;
     bool _isSending = false;
 
     showDialog(
@@ -231,16 +235,14 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         children: [
                           Text("${S.of(context).correctPunchTime}: "),
                           Text("${PunchDateUtils.getTimeString(correctTime)}",style: TextStyle(fontWeight: FontWeight.bold),),
-                          FlatButton(
+                          TextButton(
                               onPressed: ()async{
                                 FocusScope.of(context).requestFocus(FocusNode());
-                                DateTime pickedTime = await _selectTime(correctTime);
-                                if(pickedTime!=null){
+                                DateTime? pickedTime = await _selectTime(correctTime);
+                                if(pickedTime != null){
                                   _setState(() { correctTime = pickedTime.toString();});
                                 }
                               },
-                              shape: CircleBorder(),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Icon(Icons.edit,color: Color(primaryColor),),
@@ -301,7 +303,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   _showBreakRevisionDialog(EmployeeBreak employeeBreak){
     EmployeeBreak newBreak = EmployeeBreak.fromJson(employeeBreak.toJson());
     String description = '';
-    String errorMessage;
+    String? errorMessage;
     bool _isSending = false;
     TextEditingController _length = TextEditingController(text: newBreak.length.toString());
     showDialog(
@@ -328,16 +330,14 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           children: [
                             Text("${S.of(context).correctBreakTime}: "),
                             Text("${PunchDateUtils.getTimeString(newBreak.start)}",style: TextStyle(fontWeight: FontWeight.bold),),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
                                   FocusScope.of(context).requestFocus(FocusNode());
-                                  DateTime pickedTime = await _selectTime(newBreak.start);
-                                  if(pickedTime!=null){
+                                  DateTime? pickedTime = await _selectTime(newBreak.start!);
+                                  if(pickedTime != null){
                                     _setState(() { newBreak.start = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Icon(Icons.edit,color: Color(primaryColor),),
@@ -400,11 +400,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                                 return;
                               }
                               _setState(() { _isSending=true; });
-                              await _sendBreakRevisionRequest(
-                                  oldBreak: employeeBreak,
-                                  newBreak: newBreak,
-                                  description: description
-                              );
+                              await _sendBreakRevisionRequest(employeeBreak, newBreak, description);
                               Navigator.pop(_context);
                             }
                           },
@@ -432,7 +428,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     bool _isSending = false;
     WorkHistory newWork = WorkHistory.fromJson(work.toJson());
     String description = '';
-    String errorMessage;
+    String? errorMessage;
 
     showDialog(
         context: context,
@@ -460,32 +456,15 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                             children: [
                               SizedBox(height: 8,),
                               Text(S.of(context).project,style: TextStyle(fontSize: 12),),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black54),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-                                clipBehavior: Clip.hardEdge,
-                                margin: EdgeInsets.only(top: 4),
-                                child: DropdownButton<Project>(
-                                  items: projects.map((Project value) {
-                                    return DropdownMenuItem<Project>(
-                                      value: value,
-                                      child: Text(value.name, style: TextStyle(fontSize: 12),),
-                                    );
-                                  }).toList(),
-                                  value: projects.firstWhere((p) => p.id == newWork.projectId, orElse: ()=>null),
-                                  isExpanded: true,
-                                  isDense: true,
-                                  underline: SizedBox(),
-                                  onChanged: (v) {
-                                    _setState((){
-                                      newWork.projectId = v.id;
-                                      newWork.projectName = v.name;
-                                    });
-                                  },
-                                ),
+                              ProjectPicker(
+                                  projects: projects,
+                                  projectId: newWork.projectId,
+                                onSelected: (v) {
+                                  _setState((){
+                                    newWork.projectId = v?.id;
+                                    newWork.projectName = v?.name;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -495,32 +474,15 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                             children: [
                               SizedBox(height: 6,),
                               Text(S.of(context).task, style: TextStyle(fontSize: 12),),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black54),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                                clipBehavior: Clip.hardEdge,
-                                margin: EdgeInsets.only(top: 4),
-                                child: DropdownButton<ScheduleTask>(
-                                  items: tasks.map((ScheduleTask value) {
-                                    return DropdownMenuItem<ScheduleTask>(
-                                      value: value,
-                                      child: Text(value.name,style: TextStyle(fontSize: 12),),
-                                    );
-                                  }).toList(),
-                                  value: tasks.firstWhere((t) => t.id == newWork.taskId, orElse: ()=>null),
-                                  isExpanded: true,
-                                  isDense: true,
-                                  underline: SizedBox(),
-                                  onChanged: (v) {
-                                    _setState((){
-                                      newWork.taskId = v.id;
-                                      newWork.taskName = v.name;
-                                    });
-                                  },
-                                ),
+                              TaskPicker(
+                                  tasks: tasks,
+                                taskId: newWork.taskId,
+                                onSelected: (v) {
+                                  _setState((){
+                                    newWork.taskId = v?.id;
+                                    newWork.taskName = v?.name;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -530,16 +492,13 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           children: [
                             Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12),),
                             Text("${PunchDateUtils.getTimeString(newWork.start)}"),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(newWork.start);
+                                  DateTime? pickedTime = await _selectTime(newWork.start!);
                                   if(pickedTime!=null){
                                     _setState(() { newWork.start = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.zero,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -550,16 +509,13 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           children: [
                             Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12),),
                             Text("${PunchDateUtils.getTimeString(newWork.end)}"),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(newWork.end);
+                                  DateTime? pickedTime = await _selectTime(newWork.end!);
                                   if(pickedTime!=null){
                                     _setState(() { newWork.end = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.zero,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -613,9 +569,9 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     );
   }
 
-  Future<DateTime> _selectTime(String createdAt)async{
+  Future<DateTime?> _selectTime(String createdAt)async{
     DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
     );
@@ -625,42 +581,44 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     return null;
   }
 
-  _sendPunchRevisionRequest(int punchId, String newValue, String oldValue, String description)async{
-    String result = await context.read<RevisionModel>().sendPunchRevisionRequest(
+  _sendPunchRevisionRequest(int? punchId, String newValue, String? oldValue, String description)async{
+    String? result = await context.read<RevisionModel>().sendPunchRevisionRequest(
         punchId: punchId,
         newValue: newValue,
         oldValue:oldValue,
         description: description
     );
-    _showMessage(result);
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }
   }
 
-  _sendBreakRevisionRequest({EmployeeBreak oldBreak, EmployeeBreak newBreak, String description})async{
-    String result = await context.read<RevisionModel>().sendBreakRevisionRequest(
+  _sendBreakRevisionRequest(EmployeeBreak oldBreak, EmployeeBreak newBreak, String description)async{
+    String? result = await context.read<RevisionModel>().sendBreakRevisionRequest(
         oldBreak: oldBreak,
         newBreak:newBreak,
         description: description
     );
-    _showMessage(result);
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }
   }
 
   sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
-    String result = await context.read<RevisionModel>().sendWorkRevisionRequest(
+    String? result = await context.read<RevisionModel>().sendWorkRevisionRequest(
         newWork: newWork,
         oldWork: oldWork,
         description: description
     );
-    _showMessage(result);
-  }
-
-  _showMessage(String message){
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }
   }
 
   void _onRefresh() async{
     try{
       await context.read<UserModel>().getUserTimeSheetData(startOfWeek);
-      selectedPunches = user.getPunchesGroupOfWeek(startOfWeek);
+      selectedPunches = user!.getPunchesGroupOfWeek(startOfWeek);
       _refreshController.refreshCompleted();
       if(mounted)setState(() {});
     }catch(e){
@@ -672,7 +630,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    Punch currentPunch = user.getTodayPunch();
+    Punch? currentPunch = user!.getTodayPunch();
     projects = context.watch<WorkModel>().projects;
     tasks = context.watch<WorkModel>().tasks;
 
@@ -715,7 +673,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     child: Center(
                       child: ClipOval(
                         child: CachedNetworkImage(
-                          imageUrl: "${AppConst.domainURL}images/user_avatars/${user.avatar}",
+                          imageUrl: user!.avatarUrl(),
                           height: 150,
                           width: 150,
                           alignment: Alignment.center,
@@ -753,7 +711,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfLastWeek())}H",
+                            Text("${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfLastWeek())}H",
                               style: TextStyle(fontSize: 12),
                             ),
                             Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now().subtract(Duration(days: 7)))}",
@@ -774,7 +732,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: currentPunch!=null?Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${currentPunch.createdAt.substring(11,16)}",style: TextStyle(fontSize: 12)),
+                            Text("${currentPunch.getTime()}",style: TextStyle(fontSize: 12)),
                             Text("${currentPunch.punch} ${S.of(context).time}",style: TextStyle(fontSize: 12)),
                           ],
                         ):Text(S.of(context).noPunch,style: TextStyle(fontSize: 12)),
@@ -807,7 +765,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("${user.getFullName()}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white),),
+                      Text("${user!.getFullName()}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white),),
                       IconButton(
                           icon: Icon(Icons.logout),
                           splashColor: Colors.white,
@@ -848,7 +806,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     weekStartsOnSunday: true,
                     selectedDate: selectedDate,
                   ),
-                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",
+                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfWeek(startOfWeek))}H",
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ],
@@ -893,7 +851,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 class TopBackgroundClipper extends CustomClipper<Rect> {
   final double width;
   final double height;
-  TopBackgroundClipper({this.width,this.height});
+  TopBackgroundClipper({required this.width ,required this.height});
   @override
   getClip(Size size) {
     var path = Rect.fromCircle(center: Offset(width/2,height) ,radius: width);

@@ -1,9 +1,12 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
+import 'package:facepunch/widgets/project_picker.dart';
+import 'package:facepunch/widgets/task_picker.dart';
+
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/revision_model.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import '/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -19,8 +22,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   List<WorkSchedule> schedules = [];
   List<EmployeeCall> calls = [];
   RefreshController _refreshController = RefreshController(initialRefresh: true);
-  WorkSchedule _schedule;
-  EmployeeCall _call;
+  WorkSchedule? _schedule;
+  EmployeeCall? _call;
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
 
@@ -30,7 +33,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   _selectScheduleDate() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
         initialDatePickerMode: DatePickerMode.day,
@@ -44,8 +47,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
 
   _onRefresh()async{
     final user = context.read<UserModel>().user;
-    String result = await user.getDailySchedule(selectedDate.toString());
-    if(result==null){
+    String? result = await user!.getDailySchedule(selectedDate.toString());
+    if(result == null){
       schedules = user.schedules;
       calls = user.calls;
     }else{
@@ -84,7 +87,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text( s.shift.toUpperCase(),),
+                  Text('${s.shift?.toUpperCase()}',),
                   Text("${PunchDateUtils.get12TimeString(s.start)} ~ ${PunchDateUtils.get12TimeString(s.end)}",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -217,9 +220,9 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     super.dispose();
   }
 
-  Future<DateTime> _selectTime(String createdAt)async{
+  Future<DateTime?> _selectTime(String createdAt)async{
     DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
     );
@@ -232,7 +235,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   _showScheduleRevisionDialog(WorkSchedule s){
     final schedule = WorkSchedule.fromJson(s.toJson());
     String description = '';
-    String errorMessage;
+    String? errorMessage;
 
     showDialog(
         context: context,
@@ -262,71 +265,27 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                             children: [
                               SizedBox(height: 8,),
                               Text(S.of(context).project,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black54),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                                clipBehavior: Clip.hardEdge,
-                                margin: EdgeInsets.only(top: 4),
-                                child: DropdownButton<Project>(
-                                  items: projects.map((Project value) {
-                                    return DropdownMenuItem<Project>(
-                                      value: value,
-                                      child: Text(
-                                        value.name,
-                                        style: TextStyle(fontSize: 12),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  value: projects.firstWhere((p) => p.id==schedule.projectId,orElse: ()=>null),
-                                  isExpanded: true,
-                                  isDense: true,
-                                  underline: SizedBox(),
-                                  onChanged: (v) {
-                                    _setState((){
-                                      schedule.projectId = v.id;
-                                      schedule.projectName = v.name;
-                                    });
-                                  },
-                                ),
+                              ProjectPicker(
+                                projects: projects,
+                                projectId: schedule.projectId,
+                                onSelected: (v) {
+                                  _setState((){
+                                    schedule.projectId = v?.id;
+                                    schedule.projectName = v?.name;
+                                  });
+                                },
                               ),
                               SizedBox(height: 8,),
                               Text(S.of(context).task,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black54),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                                clipBehavior: Clip.hardEdge,
-                                margin: EdgeInsets.only(top: 4),
-                                child: DropdownButton<ScheduleTask>(
-                                  items:tasks.map((ScheduleTask value) {
-                                    return DropdownMenuItem<ScheduleTask>(
-                                      value: value,
-                                      child: Text(
-                                        value.name,
-                                        style: TextStyle(fontSize: 12),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    );
-                                  }).toList(),
-                                  value: tasks.firstWhere((t) => t.id==schedule.taskId,orElse: ()=>null),
-                                  isExpanded: true,
-                                  isDense: true,
-                                  underline: SizedBox(),
-                                  onChanged: (v) {
-                                    _setState((){
-                                      schedule.taskId = v.id;
-                                      schedule.taskName = v.name;
-                                    });
-                                  },
-                                ),
+                              TaskPicker(
+                                tasks: tasks,
+                                taskId: schedule.taskId,
+                                onSelected: (v) {
+                                  _setState((){
+                                    schedule.taskId = v?.id;
+                                    schedule.taskName = v?.name;
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -337,17 +296,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         children: [
                           Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                           Text("${PunchDateUtils.get12TimeString(schedule.start)}"),
-                          FlatButton(
+                          TextButton(
                               onPressed: ()async{
-                                DateTime pickedTime = await _selectTime(schedule.start);
-                                if(pickedTime!=null){
+                                DateTime? pickedTime = await _selectTime(schedule.start!);
+                                if(pickedTime != null){
                                   _setState(() { schedule.start = pickedTime.toString();});
                                 }
                               },
-                              shape: CircleBorder(),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.all(8),
-                              minWidth: 0,
                               child: Icon(Icons.edit,color: Color(primaryColor))
                           ),
                         ],
@@ -358,17 +313,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         children: [
                           Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                           Text("${PunchDateUtils.get12TimeString(schedule.end)}"),
-                          FlatButton(
+                          TextButton(
                               onPressed: ()async{
-                                DateTime pickedTime = await _selectTime(schedule.end);
+                                DateTime? pickedTime = await _selectTime(schedule.end!);
                                 if(pickedTime!=null){
                                   _setState(() { schedule.end = pickedTime.toString();});
                                 }
                               },
-                              shape: CircleBorder(),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.all(8),
-                              minWidth: 0,
                               child: Icon(Icons.edit,color: Color(primaryColor))
                           ),
                         ],
@@ -438,7 +389,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   _showCallRevisionDialog(EmployeeCall c){
     final call = EmployeeCall.fromJson(c.toJson());
     String description = '';
-    String errorMessage;
+    String? errorMessage;
 
     showDialog(
         context: context,
@@ -467,71 +418,27 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                           children: [
                             SizedBox(height: 8,),
                             Text(S.of(context).project,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black54),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                              clipBehavior: Clip.hardEdge,
-                              margin: EdgeInsets.only(top: 4),
-                              child: DropdownButton<Project>(
-                                items: projects.map((Project value) {
-                                  return DropdownMenuItem<Project>(
-                                    value: value,
-                                    child: Text(
-                                      value.name,
-                                      style: TextStyle(fontSize: 12),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }).toList(),
-                                value: projects.firstWhere((p) => p.id==call.projectId,orElse: ()=>null),
-                                isExpanded: true,
-                                isDense: true,
-                                underline: SizedBox(),
-                                onChanged: (v) {
-                                  _setState((){
-                                    call.projectId = v.id;
-                                    call.projectName = v.name;
-                                  });
-                                },
-                              ),
+                            ProjectPicker(
+                              projects: projects,
+                              projectId: call.projectId,
+                              onSelected: (v) {
+                                _setState((){
+                                  call.projectId = v?.id;
+                                  call.projectName = v?.name;
+                                });
+                              },
                             ),
                             SizedBox(height: 8,),
                             Text(S.of(context).task,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black54),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                              clipBehavior: Clip.hardEdge,
-                              margin: EdgeInsets.only(top: 4),
-                              child: DropdownButton<ScheduleTask>(
-                                items:tasks.map((ScheduleTask value) {
-                                  return DropdownMenuItem<ScheduleTask>(
-                                    value: value,
-                                    child: Text(
-                                      value.name,
-                                      style: TextStyle(fontSize: 12),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }).toList(),
-                                value: tasks.firstWhere((t) => t.id==call.taskId,orElse: ()=>null),
-                                isExpanded: true,
-                                isDense: true,
-                                underline: SizedBox(),
-                                onChanged: (v) {
-                                  _setState((){
-                                    call.taskId = v.id;
-                                    call.taskName = v.name;
-                                  });
-                                },
-                              ),
+                            TaskPicker(
+                                tasks: tasks,
+                              taskId: call.taskId,
+                              onSelected: (v) {
+                                _setState((){
+                                  call.taskId = v?.id;
+                                  call.taskName = v?.name;
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -542,17 +449,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         children: [
                           Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                           Text("${PunchDateUtils.get12TimeString(call.start)}"),
-                          FlatButton(
+                          TextButton(
                               onPressed: ()async{
-                                DateTime pickedTime = await _selectTime(call.start);
-                                if(pickedTime!=null){
+                                DateTime? pickedTime = await _selectTime(call.start!);
+                                if(pickedTime != null){
                                   _setState(() { call.start = pickedTime.toString();});
                                 }
                               },
-                              shape: CircleBorder(),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.all(8),
-                              minWidth: 0,
                               child: Icon(Icons.edit,color: Color(primaryColor))
                           ),
                         ],
@@ -563,17 +466,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         children: [
                           Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                           Text("${PunchDateUtils.get12TimeString(call.end)}"),
-                          FlatButton(
+                          TextButton(
                               onPressed: ()async{
-                                DateTime pickedTime = await _selectTime(call.end);
-                                if(pickedTime!=null){
+                                DateTime? pickedTime = await _selectTime(call.end!);
+                                if(pickedTime != null){
                                   _setState(() { call.end = pickedTime.toString();});
                                 }
                               },
-                              shape: CircleBorder(),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.all(8),
-                              minWidth: 0,
                               child: Icon(Icons.edit,color: Color(primaryColor))
                           ),
                         ],
@@ -589,7 +488,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                                 Radio(
                                   onChanged: (v){
                                     _setState((){
-                                      call.priority = v;
+                                      call.priority = v as int?;
                                     });
                                   },
                                   value: 1,
@@ -599,7 +498,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                                 Radio(
                                   onChanged: (v){
                                     _setState((){
-                                      call.priority = v;
+                                      call.priority = v as int?;
                                     });
                                   },
                                   value: 2,
@@ -609,7 +508,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                                 Radio(
                                   onChanged: (v){
                                     _setState((){
-                                      call.priority = v;
+                                      call.priority = v as int?;
                                     });
                                   },
                                   value: 3,

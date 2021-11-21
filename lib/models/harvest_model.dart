@@ -268,7 +268,7 @@ class HarvestModel extends BaseProvider{
     return null;
   }
 
-  Future deleteHarvest(int id)async{
+  Future deleteHarvest(int? id)async{
     try{
       final res = await sendPostRequest(
         AppConst.deleteHarvest,
@@ -287,7 +287,7 @@ class HarvestModel extends BaseProvider{
     return null;
   }
 
-  Future getEmployeeHarvestStats(String date, int field)async{
+  Future getEmployeeHarvestStats(String date, int? field)async{
     try{
       final res = await sendPostRequest(
         AppConst.getEmployeeHarvestStats,
@@ -314,7 +314,7 @@ class HarvestModel extends BaseProvider{
     }
   }
 
-  Future getCompanyHarvestStats(String date, int field)async{
+  Future getCompanyHarvestStats(String date, int? field)async{
     try{
       final res = await sendPostRequest(
         AppConst.getCompanyHarvestStats,
@@ -477,6 +477,12 @@ class HContainer{
     data['updated_at'] = this.updatedAt;
     return data;
   }
+
+  String shortName(){
+    if(name == null && name!.isEmpty) return '';
+    return name![0].toUpperCase();
+  }
+
 }
 
 class Field{
@@ -523,6 +529,11 @@ class Field{
     data['updated_at'] = this.updatedAt;
     return data;
   }
+
+  String shortName(){
+    if(name == null || name!.isEmpty) return '';
+    return name!.substring(0, (name!.length > 1 ? 2 : name!.length)).toUpperCase();
+  }
 }
 
 class HarvestEmployeeStats{
@@ -540,6 +551,12 @@ class HarvestEmployeeStats{
     }catch(e){
       print('[HarvestEmployeeStats.fromJson]$e');
     }
+  }
+
+  double avg(){
+    if(quantity == null || quantity == 0) return 0;
+    if(time == null || time == 0) return 0;
+    return quantity! / time!;
   }
 }
 
@@ -562,6 +579,18 @@ class HarvestCompanyStats{
     }catch(e){
       print('[HarvestCompanyStats.fromJson]$e');
     }
+  }
+
+  String dateAvg(){
+    if(quantityOfDate != null || quantityOfDate == 0) return '0.00';
+    if(harvestTimeOfDate != null || harvestTimeOfDate == 0) return '0.00';
+    return (quantityOfDate! / harvestTimeOfDate!).toStringAsFixed(2);
+  }
+
+  String yearAvg(){
+    if(harvestTimeOfYear != null || harvestTimeOfYear == 0) return '0.00';
+    if(harvestTimeOfYear != null || harvestTimeOfYear == 0) return '0.00';
+    return (quantityOfYear! / harvestTimeOfYear!).toStringAsFixed(2);
   }
 
 }

@@ -6,46 +6,49 @@ typedef BoolCallback = bool Function();
 
 class CupertinoPopoverButton extends StatelessWidget {
   final Widget child;
-  final WidgetBuilder popoverBuild;
-  final double popoverWidth;
-  final double popoverHeight;
+  final WidgetBuilder? popoverBuild;
+  final double? popoverWidth;
+  final double? popoverHeight;
   final Color popoverColor;
-  final List<BoxShadow> popoverBoxShadow;
+  final List<BoxShadow>? popoverBoxShadow;
   final double radius;
   final Duration transitionDuration;
-  final BoolCallback onTap;
-  final BoxConstraints popoverConstraints;
+  final BoolCallback? onTap;
+  final BoxConstraints? popoverConstraints;
   final Color barrierColor;
   final CupertinoPopoverDirection direction;
 
   CupertinoPopoverButton(
-      {@required this.child,
-      this.popoverBuild,
-      this.popoverColor = Colors.white,
-      this.popoverBoxShadow,
-      this.popoverWidth,
-      this.popoverHeight,
-      BoxConstraints popoverConstraints,
-      this.direction = CupertinoPopoverDirection.bottom,
-      this.onTap,
-      this.transitionDuration = const Duration(milliseconds: 200),
-      this.barrierColor = Colors.black54,
-      this.radius = 8.0})
+      {required this.child,
+        this.popoverBuild,
+        this.popoverColor = Colors.white,
+        this.popoverBoxShadow,
+        this.popoverWidth,
+        this.popoverHeight,
+        BoxConstraints? popoverConstraints,
+        this.direction = CupertinoPopoverDirection.bottom,
+        this.onTap,
+        this.transitionDuration = const Duration(milliseconds: 200),
+        this.barrierColor = Colors.black54,
+        this.radius = 8.0})
       : assert(popoverBuild != null),
         this.popoverConstraints =
-            (popoverWidth != null || popoverHeight != null)
-                ? popoverConstraints?.tighten(
-                        width: popoverWidth, height: popoverHeight) ??
-                    BoxConstraints.tightFor(
-                        width: popoverWidth, height: popoverHeight)
-                : popoverConstraints;
+        (popoverWidth != null || popoverHeight != null)
+            ? popoverConstraints?.tighten(
+            width: popoverWidth, height: popoverHeight) ??
+            BoxConstraints.tightFor(
+                width: popoverWidth, height: popoverHeight)
+            : popoverConstraints;
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onLongPress: () {
+      onTap: () {
+        if (onTap != null && onTap!()) {
+          return;
+        }
         var offset = _WidgetUtil.getWidgetLocalToGlobal(context);
         var bounds = _WidgetUtil.getWidgetBounds(context);
         var body;
@@ -59,13 +62,13 @@ class CupertinoPopoverButton extends StatelessWidget {
           },
           barrierDismissible: true,
           barrierLabel:
-              MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          MaterialLocalizations.of(context).modalBarrierDismissLabel,
           barrierColor: this.barrierColor,
           transitionDuration: transitionDuration,
           transitionBuilder: (BuildContext context, Animation<double> animation,
               Animation<double> secondaryAnimation, Widget child) {
             if (body == null) {
-              body = popoverBuild(context);
+              body = popoverBuild!(context);
             }
             return FadeTransition(
               opacity: CurvedAnimation(
@@ -88,9 +91,6 @@ class CupertinoPopoverButton extends StatelessWidget {
           },
         );
       },
-      onTap: (){
-        onTap();
-      },
       child: child,
     );
   }
@@ -101,32 +101,32 @@ class CupertinoPopover extends StatefulWidget {
   final Rect attachRect;
   final Widget child;
   final Color color;
-  final List<BoxShadow> boxShadow;
+  final List<BoxShadow>? boxShadow;
   final double radius;
   final CupertinoPopoverDirection direction;
   final Animation<double> doubleAnimation;
-  BoxConstraints constraints;
+  BoxConstraints? constraints;
 
   CupertinoPopover(
-      {@required this.attachRect,
-      @required this.child,
-      BoxConstraints constraints,
-      this.color = Colors.white,
-      this.boxShadow,
-      @required BuildContext context,
-      this.direction = CupertinoPopoverDirection.bottom,
-      this.doubleAnimation,
-      this.radius = 8.0})
+      {required this.attachRect,
+        required this.child,
+        BoxConstraints? constraints,
+        this.color = Colors.white,
+        this.boxShadow,
+        required BuildContext context,
+        this.direction = CupertinoPopoverDirection.bottom,
+        required this.doubleAnimation,
+        this.radius = 8.0})
       : super() {
     BoxConstraints temp;
     if (constraints != null) {
       temp = BoxConstraints(maxHeight: 123.0, maxWidth: 150.0).copyWith(
         minWidth: constraints.minWidth.isFinite ? constraints.minWidth : null,
         minHeight:
-            constraints.minHeight.isFinite ? constraints.minHeight : null,
+        constraints.minHeight.isFinite ? constraints.minHeight : null,
         maxWidth: constraints.maxWidth.isFinite ? constraints.maxWidth : null,
         maxHeight:
-            constraints.maxHeight.isFinite ? constraints.maxHeight : null,
+        constraints.maxHeight.isFinite ? constraints.maxHeight : null,
       );
     } else {
       temp = BoxConstraints(maxHeight: 123.0, maxWidth: 150.0);
@@ -155,11 +155,6 @@ class CupertinoPopoverState extends State<CupertinoPopover>
   static const double _arrowWidth = 12.0;
   static const double _arrowHeight = 8.0;
 
-//  AnimationController animation;
-
-  /// 是否箭头向上
-  bool isArrowUp;
-
   @override
   void initState() {
     super.initState();
@@ -179,10 +174,10 @@ class CupertinoPopoverState extends State<CupertinoPopover>
             scale: widget.doubleAnimation,
             radius: widget.radius,
             color: widget.color,
-            boxShadow: widget.boxShadow,
+            boxShadow: widget.boxShadow ?? [],
             direction: widget.direction,
             child:
-                Material(type: MaterialType.transparency, child: widget.child),
+            Material(type: MaterialType.transparency, child: widget.child),
           ),
         )
       ],
@@ -193,15 +188,15 @@ class CupertinoPopoverState extends State<CupertinoPopover>
 class _CupertionPopoverPosition extends SingleChildRenderObjectWidget {
   final Rect attachRect;
   final Animation<double> scale;
-  final BoxConstraints constraints;
+  final BoxConstraints? constraints;
   final CupertinoPopoverDirection direction;
 
   _CupertionPopoverPosition(
-      {Widget child,
-      this.attachRect,
-      this.constraints,
-      this.scale,
-      this.direction})
+      {required Widget child,
+        required this.attachRect,
+        this.constraints,
+        required this.scale,
+        required this.direction})
       : super(child: child);
 
   @override
@@ -209,7 +204,7 @@ class _CupertionPopoverPosition extends SingleChildRenderObjectWidget {
       _CupertionPopoverPositionRenderObject(
           attachRect: attachRect,
           direction: direction,
-          constraints: constraints);
+          constraints: constraints ?? BoxConstraints());
 
   @override
   void updateRenderObject(BuildContext context,
@@ -217,7 +212,7 @@ class _CupertionPopoverPosition extends SingleChildRenderObjectWidget {
     renderObject
       ..attachRect = attachRect
       ..direction = direction
-      ..additionalConstraints = constraints;
+      ..additionalConstraints = constraints ?? BoxConstraints();
   }
 
   @override
@@ -255,32 +250,30 @@ class _CupertionPopoverPositionRenderObject extends RenderShiftedBox {
   }
 
   _CupertionPopoverPositionRenderObject(
-      {RenderBox child,
-      Rect attachRect,
-      Color color,
-      BoxConstraints constraints,
-      Animation<double> scale,
-      CupertinoPopoverDirection direction})
-      : super(child) {
-    this._attachRect = attachRect;
-    this._additionalConstraints = constraints;
-    this._direction = direction;
-  }
+      {RenderBox? child,
+        required Rect attachRect,
+        BoxConstraints constraints = const BoxConstraints(),
+        required CupertinoPopoverDirection direction})
+      :
+        this._attachRect = attachRect,
+        this._additionalConstraints = constraints,
+        this._direction = direction,
+        super(child);
 
   @override
   void performLayout() {
-    child.layout(_additionalConstraints.enforce(constraints),
+    child!.layout(_additionalConstraints.enforce(constraints),
         parentUsesSize: true);
     size = Size(constraints.maxWidth, constraints.maxHeight);
 
-    final BoxParentData childParentData = child.parentData;
+    final BoxParentData childParentData = child!.parentData as BoxParentData;
 
-    childParentData.offset = calcOffset(child.size);
+    childParentData.offset = calcOffset(child!.size);
   }
 
   Offset calcOffset(Size size) {
     CupertinoPopoverDirection calcDirection =
-        _calcDirection(attachRect, size, direction);
+    _calcDirection(attachRect, size, direction);
 
     if (calcDirection == CupertinoPopoverDirection.top ||
         calcDirection == CupertinoPopoverDirection.bottom) {
@@ -346,13 +339,13 @@ class _CupertionPopoverContext extends SingleChildRenderObjectWidget {
   final double radius;
   final CupertinoPopoverDirection direction;
   _CupertionPopoverContext(
-      {Widget child,
-      this.attachRect,
-      this.color,
-      this.boxShadow,
-      this.scale,
-      this.radius,
-      this.direction})
+      {required Widget child,
+        required this.attachRect,
+        required this.color,
+        this.boxShadow = const [],
+        required this.scale,
+        required this.radius,
+        required this.direction})
       : super(child: child);
 
   @override
@@ -430,21 +423,20 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
   }
 
   _CupertionPopoverContextRenderObject(
-      {RenderBox child,
-      Rect attachRect,
-      Color color,
-      List<BoxShadow> boxShadow,
-      double scale,
-      double radius,
-      CupertinoPopoverDirection direction})
-      : super(child) {
-    this._attachRect = attachRect;
-    this._color = color;
-    this._boxShadow = boxShadow;
-    this._scale = scale;
-    this._radius = radius;
-    this._direction = direction;
-  }
+      {RenderBox? child,
+        required Rect attachRect,
+        required Color color,
+        List<BoxShadow> boxShadow = const [],
+        required double scale,
+        required double radius,
+        required CupertinoPopoverDirection direction})
+      :
+        this._attachRect = attachRect,
+        this._color = color,
+        this._boxShadow = boxShadow,
+        this._scale = scale,
+        this._radius = radius,
+        this._direction = direction,super(child);
 
   @override
   void performLayout() {
@@ -454,30 +446,30 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
     if (direction == CupertinoPopoverDirection.top ||
         direction == CupertinoPopoverDirection.bottom) {
       childConstraints = BoxConstraints(
-              maxHeight:
-                  constraints.maxHeight - CupertinoPopoverState._arrowHeight)
+          maxHeight:
+          constraints.maxHeight - CupertinoPopoverState._arrowHeight)
           .enforce(constraints);
     } else {
       childConstraints = BoxConstraints(
-              maxWidth:
-                  constraints.maxWidth - CupertinoPopoverState._arrowHeight)
+          maxWidth:
+          constraints.maxWidth - CupertinoPopoverState._arrowHeight)
           .enforce(constraints);
     }
 
-    child.layout(childConstraints, parentUsesSize: true);
+    child!.layout(childConstraints, parentUsesSize: true);
 
     if (direction == CupertinoPopoverDirection.top ||
         direction == CupertinoPopoverDirection.bottom) {
-      size = Size(child.size.width,
-          child.size.height + CupertinoPopoverState._arrowHeight);
+      size = Size(child!.size.width,
+          child!.size.height + CupertinoPopoverState._arrowHeight);
     } else {
-      size = Size(child.size.width + CupertinoPopoverState._arrowHeight,
-          child.size.height);
+      size = Size(child!.size.width + CupertinoPopoverState._arrowHeight,
+          child!.size.height);
     }
     CupertinoPopoverDirection calcDirection =
-        _calcDirection(attachRect, size, direction);
+    _calcDirection(attachRect, size, direction);
 
-    final BoxParentData childParentData = child.parentData;
+    final BoxParentData childParentData = child!.parentData as BoxParentData;
     if (calcDirection == CupertinoPopoverDirection.bottom) {
       childParentData.offset = Offset(0.0, CupertinoPopoverState._arrowHeight);
     } else if (calcDirection == CupertinoPopoverDirection.right) {
@@ -492,14 +484,14 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
 //
 
     CupertinoPopoverDirection calcDirection =
-        _calcDirection(attachRect, size, direction);
-    // var isArrowUp = calcDirection == CupertinoPopoverDirection.bottom;
-    Rect arrowRect;
-    Offset translation;
+    _calcDirection(attachRect, size, direction);
+
+    Rect? arrowRect;
+    Offset? translation;
     Rect bodyRect;
 
-    final BoxParentData childParentData = child.parentData;
-    bodyRect = childParentData.offset & child.size;
+    final BoxParentData childParentData = (child!.parentData) as BoxParentData;
+    bodyRect = childParentData.offset & child!.size;
 
     var arrowLeft = attachRect.left + // 用于 Top和Bottom
         attachRect.width / 2 -
@@ -515,7 +507,7 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
       case CupertinoPopoverDirection.top:
         arrowRect = Rect.fromLTWH(
             arrowLeft,
-            child.size.height,
+            child!.size.height,
             CupertinoPopoverState._arrowWidth,
             CupertinoPopoverState._arrowHeight);
         translation = Offset(
@@ -524,7 +516,7 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
         break;
       case CupertinoPopoverDirection.left:
         arrowRect = Rect.fromLTWH(
-            child.size.width,
+            child!.size.width,
             arrowTop,
             CupertinoPopoverState._arrowHeight,
             CupertinoPopoverState._arrowWidth);
@@ -552,29 +544,28 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
       default:
     }
 
-    transform.translate(translation.dx, translation.dy);
+    transform.translate(translation!.dx, translation.dy);
     transform.scale(scale, scale, 1.0);
     transform.translate(-translation.dx, -translation.dy);
 
     _paintShadows(
-        context, transform, offset, calcDirection, arrowRect, bodyRect);
+        context, transform, offset, calcDirection, arrowRect!, bodyRect);
 
     Path clipPath = _getClip(calcDirection, arrowRect, bodyRect);
     context.pushClipPath(needsCompositing, offset, offset & size, clipPath,
-        (context, offset) {
-      context.pushTransform(needsCompositing, offset, transform,
-          (context, offset) {
-        final Paint backgroundPaint = Paint();
-        backgroundPaint.color = color;
-        context.canvas.drawRect(offset & size, backgroundPaint);
-        super.paint(context, offset);
-      });
-    });
+            (context, offset) {
+          context.pushTransform(needsCompositing, offset, transform,
+                  (context, offset) {
+                final Paint backgroundPaint = Paint();
+                backgroundPaint.color = color;
+                context.canvas.drawRect(offset & size, backgroundPaint);
+                super.paint(context, offset);
+              });
+        });
   }
 
   void _paintShadows(PaintingContext context, Matrix4 transform, Offset offset,
       CupertinoPopoverDirection direction, Rect arrowRect, Rect bodyRect) {
-    if (boxShadow == null) return;
     for (final BoxShadow boxShadow in boxShadow) {
       final Paint paint = boxShadow.toPaint();
       arrowRect = arrowRect
@@ -588,9 +579,9 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
       Path path = _getClip(direction, arrowRect, bodyRect);
 
       context.pushTransform(needsCompositing, offset, transform,
-          (context, offset) {
-        context.canvas.drawPath(path, paint);
-      });
+              (context, offset) {
+            context.canvas.drawPath(path, paint);
+          });
     }
   }
 
@@ -693,9 +684,9 @@ CupertinoPopoverDirection _calcDirection(
           : CupertinoPopoverDirection.top; // 判断顶部位置够不够
     case CupertinoPopoverDirection.bottom:
       return _ScreenUtil.getInstance().screenHeight >
-              attachRect.bottom +
-                  size.height +
-                  CupertinoPopoverState._arrowHeight
+          attachRect.bottom +
+              size.height +
+              CupertinoPopoverState._arrowHeight
           ? CupertinoPopoverDirection.bottom
           : CupertinoPopoverDirection.top;
     case CupertinoPopoverDirection.left:
@@ -704,9 +695,9 @@ CupertinoPopoverDirection _calcDirection(
           : CupertinoPopoverDirection.left; // 判断顶部位置够不够
     case CupertinoPopoverDirection.right:
       return _ScreenUtil.getInstance().screenWidth >
-              attachRect.right +
-                  size.width +
-                  CupertinoPopoverState._arrowHeight
+          attachRect.right +
+              size.width +
+              CupertinoPopoverState._arrowHeight
           ? CupertinoPopoverDirection.right
           : CupertinoPopoverDirection.left;
   }

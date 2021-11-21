@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:facepunch/lang/l10n.dart';
+import '/lang/l10n.dart';
 import 'base_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +34,14 @@ class WorkModel extends BaseProvider{
     }
   }
 
-  Future<String?> startShopTracking({required String token, required int projectId, required int taskId})async{
+  Future<String?> startShopTracking(String? token, int? projectId, int? taskId)async{
     try{
       var res = await sendPostRequest(
           AppConst.startShopTracking,
           token,
           {
-            'task_id': taskId.toString(),
-            'project_id': projectId.toString(),
+            'task_id': taskId,
+            'project_id': projectId,
           }
       );
       print('[ScheduleTask.startShopTracking]${res.body}');
@@ -307,12 +307,12 @@ class WorkSchedule extends BaseModel{
     }
   }
 
-  Future<String?> startSchedule(token)async{
+  Future<String?> startSchedule(String? token)async{
     try{
       var res = await sendPostRequest(
         AppConst.startSchedule,
         token??GlobalData.token,
-        { 'id' : id.toString() }
+        { 'id' : id }
       );
       print('[WorkSchedule.startSchedule]${res.body}');
       if(res.statusCode==200){
@@ -331,7 +331,7 @@ class WorkSchedule extends BaseModel{
       var res = await sendPostRequest(
         AppConst.endSchedule,
         GlobalData.token,
-        {'id':id.toString()}
+        {'id':id}
       );
       print('[WorkSchedule.endSchedule]${res.body}');
       if(res.statusCode==200){
@@ -350,7 +350,7 @@ class WorkSchedule extends BaseModel{
       var res = await sendPostRequest(
           AppConst.deleteSchedule,
           GlobalData.token,
-          {'id':id.toString()}
+          { 'id':id }
       );
       print('[WorkSchedule.deleteSchedule]${res.body}');
       if(res.statusCode==200){
@@ -502,12 +502,12 @@ class EmployeeCall extends BaseModel{
     return end!.substring(11, 16);
   }
 
-  Future<String?> startCall(String token)async{
+  Future<String?> startCall(String? token)async{
     try{
       var res = await sendPostRequest(
           AppConst.startCall,
           token,
-          {'id':id.toString()}
+          {'id':id}
       );
       print('[EmployeeCall.startCall]${res.body}');
       if(res.statusCode==200){

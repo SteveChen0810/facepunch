@@ -1,15 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/company_model.dart';
+import '/lang/l10n.dart';
+import '/models/company_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:wakelock/wakelock.dart';
-import '../../models/user_model.dart';
-import '../../screens/employee/employee_home.dart';
-import '../../models/app_const.dart';
-import '../../widgets/face_painter.dart';
-import '../../widgets/utils.dart';
+import '/models/user_model.dart';
+import '/screens/employee/employee_home.dart';
+import '/models/app_const.dart';
+import '/widgets/face_painter.dart';
+import '/widgets/utils.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -18,9 +18,6 @@ import 'dart:math' as math;
 import 'package:provider/provider.dart';
 
 class EmployeeLogin extends StatefulWidget {
-
-  final Function showMessage;
-  EmployeeLogin({this.showMessage});
 
   @override
   _EmployeeLoginState createState() => _EmployeeLoginState();
@@ -34,10 +31,10 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       enableContours: true,
       enableTracking: true,
   ));
-  List<Face> faces;
-  CameraController cameraController;
+  List<Face>? faces;
+  CameraController? cameraController;
   CameraLensDirection _direction = CameraLensDirection.front;
-  ImageRotation rotation;
+  ImageRotation? rotation;
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
   bool _isDetecting = false;
   String _photoPath="";
@@ -84,10 +81,10 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                 : ResolutionPreset.high,
             enableAudio: false,
         );
-        await cameraController.initialize();
+        await cameraController!.initialize();
         await initDetectFace();
       }else{
-        widget.showMessage(S.of(context).allowFacePunchToTakePictures);
+        Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
       print(e);
@@ -96,20 +93,20 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
 
   Future<void> initDetectFace()async{
     try{
-      if(cameraController.value.isStreamingImages)return;
-      cameraController.startImageStream((CameraImage image) {
+      if(cameraController!.value.isStreamingImages)return;
+      cameraController!.startImageStream((CameraImage image) {
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
-        detect(image, FirebaseVision.instance.faceDetector().processImage, rotation)
+        detect(image, FirebaseVision.instance.faceDetector().processImage, rotation!)
             .then((dynamic result) {
           setState(() {faces = result;});
           _isDetecting = false;
         },
         ).catchError((e) {print(e);_isDetecting = false;},);
-      }).catchError((e){print(e);widget.showMessage(e.toString());});
+      }).catchError((e){print(e);Tools.showErrorMessage(context, e.toString());});
     }on CameraException catch(e){
       print(e);
-      widget.showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
@@ -121,27 +118,27 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       }
     }on CameraException catch(e){
       print(e);
-      widget.showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
   Future<void> takePhoto() async {
     try {
-      if (!cameraController.value.isInitialized) {
+      if (!cameraController!.value.isInitialized) {
         return null;
       }
-      if (cameraController.value.isTakingPicture) {
+      if (cameraController!.value.isTakingPicture) {
         return ;
       }
-      if(faces==null || faces.isEmpty){
-        widget.showMessage(S.of(context).thereIsNotAnyFaces);
+      if(faces==null || faces!.isEmpty){
+        Tools.showErrorMessage(context, S.of(context).thereIsNotAnyFaces);
         return null;
       }
-      if(cameraController.value.isStreamingImages){
-        await cameraController.stopImageStream();
+      if(cameraController!.value.isStreamingImages){
+        await cameraController!.stopImageStream();
       }
       await Future.delayed(new Duration(milliseconds: 100));
-      XFile file = await cameraController.takePicture();
+      XFile file = await cameraController!.takePicture();
       print(file.path);
       setState(() {_photoPath = file.path;});
     } on CameraException catch (e) {
@@ -152,28 +149,28 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   Future<bool> loginWithFace(String path)async{
     try{
       String base64Image = base64Encode(File(path).readAsBytesSync());
-      String result = await context.read<UserModel>().loginWithFace(base64Image);
+      String? result = await context.read<UserModel>().loginWithFace(base64Image);
       if(result==null){
         return true;
       }else{
-        widget.showMessage(result);
+        Tools.showErrorMessage(context, result);
       }
     }catch(e){
       print("[EmployeeLogin.loginWithFace] $e");
-      widget.showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
     return false;
   }
 
   Widget faceRect() {
     try{
-      if (faces == null || cameraController == null || !cameraController.value.isInitialized) {
+      if (faces == null || cameraController == null || !cameraController!.value.isInitialized) {
         return SizedBox();
       }
       CustomPainter painter;
-      final Size imageSize = Size(cameraController.value.previewSize.height, cameraController.value.previewSize.width,);
+      final Size imageSize = Size(cameraController!.value.previewSize!.height, cameraController!.value.previewSize!.width,);
       if (faces is! List<Face>) return SizedBox();
-      painter = FaceDetectorPainter(imageSize, faces);
+      painter = FaceDetectorPainter(imageSize, faces!);
       return CustomPaint(painter: painter,);
     }catch(e){
       print("[EmployeeLogin.faceRect] $e");
@@ -196,18 +193,18 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   height: size,
                   padding: EdgeInsets.all(8),
                   child: _photoPath.isEmpty
-                    ?(cameraController==null || !cameraController.value.isInitialized)
+                    ?(cameraController==null || !cameraController!.value.isInitialized)
                     ?Center(child: CircularProgressIndicator(),)
                     :ClipRect(
                       child: Transform.scale(
-                          scale: 1/cameraController.value.aspectRatio,
+                          scale: 1/cameraController!.value.aspectRatio,
                           child: Center(
                               child: AspectRatio(
-                                  aspectRatio: cameraController.value.aspectRatio,
+                                  aspectRatio: cameraController!.value.aspectRatio,
                                   child: Stack(
                                     fit: StackFit.expand,
                                     children: [
-                                      CameraPreview(cameraController),
+                                      CameraPreview(cameraController!),
                                       Platform.isIOS?faceRect():
                                       Transform(
                                         alignment: Alignment.center,
@@ -249,14 +246,14 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
               if(_photoPath.isEmpty){
                 bool result = false;
                 await takePhoto();
-                if(_photoPath!=null && _photoPath.isNotEmpty){
+                if(_photoPath.isNotEmpty){
                   result = await loginWithFace(_photoPath);
                 }
-                _btnController?.reset();
+                _btnController.reset();
                 if(result){
                   final user = context.read<UserModel>().user;
-                  if(mounted){setState(() {_pageIndex = 2; userName = "${user.getFullName()}";});}
-                  await context.read<CompanyModel>().getMyCompany(user.companyId);
+                  if(mounted){setState(() {_pageIndex = 2; userName = "${user?.getFullName()}";});}
+                  await context.read<CompanyModel>().getMyCompany(user?.companyId);
                   if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
                 }
               }else{
@@ -291,20 +288,18 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
               )
           ),
           SizedBox(height: 10,),
-          ButtonTheme(
+          MaterialButton(
             minWidth: size,
             height: 40,
             splashColor: Color(primaryColor),
-            child: RaisedButton(
-              onPressed: (){
-                _initializeCamera();
-                setState(() {_pageIndex=1;});
-              },
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              color: Colors.black87,
-              child: Text(S.of(context).faceScanLogin,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
-            ),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            color: Colors.black87,
+            onPressed: (){
+              _initializeCamera();
+              setState(() {_pageIndex=1;});
+            },
+            child: Text(S.of(context).faceScanLogin,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
           )
         ],
       );

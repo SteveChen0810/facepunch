@@ -1,13 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
+import 'package:facepunch/models/harvest_model.dart';
+import 'package:facepunch/widgets/project_picker.dart';
+import 'package:facepunch/widgets/task_picker.dart';
+import 'package:facepunch/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
+
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/company_model.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import '/widgets/calendar_strip/date-utils.dart';
 
 class EmployeeDispatch extends StatefulWidget{
 
@@ -20,13 +25,13 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   List<User> employees = [];
   List<EmployeeCall> calls = [];
-  User selectedUser;
-  EmployeeCall _call;
+  User? selectedUser;
+  EmployeeCall? _call;
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
 
   _selectScheduleDate() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
         context: context,
         initialDate: selectedDate,
         initialDatePickerMode: DatePickerMode.day,
@@ -40,11 +45,11 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
 
   _onRefresh()async{
     if(selectedUser!=null){
-      final result = await selectedUser.getDailyCall(selectedDate.toString());
+      final result = await selectedUser!.getDailyCall(selectedDate.toString());
       if(result != null){
-        _showMessage(result);
+        Tools.showErrorMessage(context, result);
       }else{
-        calls = selectedUser.calls;
+        calls = selectedUser!.calls;
       }
     }
     _refreshController.refreshCompleted();
@@ -120,19 +125,15 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     );
   }
 
-  _showMessage(String message){
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
   @override
   void dispose() {
     _refreshController.dispose();
     super.dispose();
   }
 
-  Future<DateTime> _selectTime(String createdAt)async{
+  Future<DateTime?> _selectTime(String createdAt)async{
     DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
     );
@@ -142,7 +143,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     return null;
   }
 
-  _showCallDialog(EmployeeCall c){
+  _showCallDialog(EmployeeCall? c){
     if(projects.isEmpty || tasks.isEmpty || selectedUser==null)return;
     EmployeeCall call = EmployeeCall(
         projectId: projects.first.id,
@@ -151,7 +152,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
         taskName: tasks.first.name,
         start: selectedDate.toString(),
         end: selectedDate.toString(),
-        userId: selectedUser.id,
+        userId: selectedUser!.id,
         priority: 1,
     );
     if(c != null){
@@ -183,67 +184,23 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                         ),
                         SizedBox(height: 8,),
                         Text(S.of(context).project,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black54),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                          clipBehavior: Clip.hardEdge,
-                          margin: EdgeInsets.only(top: 4),
-                          child: DropdownButton<Project>(
-                            items: projects.map((Project value) {
-                              return DropdownMenuItem<Project>(
-                                value: value,
-                                child: Text(
-                                  value.name,
-                                  style: TextStyle(fontSize: 12),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }).toList(),
-                            value: projects.firstWhere((p) => p.id == call.projectId,orElse: ()=>null),
-                            isExpanded: true,
-                            isDense: true,
-                            underline: SizedBox(),
-                            onChanged: (v) {
-                              _setState((){ call.projectId = v.id; call.projectName = v.name; });
-                              FocusScope.of(context).requestFocus(FocusNode());
-                            },
-                          ),
+                        ProjectPicker(
+                          projects: projects,
+                          projectId: call.projectId,
+                          onSelected: (v) {
+                            _setState((){ call.projectId = v?.id; call.projectName = v?.name; });
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          },
                         ),
                         SizedBox(height: 8,),
-                        Text(S.of(context).activity,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black54),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                          clipBehavior: Clip.hardEdge,
-                          margin: EdgeInsets.only(top: 4),
-                          child: DropdownButton<ScheduleTask>(
-                            items:tasks.map((ScheduleTask value) {
-                              return DropdownMenuItem<ScheduleTask>(
-                                value: value,
-                                child: Text(
-                                  value.name,
-                                  style: TextStyle(fontSize: 12),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }).toList(),
-                            value: tasks.firstWhere((t) => t.id == call.taskId,orElse: ()=>null),
-                            isExpanded: true,
-                            isDense: true,
-                            underline: SizedBox(),
-                            onChanged: (v) {
-                              _setState((){call.taskId = v.id; call.taskName = v.name;});
-                              FocusScope.of(context).requestFocus(FocusNode());
-                            },
-                          ),
+                        Text(S.of(context).task,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
+                        TaskPicker(
+                          tasks: tasks,
+                          taskId: call.taskId,
+                          onSelected: (v) {
+                            _setState((){call.taskId = v?.id; call.taskName = v?.name;});
+                            FocusScope.of(context).requestFocus(FocusNode());
+                          },
                         ),
                         SizedBox(height: 8,),
                         Container(
@@ -256,7 +213,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                                   Radio(
                                     onChanged: (v){
                                       _setState((){
-                                        call.priority = v;
+                                        call.priority = v as int?;
                                       });
                                     },
                                     value: 1,
@@ -266,7 +223,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                                   Radio(
                                     onChanged: (v){
                                       _setState((){
-                                        call.priority = v;
+                                        call.priority = v as int?;
                                       });
                                     },
                                     value: 2,
@@ -276,7 +233,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                                   Radio(
                                     onChanged: (v){
                                       _setState((){
-                                        call.priority = v;
+                                        call.priority = v as int?;
                                       });
                                     },
                                     value: 3,
@@ -293,17 +250,13 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                           children: [
                             Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                             Text("${PunchDateUtils.getTimeString(call.start)}"),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(call.start);
-                                  if(pickedTime!=null){
+                                  DateTime? pickedTime = await _selectTime(call.start!);
+                                  if(pickedTime != null){
                                     _setState(() { call.start = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.all(8),
-                                minWidth: 0,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -313,17 +266,13 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                           children: [
                             Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                             Text("${PunchDateUtils.getTimeString(call.end)}"),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(call.end);
+                                  DateTime? pickedTime = await _selectTime(call.end!);
                                   if(pickedTime!=null){
                                     _setState(() { call.end = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.all(8),
-                                minWidth: 0,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -393,7 +342,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
 
   _addEditCall(EmployeeCall call)async{
     final result = await call.addEditCall();
-    if(result != null) _showMessage(result);
+    if(result != null) Tools.showErrorMessage(context, result);
     _refreshController.requestRefresh();
   }
 
@@ -423,18 +372,14 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     setState(() {
                       selectedDate = selectedDate.subtract(Duration(days: 1));
                     });
                     _refreshController.requestRefresh();
                   },
-                  shape: CircleBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   child: Icon(Icons.arrow_back_ios_outlined,color: Colors.black,size: 30,),
-                  padding: EdgeInsets.all(4),
-                  minWidth: 0,
                 ),
                 SizedBox(width: 10,),
                 MaterialButton(
@@ -445,18 +390,14 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                   child: Text(selectedDate.toString().split(' ')[0],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
                 ),
                 SizedBox(width: 10,),
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     setState(() {
                       selectedDate = selectedDate.add(Duration(days: 1));
                     });
                     _refreshController.requestRefresh();
                   },
-                  shape: CircleBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   child: Icon(Icons.arrow_forward_ios_outlined,color: Colors.black,size: 30,),
-                  padding: EdgeInsets.all(4),
-                  minWidth: 0,
                 ),
               ],
             ),
@@ -472,7 +413,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                 slivers: [
                   SliverList(delegate: SliverChildListDelegate([
                     _scheduleLine(),
-                    if(selectedUser!=null && selectedUser.type!='shop_tracking')
+                    if(selectedUser!=null && selectedUser!.type != 'shop_tracking')
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: MaterialButton(

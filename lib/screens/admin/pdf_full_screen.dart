@@ -1,10 +1,10 @@
-import 'package:facepunch/lang/l10n.dart';
+import '/lang/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class PDFFullScreen extends StatefulWidget{
   final String url;
-  PDFFullScreen({this.url});
+  PDFFullScreen({required this.url});
 
   @override
   _PDFFullScreenState createState() => _PDFFullScreenState();
@@ -12,7 +12,7 @@ class PDFFullScreen extends StatefulWidget{
 
 class _PDFFullScreenState extends State<PDFFullScreen> {
 
-  String pdfError;
+  String? pdfError;
 
 
   @override

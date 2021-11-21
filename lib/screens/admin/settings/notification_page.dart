@@ -1,8 +1,9 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/notification.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/notification.dart';
+import '/models/revision_model.dart';
+import '/widgets/calendar_strip/date-utils.dart';
+import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -17,7 +18,7 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   RefreshController _refreshController = RefreshController(initialRefresh: true);
-  Revision _revision;
+  Revision? _revision;
 
   void _onRefresh() async{
     await context.read<NotificationModel>().getNotificationFromServer();
@@ -39,25 +40,26 @@ class _NotificationPageState extends State<NotificationPage> {
         );
       }
       return Slidable(
-        actionPane: SlidableDrawerActionPane(),
-        actionExtentRatio: 0.15,
-        secondaryActions: <Widget>[
-          IconSlideAction(
-            caption: S.of(context).delete,
-            color: Colors.red,
-            icon: Icons.delete,
-            onTap: ()async{
-              setState(() { _revision = revision;});
-              String result = await revision.delete();
-              setState(() { _revision = null;});
-              if(result == null){
-                context.read<NotificationModel>().removeRevision(revision);
-              }else{
-                _showMessage(result);
-              }
-            },
-          ),
-        ],
+        endActionPane: ActionPane(
+          motion: ScrollMotion(),
+          children: [
+            SlidableAction(
+              label: S.of(context).delete,
+              backgroundColor: Colors.red,
+              icon: Icons.delete,
+              onPressed: (v)async{
+                setState(() { _revision = revision;});
+                String? result = await revision.delete();
+                setState(() { _revision = null;});
+                if(result == null){
+                  context.read<NotificationModel>().removeRevision(revision);
+                }else{
+                  Tools.showErrorMessage(context, result);
+                }
+              },
+            ),
+          ]
+        ),
         child: InkWell(
           onTap: ()=>_showRevisionDialog(revision),
           child: Container(
@@ -72,13 +74,13 @@ class _NotificationPageState extends State<NotificationPage> {
                   children: [
                     Text(PunchDateUtils.toDateTime(revision.createdAt)),
                     SizedBox(height: 8,),
-                    Text('${revision.type.toUpperCase()}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
+                    Text('${revision.type?.toUpperCase()}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),),
                   ],
                 ),
                 Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: Text('${revision.user.getFullName()}',
+                      child: Text('${revision.user?.getFullName()}',
                         style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
@@ -109,18 +111,6 @@ class _NotificationPageState extends State<NotificationPage> {
           child: Text(e.toString())
       );
     }
-  }
-
-  _showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
   }
 
   _showRevisionDialog(Revision revision){
@@ -524,7 +514,6 @@ class _NotificationPageState extends State<NotificationPage> {
       print('[NotificationPage._showRevisionDialog]$e');
       content = Text(e.toString(), style: TextStyle(color: Colors.red),);
     }
-
     showDialog(
         context: context,
         builder:(_)=> AlertDialog(
@@ -557,10 +546,10 @@ class _NotificationPageState extends State<NotificationPage> {
                           onPressed: ()async{
                             Navigator.pop(context);
                             setState(() { _revision = revision; });
-                            String result = await revision.accept();
+                            String? result = await revision.accept();
                             setState(() { _revision = null; });
                             if(result != null){
-                              _showMessage(result);
+                              Tools.showErrorMessage(context, result);
                             }
                           },
                           child: Text(S.of(context).accept, style: TextStyle(color: Colors.green),)
@@ -570,10 +559,10 @@ class _NotificationPageState extends State<NotificationPage> {
                           onPressed: ()async{
                             Navigator.pop(context);
                             setState(() { _revision = revision; });
-                            String result = await revision.decline();
+                            String? result = await revision.decline();
                             setState(() { _revision = null; });
                             if(result != null){
-                              _showMessage(result);
+                              Tools.showErrorMessage(context, result);
                             }
                           },
                           child: Text(S.of(context).decline, style: TextStyle(color: Colors.orange),)
@@ -582,11 +571,11 @@ class _NotificationPageState extends State<NotificationPage> {
                         onPressed: ()async{
                           Navigator.pop(context);
                           setState(() { _revision = revision; });
-                          String result = await revision.delete();
+                          String? result = await revision.delete();
                           setState(() { _revision = null; });
                           context.read<NotificationModel>().removeRevision(revision);
                           if(result != null){
-                            _showMessage(result);
+                            Tools.showErrorMessage(context, result);
                           }
                         },
                         child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)

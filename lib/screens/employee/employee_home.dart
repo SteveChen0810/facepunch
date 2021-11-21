@@ -1,18 +1,18 @@
-import 'package:facepunch/models/notification.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/screens/employee/employee_dispatch.dart';
-import 'package:facepunch/widgets/dialogs.dart';
-import 'package:facepunch/widgets/utils.dart';
+import '/models/notification.dart';
+import '/models/work_model.dart';
+import '/screens/employee/employee_dispatch.dart';
+import '/widgets/dialogs.dart';
+import '/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-import '../../lang/l10n.dart';
-import '../../models/company_model.dart';
-import '../../models/user_model.dart';
+import '/lang/l10n.dart';
+import '/models/company_model.dart';
+import '/models/user_model.dart';
 import '../admin/nfc/nfc_scan.dart';
 import 'employee_document.dart';
 import 'employee_notification.dart';
 import 'employee_timesheet.dart';
-import '../../models/app_const.dart';
+import '/models/app_const.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -37,31 +37,39 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   }
 
   initFireBaseNotification(){
-    final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        _onMessage(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        _onMessage(message);
-      },
-      onResume: (Map<String, dynamic> message) async {
-        _onMessage(message);
-      },
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _onMessage(message);
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      _onMessage(message);
+    });
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message){
+      if(message != null)_onMessage(message);
+    });
+    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
     );
-    _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings(sound: true, badge: true, alert: true));
   }
 
-  _onMessage(message){
-    Tools.playSound();
-    AppNotification newNotification = AppNotification.fromJsonFirebase(message);
-    showNotificationDialog(newNotification,context,);
+  _onMessage(RemoteMessage message){
+    try{
+      AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
+      Tools.playSound();
+      showNotificationDialog(newNotification, context,);
+    }catch(e){
+      print('[_onMessage]$e');
+    }
   }
 
   _fetchData()async{
     await context.read<WorkModel>().getProjectsAndTasks();
     final user = context.read<UserModel>().user;
-    if(user.canManageDispatch()){
+    if(user?.canManageDispatch()??false){
       await context.read<CompanyModel>().getCompanyUsers();
     }
     await context.read<UserModel>().getYearTotalHours();
@@ -81,7 +89,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
           children: [
             EmployeeTimeSheet(),
             EmployeeDocument(),
-            if(user.canNTCTracking)
+            if(user.canNTCTracking??false)
               NFCScanPage(),
             if(user.hasSchedule())
               EmployeeSchedule(),
@@ -108,13 +116,13 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
               activeIcon: Image.asset("assets/images/ic_document.png",width: 30,color: Color(primaryColor),),
               label: S.of(context).document
           ),
-          if(user.canNTCTracking)
+          if(user.canNTCTracking??false)
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/nfc.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/nfc.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
             ),
-          if(user.hasSchedule())
+          if(user!.hasSchedule())
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),
@@ -144,7 +152,6 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
       ),
       backgroundColor: Color(0xFFf4f4f4),
       resizeToAvoidBottomInset: true,
-      resizeToAvoidBottomPadding: true,
     );
   }
 }

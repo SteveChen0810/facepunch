@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
+import '/lang/l10n.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 typedef HandleDetection = Future<List<Face>> Function(FirebaseVisionImage image);
 
@@ -72,12 +73,44 @@ ImageRotation rotationIntToImageRotation(int rotation) {
 class Tools {
   static Future<void> playSound()async{
     try{
-      AssetsAudioPlayer().open(
-        Audio("assets/sound/sound.mp3"),
-        autoStart: true,
-      );
+      // AssetsAudioPlayer().open(
+      //   Audio("assets/sound/sound.mp3"),
+      //   autoStart: true,
+      // );
     }catch(e){
       print('[playSound]$e');
+    }
+  }
+
+  static showErrorMessage(BuildContext context, String message){
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(onPressed: (){}, label: S.of(context).close, textColor: Colors.white,),
+        )
+    );
+  }
+
+  static showSuccessMessage(BuildContext context, String message){
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+          action: SnackBarAction(onPressed: (){}, label: S.of(context).close, textColor: Colors.white,),
+        )
+    );
+  }
+
+  static Future<void> consoleLog(String log)async{
+    try{
+      print(log);
+    }catch(e){
+      print(e);
     }
   }
 }

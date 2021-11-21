@@ -5,10 +5,10 @@ import 'work_model.dart';
 import 'dart:convert';
 import 'app_const.dart';
 
-class RevisionModel extends BaseModel {
+class RevisionModel extends BaseProvider {
 
-  Future<String?> sendPunchRevisionRequest({required int punchId, required String newValue,
-    required String oldValue, required String description})async{
+  Future<String?> sendPunchRevisionRequest({int? punchId, required String newValue,
+    String? oldValue, required String description})async{
     try{
       var res = await sendPostRequest(
           AppConst.sendTimeRevisionRequest,

@@ -1,9 +1,10 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/screens/about_page.dart';
-import 'package:facepunch/widgets/address_picker/country_state_city_picker.dart';
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/company_model.dart';
+import '/models/user_model.dart';
+import '/screens/about_page.dart';
+import '/widgets/address_picker/country_state_city_picker.dart';
+import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,21 +17,21 @@ class AdminSetting extends StatefulWidget {
 class _AdminSettingState extends State<AdminSetting> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  TextEditingController _email;
+  late TextEditingController _email;
   TextEditingController _newPassword = TextEditingController();
   TextEditingController _oldPassword = TextEditingController();
-  TextEditingController _fName;
-  TextEditingController _lName;
-  String _emailError,_passwordError,_fNameError,_lNameError;
+  late TextEditingController _fName;
+  late TextEditingController _lName;
+  String? _emailError,_passwordError,_fNameError,_lNameError;
 
-  Company myCompany;
-  TextEditingController _name;
-  TextEditingController _address1;
-  TextEditingController _address2;
-  TextEditingController _postalCode;
-  TextEditingController _phone;
-  String country, state, city;
-  String _nameError, _addressError, _postalCodeError;
+  late Company myCompany;
+  late TextEditingController _name;
+  late TextEditingController _address1;
+  late TextEditingController _address2;
+  late TextEditingController _postalCode;
+  late TextEditingController _phone;
+  String? country, state, city;
+  String? _nameError, _addressError, _postalCodeError;
 
   bool isProfileUpdating = false;
   bool isCompanyUpdating = false;
@@ -40,12 +41,12 @@ class _AdminSettingState extends State<AdminSetting> {
   @override
   void initState() {
     super.initState();
-    User user = context.read<UserModel>().user;
+    User user = context.read<UserModel>().user!;
     _email = TextEditingController(text: user.email);
     _fName = TextEditingController(text: user.firstName);
     _lName = TextEditingController(text: user.lastName);
 
-    myCompany = context.read<CompanyModel>().myCompany;
+    myCompany = context.read<CompanyModel>().myCompany!;
     _name = TextEditingController(text: myCompany.name);
     _address1 = TextEditingController(text: user.address1);
     _address2 = TextEditingController(text: user.address2);
@@ -91,15 +92,15 @@ class _AdminSettingState extends State<AdminSetting> {
       return false;
     }
     if(country==null){
-      showMessage(S.of(context).countryIsRequired);
+      Tools.showErrorMessage(context, S.of(context).countryIsRequired);
       return false;
     }
     if(state==null){
-      showMessage(S.of(context).stateIsRequired);
+      Tools.showErrorMessage(context, S.of(context).stateIsRequired);
       return false;
     }
     if(city==null){
-      showMessage(S.of(context).cityIsRequired);
+      Tools.showErrorMessage(context, S.of(context).cityIsRequired);
       return false;
     }
     if(_postalCode.text.isEmpty){
@@ -121,7 +122,7 @@ class _AdminSettingState extends State<AdminSetting> {
       if(isProfileUpdating)return;
       if(profileValidator()){
         setState(() {isProfileUpdating = true;});
-        String result = await context.read<UserModel>().updateAdmin(
+        String? result = await context.read<UserModel>().updateAdmin(
             email: _email.text,
             fName: _fName.text,
             lName: _lName.text,
@@ -130,7 +131,7 @@ class _AdminSettingState extends State<AdminSetting> {
         );
         setState(() {isProfileUpdating = false;});
         if(result!=null){
-          showMessage(result);
+          Tools.showErrorMessage(context, result);
         }
       }else{
         setState(() {});
@@ -144,7 +145,7 @@ class _AdminSettingState extends State<AdminSetting> {
     try{
       if(isCompanyUpdating)return;
       setState(() {isCompanyUpdating = true;});
-      String result = await context.read<CompanyModel>().updateCompany(
+      String? result = await context.read<CompanyModel>().updateCompany(
           name: _name.text,
           phone: _phone.text,
           postalCode: _postalCode.text,
@@ -158,30 +159,17 @@ class _AdminSettingState extends State<AdminSetting> {
         isCompanyUpdating = false;
       });
       if(result!=null){
-        showMessage(result);
+        Tools.showErrorMessage(context, result);
       }
     }catch(e){
       print("[SettingScreen.updateUser] $e");
     }
   }
 
-  showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    User user = context.watch<UserModel>().user;
-    CompanySettings companySettings = context.watch<CompanyModel>().myCompanySettings;
-
+    User? user = context.watch<UserModel>().user;
+    CompanySettings companySettings = context.watch<CompanyModel>().myCompanySettings!;
     if(user==null)return Container();
     return Scaffold(
       key: _scaffoldKey,
@@ -329,19 +317,17 @@ class _AdminSettingState extends State<AdminSetting> {
                         ),
                         SizedBox(height: 8,),
                         Center(
-                          child: ButtonTheme(
+                          child: MaterialButton(
                             minWidth: MediaQuery.of(context).size.width/2,
                             padding: EdgeInsets.all(8),
-                            child: RaisedButton(
-                              child: isProfileUpdating?SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
-                              ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                              onPressed: updateUser,
-                              color: Colors.red,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            ),
+                            child: isProfileUpdating?SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
+                            ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            onPressed: updateUser,
+                            color: Colors.red,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
                         ),
                       ],
@@ -458,19 +444,17 @@ class _AdminSettingState extends State<AdminSetting> {
                         ),
                         SizedBox(height: 8,),
                         Center(
-                          child: ButtonTheme(
+                          child: MaterialButton(
                             minWidth: MediaQuery.of(context).size.width/2,
                             padding: EdgeInsets.all(8),
-                            child: RaisedButton(
-                              child: isCompanyUpdating?SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
-                              ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                              onPressed: updateCompany,
-                              color: Colors.red,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            ),
+                            child: isCompanyUpdating?SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
+                            ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                            onPressed: updateCompany,
+                            color: Colors.red,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           ),
                         ),
                       ],
@@ -481,12 +465,12 @@ class _AdminSettingState extends State<AdminSetting> {
                   child: Column(
                     children: [
                       SwitchListTile(
-                        value: companySettings.receiveRevisionNotification,
+                        value: companySettings.receiveRevisionNotification??true,
                         onChanged: isRevisionNotificationUpdating?null:(v)async{
                           setState(() {isRevisionNotificationUpdating = true;});
                           companySettings.receiveRevisionNotification = v;
-                          String result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
-                          if(result!=null)showMessage(result);
+                          String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                          if(result!=null)Tools.showErrorMessage(context, result);
                           setState(() {isRevisionNotificationUpdating = false;});
                         },
                         dense: true,
@@ -505,12 +489,12 @@ class _AdminSettingState extends State<AdminSetting> {
                         ),
                       ),
                       SwitchListTile(
-                        value: companySettings.receivePunchNotification,
+                        value: companySettings.receivePunchNotification??false,
                         onChanged: isPunchNotificationUpdating?null:(v)async{
                           setState(() {isPunchNotificationUpdating = true;});
                           companySettings.receivePunchNotification = v;
-                          String result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
-                          if(result!=null)showMessage(result);
+                          String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                          if(result!=null)Tools.showErrorMessage(context, result);
                           setState(() {isPunchNotificationUpdating = false;});
                         },
                         dense: true,

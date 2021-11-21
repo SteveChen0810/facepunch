@@ -1,51 +1,54 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/screens/admin/pdf_full_screen.dart';
-import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
-import 'package:facepunch/widgets/dialogs.dart';
+import 'package:facepunch/widgets/project_picker.dart';
+import 'package:facepunch/widgets/task_picker.dart';
+import 'package:facepunch/widgets/utils.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import '../../models/app_const.dart';
-import '../../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 
+import '/lang/l10n.dart';
+import '/models/company_model.dart';
+import '/models/work_model.dart';
+import '/screens/admin/pdf_full_screen.dart';
+import '/widgets/calendar_strip/calendar_strip.dart';
+import '/widgets/calendar_strip/date-utils.dart';
+import '/widgets/dialogs.dart';
+import '/models/app_const.dart';
+import '/models/user_model.dart';
+
+
 class EmployeeLogs extends StatefulWidget {
 
   final User employee;
-  final double longitude;
-  final double latitude;
+  final double? longitude;
+  final double? latitude;
 
-  EmployeeLogs({this.employee,this.longitude,this.latitude});
+  EmployeeLogs({required this.employee, this.longitude, this.latitude});
 
   @override
   _EmployeeLogsState createState() => _EmployeeLogsState();
 }
 
 class _EmployeeLogsState extends State<EmployeeLogs> {
-  RefreshController _refreshController;
+  late RefreshController _refreshController;
   Map<String, List<Punch>> selectedPunches = {};
   DateTime startDate = DateTime.parse("${DateTime.now().year}-01-01");
   DateTime endDate = DateTime.parse("${DateTime.now().year}-12-31");
   DateTime selectedDate = DateTime.now();
-  User user;
+  late User user;
   DateTime startOfWeek = PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
   Completer<GoogleMapController> _mapController = Completer();
-  CameraPosition _currentPosition ;
+  late CameraPosition _currentPosition;
   Set<Marker> markers = {};
+  CompanySettings? settings;
+  List<Project> projects = [];
+  List<ScheduleTask> tasks = [];
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  CompanySettings settings;
-  List<Project> projects;
-  List<ScheduleTask> tasks;
-
-  Punch selectedPunch;
-  EmployeeBreak selectedBreak;
-  WorkHistory selectedWork;
+  Punch? selectedPunch;
+  EmployeeBreak? selectedBreak;
+  WorkHistory? selectedWork;
 
   @override
   void initState() {
@@ -74,21 +77,21 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
     selectedPunches = {'${date.toString()}':punchesOfDate};
     markers.clear();
     punchesOfDate.forEach((p) {
-      if(p.latitude!=null && p.longitude!=null)
+      if(p.latitude!=null && p.longitude!=null && p.createdAt != null)
         markers.add(
             Marker(
               markerId: MarkerId("punch_marker_${p.id}"),
-              position: LatLng(p.latitude, p.longitude),
+              position: LatLng(p.latitude!, p.longitude!),
               icon: BitmapDescriptor.defaultMarkerWithHue(p.punch=="Out"?BitmapDescriptor.hueRed:BitmapDescriptor.hueGreen),
-              infoWindow: InfoWindow(title: "${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}",
-                  snippet: "${PunchDateUtils.getDateString(DateTime.parse(p.createdAt))}",
+              infoWindow: InfoWindow(title: "${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt!))}",
+                  snippet: "${PunchDateUtils.getDateString(DateTime.parse(p.createdAt!))}",
               ),
             )
         );
     });
     setState(() { selectedDate = date;});
     if(punchesOfDate.isNotEmpty && punchesOfDate.last.latitude!=null && punchesOfDate.last.longitude!=null){
-      goToPosition(LatLng(punchesOfDate.last.latitude, punchesOfDate.last.longitude));
+      goToPosition(LatLng(punchesOfDate.last.latitude!, punchesOfDate.last.longitude!));
     }
   }
 
@@ -140,7 +143,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   }
 
   Widget _punchItem(Punch punch){
-    if(selectedPunch != null && punch.id==selectedPunch.id){
+    if(selectedPunch != null && punch.id == selectedPunch?.id){
       return Center(
           child: Padding(
             padding: const EdgeInsets.all(4.0),
@@ -149,58 +152,59 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
       );
     }
     return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      actionExtentRatio: 0.2,
       child: Container(
           padding: EdgeInsets.symmetric(vertical: 10),
           width: MediaQuery.of(context).size.width,
-          child: Text("Punch ${punch.punch} at ${PunchDateUtils.getTimeString(DateTime.parse(punch.createdAt))}")
+          child: Text("Punch ${punch.punch} at ${punch.getTime()}")
       ),
-      secondaryActions: <Widget>[
-        if(punch.latitude !=null && punch.longitude!=null && settings.hasGeolocationPunch)
-          IconSlideAction(
-            caption: S.of(context).pin,
-            color: Colors.green,
-            iconWidget: Icon(Icons.pin_drop,color: Colors.white,size: 20,),
+      endActionPane: ActionPane(
+        motion: ScrollMotion(),
+        children: [
+          if(punch.latitude !=null && punch.longitude!=null && (settings?.hasGeolocationPunch??false))
+            SlidableAction(
+              label: S.of(context).pin,
+              backgroundColor: Colors.green,
+              icon: Icons.pin_drop,
+              foregroundColor: Colors.white,
+              onPressed: (v){
+                goToPosition(LatLng(punch.latitude!, punch.longitude!));
+              },
+            ),
+          SlidableAction(
+            label: S.of(context).edit,
+            backgroundColor: Colors.orange,
+            icon: Icons.edit,
             foregroundColor: Colors.white,
-            onTap: (){
-              goToPosition(LatLng(punch.latitude, punch.longitude));
+            onPressed: (v)async{
+              String? changedTime = await showEditPunchDialog(punch);
+              punch.createdAt = changedTime;
+              if(mounted)setState(() {});
             },
           ),
-        IconSlideAction(
-          caption: S.of(context).edit,
-          color: Colors.orange,
-          iconWidget: Icon(Icons.edit, color: Colors.white, size: 20,),
-          foregroundColor: Colors.white,
-          onTap: ()async{
-            String changedTime = await showEditPunchDialog(punch);
-            punch.createdAt = changedTime;
-            if(mounted)setState(() {});
-          },
-        ),
-        if(punch.isIn())
-          IconSlideAction(
-            caption: S.of(context).delete,
-            color: Colors.red,
-            foregroundColor: Colors.white,
-            iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
-            onTap: ()async{
-              if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
-                setState(() { selectedPunch = punch;});
-                String result = await user.deletePunch(punch.id);
-                if(result==null){
-                  user.punches.removeWhere((p) => p.id == punch.id);
-                  selectedPunches.values.forEach((ps) {
-                    ps.removeWhere((p) => p.id == punch.id);
-                  });
-                }else{
-                  showMessage(result);
+          if(punch.isIn())
+            SlidableAction(
+              label: S.of(context).delete,
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              icon: Icons.delete,
+              onPressed: (v)async{
+                if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
+                  setState(() { selectedPunch = punch;});
+                  String? result = await user.deletePunch(punch.id);
+                  if(result==null){
+                    user.punches.removeWhere((p) => p.id == punch.id);
+                    selectedPunches.values.forEach((ps) {
+                      ps.removeWhere((p) => p.id == punch.id);
+                    });
+                  }else{
+                    Tools.showErrorMessage(context, result);
+                  }
+                  setState(() { selectedPunch = null;});
                 }
-                setState(() { selectedPunch = null;});
-              }
-            },
-          ),
-      ],
+              },
+            ),
+        ],
+      ),
     );
   }
 
@@ -224,8 +228,6 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
               ));
             }else{
               punchDetail.add(Slidable(
-                actionPane: SlidableDrawerActionPane(),
-                actionExtentRatio: 0.2,
                 child: Container(
                     padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
                     width: MediaQuery.of(context).size.width,
@@ -234,44 +236,47 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                       style: TextStyle(fontStyle: FontStyle.italic),
                     )
                 ),
-                secondaryActions: [
-                  IconSlideAction(
-                    caption: S.of(context).edit,
-                    color: Colors.orange,
-                    iconWidget: Icon(Icons.edit,color: Colors.white,size: 20,),
-                    foregroundColor: Colors.white,
-                    onTap: ()async{
-                      final w = await showEditWorkDialog(work);
-                      if(mounted)setState(() {
-                        user.works.remove(work);
-                        user.works.add(w);
-                        works.remove(work);
-                        works.add(w);
-                      });
-                    },
-                  ),
-                  IconSlideAction(
-                    caption: S.of(context).delete,
-                    color: Colors.red,
-                    foregroundColor: Colors.white,
-                    iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
-                    onTap: ()async{
-                      if(await confirmDeleting(context, S.of(context).deleteWorkConfirm)){
-                        setState(() {selectedWork = work;});
-                        String result = await user.deleteWork(work.id);
+                endActionPane: ActionPane(
+                  motion: ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      label: S.of(context).edit,
+                      backgroundColor: Colors.orange,
+                      icon: Icons.edit,
+                      foregroundColor: Colors.white,
+                      onPressed: (v)async{
+                        final w = await showEditWorkDialog(work);
                         if(mounted)setState(() {
-                          if(result==null){
-                            user.works.remove(work);
-                            works.remove(work);
-                          }else{
-                            showMessage(result);
-                          }
-                          selectedWork = null;
+                          user.works.remove(work);
+                          user.works.add(w);
+                          works.remove(work);
+                          works.add(w);
                         });
-                      }
-                    },
-                  ),
-                ],
+                      },
+                    ),
+                    SlidableAction(
+                      label: S.of(context).delete,
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      onPressed: (v)async{
+                        if(await confirmDeleting(context, S.of(context).deleteWorkConfirm)){
+                          setState(() {selectedWork = work;});
+                          String? result = await user.deleteWork(work.id);
+                          if(mounted)setState(() {
+                            if(result==null){
+                              user.works.remove(work);
+                              works.remove(work);
+                            }else{
+                              Tools.showErrorMessage(context, result);
+                            }
+                            selectedWork = null;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ));
             }
           });
@@ -287,8 +292,6 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
               ));
             }else{
               punchDetail.add(Slidable(
-                actionPane: SlidableDrawerActionPane(),
-                actionExtentRatio: 0.2,
                 child: Container(
                     padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
                     width: MediaQuery.of(context).size.width,
@@ -297,34 +300,37 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                       style: TextStyle(fontStyle: FontStyle.italic),
                     )
                 ),
-                secondaryActions: [
-                  IconSlideAction(
-                    caption: S.of(context).delete,
-                    color: Colors.red,
-                    foregroundColor: Colors.white,
-                    iconWidget: Icon(Icons.delete,color: Colors.white,size: 20,),
-                    onTap: ()async{
-                      if(await confirmDeleting(context, S.of(context).deleteBreakConfirm)){
-                        setState(() {selectedBreak = b;});
-                        String result = await user.deleteBreak(b.id);
-                        if(mounted)setState(() {
-                          if(result==null){
-                            user.breaks.remove(b);
-                            breaks.remove(b);
-                          }else{
-                            showMessage(result);
-                          }
-                          selectedBreak = null;
-                        });
-                      }
-                    },
-                  ),
-                ],
+                endActionPane: ActionPane(
+                  motion: ScrollMotion(),
+                  children: [
+                    SlidableAction(
+                      label: S.of(context).delete,
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      icon: Icons.delete,
+                      onPressed: (v)async{
+                        if(await confirmDeleting(context, S.of(context).deleteBreakConfirm)){
+                          setState(() {selectedBreak = b;});
+                          String? result = await user.deleteBreak(b.id);
+                          if(mounted)setState(() {
+                            if(result==null){
+                              user.breaks.remove(b);
+                              breaks.remove(b);
+                            }else{
+                              Tools.showErrorMessage(context, result);
+                            }
+                            selectedBreak = null;
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ));
             }
           });
 
-          Punch punchOut = user.getPunchOut(punchIn);
+          Punch? punchOut = user.getPunchOut(punchIn);
           if(punchOut != null){
             punchDetail.add(_punchItem(punchOut));
           }
@@ -369,8 +375,9 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
     return logs.reversed.toList();
   }
 
-  Future<String> showEditPunchDialog(Punch punch)async{
-    String correctTime = punch.createdAt;
+  Future<String?> showEditPunchDialog(Punch punch)async{
+    if(punch.createdAt == null) return null;
+    String correctTime = punch.createdAt!;
     bool _isSending = false;
     await showDialog(
         context: context,
@@ -408,15 +415,13 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                           children: [
                             Text("${S.of(context).correctPunchTime}: "),
                             Text("${PunchDateUtils.getTimeString(correctTime)}",style: TextStyle(fontWeight: FontWeight.bold),),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(correctTime);
-                                  if(pickedTime!=null){
+                                  DateTime? pickedTime = await _selectTime(correctTime);
+                                  if(pickedTime != null){
                                     _setState(() { correctTime = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 child: Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Icon(Icons.edit,color: Color(primaryColor),),
@@ -431,11 +436,11 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                             onPressed: ()async{
                               if(!_isSending){
                                 _setState(() { _isSending=true; });
-                                String result = await user.editPunch(punch.id, correctTime);
+                                String? result = await user.editPunch(punch.id, correctTime);
                                 if(result==null){
                                   punch.createdAt = correctTime;
                                 }else{
-                                  showMessage(result);
+                                  Tools.showErrorMessage(context, result);
                                 }
                                 Navigator.pop(_context);
                               }
@@ -453,7 +458,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           ),
         )
     );
-    return punch.createdAt;
+    return punch.createdAt!;
   }
 
   Future<WorkHistory> showEditWorkDialog(WorkHistory w)async{
@@ -482,58 +487,24 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                         SizedBox(height: 8,),
                         Text(S.of(context).project,style: TextStyle(fontSize: 12),),
                         if(work.projectId != null)
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black54),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                            clipBehavior: Clip.hardEdge,
-                            margin: EdgeInsets.only(top: 4),
-                            child: DropdownButton<Project>(
-                              items: projects.map((Project value) {
-                                return DropdownMenuItem<Project>(
-                                  value: value,
-                                  child: Text(value.name),
-                                );
-                              }).toList(),
-                              value: projects.firstWhere((p) => p.id==work.projectId,orElse: ()=>null),
-                              isExpanded: true,
-                              isDense: true,
-                              underline: SizedBox(),
-                              onChanged: (v) {
-                                _setState((){ work.projectId = v.id; work.projectName = v.name; });
-                              },
-                            ),
+                          ProjectPicker(
+                            projects: projects,
+                            projectId: work.projectId,
+                            onSelected: (v) {
+                              _setState((){ work.projectId = v?.id; work.projectName = v?.name; });
+                            },
                           ),
                         if(work.projectId == null)
                           Text(" ${work.projectName}", style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),),
                         SizedBox(height: 8,),
                         Text(S.of(context).task, style: TextStyle(fontSize: 12),),
                         if(work.taskId != null)
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black54),
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                            clipBehavior: Clip.hardEdge,
-                            margin: EdgeInsets.only(top: 4),
-                            child: DropdownButton<ScheduleTask>(
-                              items:tasks.map((ScheduleTask value) {
-                                return DropdownMenuItem<ScheduleTask>(
-                                  value: value,
-                                  child: Text(value.name),
-                                );
-                              }).toList(),
-                              value: tasks.firstWhere((t) => t.id==work.taskId,orElse: ()=>null),
-                              isExpanded: true,
-                              isDense: true,
-                              underline: SizedBox(),
-                              onChanged: (v) {
-                                _setState((){work.taskId = v.id; work.taskName = v.name;});
-                              },
-                            ),
+                          TaskPicker(
+                            tasks: tasks,
+                            taskId: work.taskId,
+                            onSelected: (v) {
+                              _setState((){work.taskId = v?.id; work.taskName = v?.name;});
+                            },
                           ),
                         if(work.taskId == null)
                           Text(" ${work.taskName}",style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),),
@@ -542,17 +513,13 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                           children: [
                             Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12),),
                             Text("${PunchDateUtils.getTimeString(work.start)}"),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(work.start);
+                                  DateTime? pickedTime = await _selectTime(work.start!);
                                   if(pickedTime != null){
                                     _setState(() { work.start = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.all(4),
-                                minWidth: 0,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -562,17 +529,13 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                           children: [
                             Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12),),
                             Text("${PunchDateUtils.getTimeString(work.end)}"),
-                            FlatButton(
+                            TextButton(
                                 onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(work.end);
+                                  DateTime? pickedTime = await _selectTime(work.end!);
                                   if(pickedTime != null){
                                     _setState(() { work.end = pickedTime.toString();});
                                   }
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.all(4),
-                                minWidth: 0,
                                 child: Icon(Icons.edit,color: Color(primaryColor))
                             ),
                           ],
@@ -584,9 +547,9 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                             onPressed: ()async{
                               if(!_isSending){
                                 _setState(() { _isSending=true; });
-                                String result = await user.editWork(work);
+                                String? result = await user.editWork(work);
                                 if(result != null){
-                                  showMessage(result);
+                                  Tools.showErrorMessage(context,result);
                                   success = false;
                                 }
                                 Navigator.pop(_context);
@@ -608,9 +571,9 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
     return success?work:w;
   }
 
-  Future<DateTime> _selectTime(String createdAt)async{
+  Future<DateTime?> _selectTime(String createdAt)async{
     DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
     );
@@ -626,18 +589,6 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
     controller.animateCamera(CameraUpdate.newCameraPosition(_cPosition));
   }
 
-  showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
-  }
-
   bool canClose(){
     return selectedWork == null && selectedBreak == null && selectedPunch == null;
   }
@@ -650,7 +601,6 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
     tasks = context.watch<WorkModel>().tasks;
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         leading: InkWell(
           onTap: (){
@@ -703,10 +653,8 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("${S.of(context).totalHours} : ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
-                    FlatButton(
+                    TextButton(
                       onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>PDFFullScreen(url: user.pdfUrl(startOfWeek),))),
-                      shape: CircleBorder(),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         child: Column(
                           children: [
                             Image.asset("assets/images/ic_document.png",width: 30,height: 30,),
@@ -739,7 +687,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                   ),
                 ),
               ),
-              if(settings.hasGeolocationPunch)
+              if(settings?.hasGeolocationPunch??false)
                 Expanded(
                 child: Stack(
                   children: [

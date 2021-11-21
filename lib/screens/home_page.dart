@@ -1,8 +1,10 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/screens/employee/employee_login.dart';
+import 'package:facepunch/widgets/utils.dart';
+
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/company_model.dart';
+import '/models/user_model.dart';
+import '/screens/employee/employee_login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'admin/admin_home.dart';
@@ -22,7 +24,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   static const FACE_PUNCH =1;
   static const ADMIN_SIGN_IN =2;
 
-  TabController _tabController;
+  late TabController _tabController;
   int _pageIndex = FACE_PUNCH;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -32,9 +34,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.initState();
   }
 
-  onLogin(String result)async{
-    if(result==null){
-      User user = context.read<UserModel>().user;
+  onLogin(String? result)async{
+    if(result == null){
+      User user = context.read<UserModel>().user!;
       await context.read<CompanyModel>().getMyCompany(user.companyId);
       if(user.isAdmin()){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
@@ -42,19 +44,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
       }
     }else{
-      _showMessage(result);
+      Tools.showErrorMessage(context, result);
     }
-  }
-
-  _showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
-        )
-    );
   }
 
   @override
@@ -95,7 +86,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ],
             padding: EdgeInsets.zero,
             onSelected: (l){
-              context.read<UserModel>().changeAppLanguage(l);
+              context.read<UserModel>().changeAppLanguage(l.toString());
             },
             child: Container(
               child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
@@ -148,9 +139,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 height: MediaQuery.of(context).size.height*0.6-kBottomNavigationBarHeight,
                 child: TabBarView(
                   children: [
-                    EmployeeLogin(showMessage: _showMessage,),
-                    StartFacePunch(showMessage: _showMessage,),
-                    AdminSignIn(onLogin: onLogin,),
+                    EmployeeLogin(),
+                    StartFacePunch(),
+                    AdminSignIn(onLogin),
                   ],
                   controller: _tabController,
                   physics: NeverScrollableScrollPhysics(),

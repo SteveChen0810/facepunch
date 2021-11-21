@@ -1,20 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
-import 'package:image_cropper/image_cropper.dart';
-import '../../models/company_model.dart';
-import '../../widgets/address_picker/country_state_city_picker.dart';
-import '../../models/user_model.dart';
-import '../../models/app_const.dart';
+import 'package:facepunch/widgets/utils.dart';
+import '/lang/l10n.dart';
+import '/widgets/calendar_strip/date-utils.dart';
+import '/models/company_model.dart';
+import '/widgets/address_picker/country_state_city_picker.dart';
+import '/models/user_model.dart';
+import '/models/app_const.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class CreateEditEmployee extends StatefulWidget {
-  final User employee;
+  final User? employee;
   CreateEditEmployee({this.employee});
   @override
   _CreateEditEmployeeState createState() => _CreateEditEmployeeState();
@@ -22,8 +22,7 @@ class CreateEditEmployee extends StatefulWidget {
 
 class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _picker = ImagePicker();
-  File _photoFile;
+  File? _photoFile;
   TextEditingController _fName = TextEditingController();
   TextEditingController _lName = TextEditingController();
   TextEditingController _email = TextEditingController();
@@ -37,11 +36,11 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   TextEditingController _nfc = TextEditingController();
 
 
-  String _fNameError,_lNameError,_emailError,_passwordError,_addressError,
+  String? _fNameError,_lNameError,_emailError,_passwordError,_addressError,
       _postalError, _codeError, _salaryError, _startDateError,_birthDayError;
-  String country,state,city, language;
-  DateTime _startDate;
-  DateTime _birthDay;
+  String? country,state,city, language;
+  DateTime? _startDate;
+  DateTime? _birthDay;
   bool isLoading = false;
 
 
@@ -49,25 +48,25 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   @override
   void initState() {
     super.initState();
-    if(widget.employee!=null){
+    if(widget.employee != null){
       try{
-        _fName = TextEditingController(text: widget.employee.firstName);
-        _lName = TextEditingController(text: widget.employee.lastName);
-        _email = TextEditingController(text: widget.employee.email);
-        _password = TextEditingController(text: widget.employee.pin);
-        _address1 = TextEditingController(text: widget.employee.address1);
-        _address2 = TextEditingController(text: widget.employee.address2);
-        _postal = TextEditingController(text: widget.employee.postalCode);
-        _phone = TextEditingController(text: widget.employee.phone);
-        _employeeCode = TextEditingController(text: widget.employee.employeeCode);
-        _salary = TextEditingController(text: widget.employee.salary);
-        _nfc = TextEditingController(text: widget.employee.nfc);
-        country = widget.employee.country;
-        state = widget.employee.state;
-        city = widget.employee.city;
-        language = widget.employee.language;
-        if(widget.employee.start!=null)_startDate = DateTime.parse(widget.employee.start);
-        if(widget.employee.birthday!=null)_birthDay = DateTime.parse(widget.employee.birthday);
+        _fName = TextEditingController(text: widget.employee?.firstName);
+        _lName = TextEditingController(text: widget.employee?.lastName);
+        _email = TextEditingController(text: widget.employee?.email);
+        _password = TextEditingController(text: widget.employee?.pin);
+        _address1 = TextEditingController(text: widget.employee?.address1);
+        _address2 = TextEditingController(text: widget.employee?.address2);
+        _postal = TextEditingController(text: widget.employee?.postalCode);
+        _phone = TextEditingController(text: widget.employee?.phone);
+        _employeeCode = TextEditingController(text: widget.employee?.employeeCode);
+        _salary = TextEditingController(text: widget.employee?.salary);
+        _nfc = TextEditingController(text: widget.employee?.nfc);
+        country = widget.employee?.country;
+        state = widget.employee?.state;
+        city = widget.employee?.city;
+        language = widget.employee?.language;
+        if(widget.employee?.start != null)_startDate = DateTime.tryParse(widget.employee!.start!);
+        if(widget.employee?.birthday != null)_birthDay = DateTime.tryParse(widget.employee!.birthday!);
       }catch(e){
        print("[CreateEditEmployee.initState] $e");
       }
@@ -75,9 +74,9 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   }
 
   _pickUserPhoto(ImageSource source)async{
-    PickedFile image = await _picker.getImage(source: source,maxHeight: 800,maxWidth: 800);
-    if(image!=null){
-      File _cropFile = await ImageCropper.cropImage(
+    XFile? image = await ImagePicker().pickImage(source: source, maxHeight: 800, maxWidth: 800);
+    if(image != null){
+      File? _cropFile = await ImageCropper.cropImage(
           sourcePath: image.path,
           aspectRatioPresets: [
             CropAspectRatioPreset.square,
@@ -109,10 +108,10 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   Widget getAvatarWidget(){
     Widget image;
     if(_photoFile!=null){
-      image = Image.file(_photoFile,width: 120,height: 120,fit: BoxFit.cover,);
-    }else if(widget.employee!=null){
+      image = Image.file(_photoFile!, width: 120,height: 120,fit: BoxFit.cover,);
+    }else if(widget.employee != null){
       image = CachedNetworkImage(
-        imageUrl: "${AppConst.domainURL}images/user_avatars/${widget.employee.avatar}",
+        imageUrl: widget.employee!.avatarUrl(),
         height: 120,
         width: 120,
         alignment: Alignment.center,
@@ -142,9 +141,9 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   }
 
   _selectStartDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: _startDate==null?DateTime.now():_startDate,
+        initialDate: _startDate == null? DateTime.now() : _startDate!,
         initialDatePickerMode: DatePickerMode.day,
         firstDate: DateTime(1970),
         lastDate: DateTime(2101));
@@ -153,26 +152,14 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   }
 
   _selectBirthDate(BuildContext context) async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
         context: context,
-        initialDate: _birthDay==null?DateTime.now():_birthDay,
+        initialDate: _birthDay == null ? DateTime.now() : _birthDay!,
         initialDatePickerMode: DatePickerMode.day,
         firstDate: DateTime(1970),
         lastDate: DateTime(2101));
     if (picked != null)
       setState(() {_birthDay = picked;});
-  }
-
-  showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: message.toLowerCase().contains("success")?Colors.green:Colors.red,
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
   }
 
   bool validator(){
@@ -236,22 +223,22 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         hasAutoBreak: widget.employee?.hasAutoBreak??true,
         projects: widget.employee?.projects??[]
       );
-      String base64Image;
-      if(_photoFile!=null){
-        base64Image = base64Encode(_photoFile.readAsBytesSync());
+      String? base64Image;
+      if(_photoFile != null){
+        base64Image = base64Encode(_photoFile!.readAsBytesSync());
       }
-      String result = await context.read<CompanyModel>().createEditEmployee(user, base64Image);
-      if(result==null){
-        showMessage(S.of(context).success);
+      String? result = await context.read<CompanyModel>().createEditEmployee(user, base64Image);
+      if(result == null){
+        Tools.showSuccessMessage(context, S.of(context).success);
         Future.delayed(Duration(seconds: 1)).whenComplete((){
           Navigator.pop(context);
         });
       }else{
-        showMessage(result);
+        Tools.showErrorMessage(context, result);
       }
     }catch(e){
       print("[createEditEmployee] $e");
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
@@ -290,53 +277,51 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                       Positioned(
                         right: 0,
                         bottom: 0,
-                        child: ButtonTheme(
-                          height: 0,
-                          minWidth: 50,
-                          splashColor: Color(primaryColor),
-                          child: RaisedButton(
-                              child: Icon(Icons.camera_enhance,),
-                              color: Colors.white,
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(4),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              onPressed: (){
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                showModalBottomSheet(
-                                    context: context,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(8))),
-                                    clipBehavior: Clip.hardEdge,
-                                    builder: (c){
-                                      return Container(
-                                        height: 104,
-                                        padding: EdgeInsets.symmetric(vertical: 4),
-                                        child: Column(
-                                          children: [
-                                            ListTile(
-                                              dense: true,
-                                              leading: Icon(Icons.camera_alt_outlined),
-                                              title: Text(S.of(context).camera),
-                                              onTap: (){
-                                                Navigator.pop(c);
-                                                _pickUserPhoto(ImageSource.camera);
-                                              },
-                                            ),
-                                            ListTile(
-                                              dense: true,
-                                              leading: Icon(Icons.photo_library),
-                                              title: Text(S.of(context).gallery),
-                                              onTap: (){
-                                                Navigator.pop(c);
-                                                _pickUserPhoto(ImageSource.gallery);
-                                              },
-                                            )
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                );
-                              }
-                          ),
+                        child: MaterialButton(
+                            height: 0,
+                            minWidth: 50,
+                            splashColor: Color(primaryColor),
+                            child: Icon(Icons.camera_enhance,),
+                            color: Colors.white,
+                            shape: CircleBorder(),
+                            padding: EdgeInsets.all(4),
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            onPressed: (){
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              showModalBottomSheet(
+                                  context: context,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(8))),
+                                  clipBehavior: Clip.hardEdge,
+                                  builder: (c){
+                                    return Container(
+                                      height: 104,
+                                      padding: EdgeInsets.symmetric(vertical: 4),
+                                      child: Column(
+                                        children: [
+                                          ListTile(
+                                            dense: true,
+                                            leading: Icon(Icons.camera_alt_outlined),
+                                            title: Text(S.of(context).camera),
+                                            onTap: (){
+                                              Navigator.pop(c);
+                                              _pickUserPhoto(ImageSource.camera);
+                                            },
+                                          ),
+                                          ListTile(
+                                            dense: true,
+                                            leading: Icon(Icons.photo_library),
+                                            title: Text(S.of(context).gallery),
+                                            onTap: (){
+                                              Navigator.pop(c);
+                                              _pickUserPhoto(ImageSource.gallery);
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  },
+                              );
+                            }
                         ),
                       ),
                     ],
@@ -356,7 +341,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _fNameError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
@@ -380,7 +365,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _lNameError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
@@ -404,7 +389,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _emailError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -424,7 +409,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _passwordError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.number,
                 maxLength: 4,
                 textInputAction: TextInputAction.next,
@@ -446,7 +431,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _addressError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -463,7 +448,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -474,7 +459,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 initCity: city,
                 initState: state,
                 initCountry: country,
-                readOnly: !settings.useOwnData,
+                readOnly: !(settings?.useOwnData??false),
                 onCountryChanged: (value) {
                   FocusScope.of(context).requestFocus(FocusNode());
                   country = value;
@@ -500,7 +485,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   contentPadding: EdgeInsets.zero,
                   errorText: _postalError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -520,7 +505,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -538,7 +523,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   contentPadding: EdgeInsets.zero,
                   errorText: _codeError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -556,7 +541,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _startDateError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 readOnly: true,
                 onTap: (){
                   _selectStartDate(context);
@@ -578,7 +563,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _salaryError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -596,7 +581,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _birthDayError
                 ),
-                enabled: !isLoading && settings.useOwnData,
+                enabled: !isLoading && (settings?.useOwnData??false),
                 readOnly: true,
                 onTap: (){
                   _selectBirthDate(context);
@@ -617,17 +602,17 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 ),
                 enabled: !isLoading,
                 onTap: (){
-                  FlutterNfcReader.read().then((NfcData data)async{
-                    if(data!=null){
-                      if(data.id!=null && data.id.isNotEmpty){
-                        _nfc.text = data.id;
-                      }else{
-                        _nfc.text = data.content;
-                      }
-                    }
-                  }).catchError((e){
-                    showMessage(e.toString());
-                  });
+                  // FlutterNfcReader.read().then((NfcData data)async{
+                  //   if(data!=null){
+                  //     if(data.id!=null && data.id.isNotEmpty){
+                  //       _nfc.text = data.id;
+                  //     }else{
+                  //       _nfc.text = data.content;
+                  //     }
+                  //   }
+                  // }).catchError((e){
+                  //   showMessage(e.toString());
+                  // });
                 },
                 maxLines: 1,
                 controller: _nfc,
@@ -647,7 +632,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 style: TextStyle(fontSize: 20, color: Colors.black87),
                 hint: Text(S.of(context).chooseLanguage),
                 isExpanded: true,
-                onChanged: !settings.useOwnData? null :(v) {
+                onChanged: !(settings?.useOwnData??false)? null :(v) {
                   setState(() { language = v; });
                   FocusScope.of(context).requestFocus(FocusNode());
                 },

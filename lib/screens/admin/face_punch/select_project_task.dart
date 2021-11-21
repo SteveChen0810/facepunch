@@ -1,9 +1,10 @@
+import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/lang/l10n.dart';
 import 'package:provider/provider.dart';
+import '/models/app_const.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import '/lang/l10n.dart';
 
 class SelectProjectTask extends StatefulWidget {
 
@@ -11,21 +12,20 @@ class SelectProjectTask extends StatefulWidget {
   final List<Project> projects;
   final List<ScheduleTask> tasks;
   final Punch punch;
-  SelectProjectTask({this.employee, this.projects, this.tasks, this.punch});
+  SelectProjectTask({required this.employee, required this.projects, required this.tasks, required this.punch});
 
   @override
   _SelectProjectTaskState createState() => _SelectProjectTaskState();
 }
 
 class _SelectProjectTaskState extends State<SelectProjectTask> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoading = false;
-  List<Project> projects;
-  List<ScheduleTask> tasks;
-  User employee;
-  Punch punch;
-  Project selectedProject;
-  ScheduleTask selectedTask;
+  late List<Project> projects;
+  late List<ScheduleTask> tasks;
+  late User employee;
+  late Punch punch;
+  Project? selectedProject;
+  ScheduleTask? selectedTask;
 
   @override
   void initState() {
@@ -36,22 +36,10 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
     punch = widget.punch;
   }
 
-  _showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(S.of(context).selectSchedule),
         elevation: 0,
@@ -87,9 +75,9 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(value.name, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                          if(value.code != null && value.code.isNotEmpty)
-                            Text(value.code, style: TextStyle(fontSize: 10),),
+                          Text('${value.name}', maxLines: 1, overflow: TextOverflow.ellipsis,),
+                          if(value.code != null && value.code!.isNotEmpty)
+                            Text('${value.code}', style: TextStyle(fontSize: 10),),
                         ],
                       ),
                     );
@@ -123,9 +111,9 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(value.name, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                          if(value.code != null && value.code.isNotEmpty)
-                            Text(value.code, style: TextStyle(fontSize: 10),),
+                          Text('${value.name}', maxLines: 1, overflow: TextOverflow.ellipsis,),
+                          if(value.code != null && value.code!.isNotEmpty)
+                            Text('${value.code}', style: TextStyle(fontSize: 10),),
                         ],
                       ),
                     );
@@ -153,14 +141,10 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
           onPressed: (selectedTask==null && selectedProject==null)?null:()async{
             if(!isLoading){
               setState(() {isLoading = true;});
-              String message = await context.read<WorkModel>().startShopTracking(
-                token: employee.token,
-                projectId: selectedProject.id,
-                taskId: selectedTask.id
-              );
+              String? message = await context.read<WorkModel>().startShopTracking(employee.token, selectedProject!.id, selectedTask!.id);
               setState(() {isLoading = false;});
               if(message != null){
-                _showMessage(message);
+                Tools.showErrorMessage(context, message);
               }else{
                 Navigator.pop(context);
               }

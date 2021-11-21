@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/user_model.dart';
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/company_model.dart';
+import '/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -17,14 +17,8 @@ class EmployeeDocument extends StatefulWidget {
 class _EmployeeDocumentState extends State<EmployeeDocument> {
   DateTime startDate = DateTime.parse("${DateTime.now().year}-01-01");
   DateTime endDate = DateTime.parse("${DateTime.now().year}-12-31");
-  DateTime selectedDate;
+  DateTime? selectedDate;
   String pdfError = "";
-
-  String harvestReportImage(){
-    final user = context.watch<UserModel>().user;
-    final imageUrl = 'harvest-reports/${user.companyId}/Harvest_Report_${DateTime.now().toString().split(' ')[0]}.png';
-    return Uri.encodeFull('https://facepunch.app/$imageUrl');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,16 +87,16 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                         ):Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: SfPdfViewer.network(
-                            user.pdfUrl(selectedDate),
+                            user!.pdfUrl(selectedDate),
                             key: Key(user.pdfUrl(selectedDate)),
                             onDocumentLoadFailed: (v){
                                 if(mounted)setState(() {pdfError = v.description;});
                             },
                           ),
                         ),
-                        if(settings.hasHarvestReport)
+                        if(settings!.hasHarvestReport??false)
                           CachedNetworkImage(
-                          imageUrl: harvestReportImage(),
+                          imageUrl: user!.harvestReportUrl(),
                           width: width,
                           placeholder: (_,__)=>Container(
                             alignment: Alignment.center,

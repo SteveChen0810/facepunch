@@ -1,8 +1,10 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
+import 'package:facepunch/widgets/utils.dart';
+
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/revision_model.dart';
+import '/models/user_model.dart';
+import '/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -17,23 +19,20 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
 
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   List<Revision> revisions = [];
-  Revision _revision;
+  Revision? _revision;
 
   _onRefresh()async{
     final user = context.read<UserModel>().user;
-    String result = await user.getRevisionNotifications();
-    if(result==null){
+    String? result = await user!.getRevisionNotifications();
+    if(result == null){
       revisions = user.revisions;
     }else{
-      _showMessage(result);
+      Tools.showErrorMessage(context, result);
     }
     _refreshController.refreshCompleted();
     if(mounted)setState(() {_revision = null;});
   }
 
-  _showMessage(String message){
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
 
   Widget _revisionItem(Revision revision){
     try{
@@ -51,8 +50,8 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(revision.createdAt),
-                  Text(revision.type.toUpperCase())
+                  Text('${revision.createdAt}'),
+                  Text('${revision.type?.toUpperCase()}')
                 ],
               ),
               Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.bold),),
@@ -178,7 +177,7 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
 
   _showRevisionDialog(Revision revision){
     String description = '';
-    String errorMessage;
+    String? errorMessage;
     showDialog(
         context: context,
         builder:(_)=> AlertDialog(
@@ -248,9 +247,9 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
 
 
   _addDescription(Revision revision, description)async{
-    String result = await revision.addDescription(description);
+    String? result = await revision.addDescription(description);
     if(result != null){
-      _showMessage(result);
+      Tools.showErrorMessage(context, result);
     }
     if(mounted) setState(() {
       _revision = null;

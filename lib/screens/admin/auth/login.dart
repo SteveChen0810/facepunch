@@ -1,6 +1,6 @@
-import 'package:facepunch/lang/l10n.dart';
+import '/lang/l10n.dart';
 
-import '../../../models/user_model.dart';
+import '/../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'recovery_password.dart';
@@ -8,7 +8,7 @@ import 'recovery_password.dart';
 class AdminSignIn extends StatefulWidget{
 
   final Function onLogin;
-  AdminSignIn({this.onLogin});
+  AdminSignIn(this.onLogin);
 
   @override
   _AdminSignInState createState() => _AdminSignInState();
@@ -19,7 +19,7 @@ class _AdminSignInState extends State<AdminSignIn> {
 
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
-  String _emailError,_passwordError;
+  String? _emailError, _passwordError;
   bool isLoading = false;
   bool isRememberMe = false;
 
@@ -46,11 +46,7 @@ class _AdminSignInState extends State<AdminSignIn> {
       if(!isLoading){
         if(loginValidator()){
           setState(() {isLoading = true;});
-          String result = await context.read<UserModel>().adminLogin(
-            email:_email.text,
-            password:_password.text,
-            isRememberMe: isRememberMe
-          );
+          String? result = await context.read<UserModel>().adminLogin(_email.text, _password.text, isRememberMe);
           await widget.onLogin(result);
           setState(() {isLoading = false;});
         }else{
@@ -138,21 +134,19 @@ class _AdminSignInState extends State<AdminSignIn> {
               ),
               SizedBox(height: 10,),
               Center(
-                child: ButtonTheme(
+                child: MaterialButton(
+                  color: Colors.black87,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   minWidth: MediaQuery.of(context).size.width-40,
                   padding: EdgeInsets.all(8),
-                  child: RaisedButton(
-                    child: isLoading?SizedBox(
-                        height: 28,
-                        width: 28,
-                        child: CircularProgressIndicator(backgroundColor: Colors.white,)
-                    ):Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Text(S.of(context).login.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                    ),
-                    onPressed: loginWithEmail,
-                    color: Colors.black87,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  onPressed: loginWithEmail,
+                  child: isLoading?SizedBox(
+                      height: 28,
+                      width: 28,
+                      child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                  ):Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Text(S.of(context).login.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
                 ),
               ),

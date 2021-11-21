@@ -1,17 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:camera/camera.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'select_call_schedule.dart';
-import 'select_project_task.dart';
-import 'package:facepunch/widgets/dialogs.dart';
-import 'package:flutter/services.dart';
-import 'package:wakelock/wakelock.dart';
-import '../../../widgets/face_painter.dart';
-import '../../../widgets/utils.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -19,6 +7,18 @@ import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'dart:math' as math;
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
+import 'package:wakelock/wakelock.dart';
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import 'select_call_schedule.dart';
+import 'select_project_task.dart';
+import '/widgets/dialogs.dart';
+import '/widgets/face_painter.dart';
+import '/widgets/utils.dart';
 
 class FacePunchScreen extends StatefulWidget {
   @override
@@ -26,7 +26,7 @@ class FacePunchScreen extends StatefulWidget {
 }
 
 class _FacePunchScreenState extends State<FacePunchScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   final FaceDetector faceDetector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
     mode: FaceDetectorMode.fast,
     enableLandmarks: true,
@@ -34,16 +34,16 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     enableContours: true,
     enableTracking: true,
   ));
-  List<Face> faces;
-  CameraController cameraController;
+  List<Face>? faces;
+  CameraController? cameraController;
   CameraLensDirection _direction = CameraLensDirection.front;
-  ImageRotation rotation;
+  ImageRotation? rotation;
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
   bool _isDetecting = false;
   bool hasError = false;
   String _photoPath="";
   bool _isCameraAllowed = false;
-  Position currentPosition;
+  Position? currentPosition;
 
   @override
   void initState() {
@@ -76,52 +76,50 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     try{
       if(_isCameraAllowed){
         CameraDescription description = await getCamera(_direction);
-        rotation = rotationIntToImageRotation(
-          description.sensorOrientation,
-        );
+        rotation = rotationIntToImageRotation(description.sensorOrientation);
         cameraController = CameraController(
           description,
           Platform.isIOS? ResolutionPreset.low: ResolutionPreset.high,
           enableAudio: false,
         );
-        await cameraController.initialize();
+        await cameraController!.initialize();
         await initDetectFace();
       }else{
-        showMessage(S.of(context).allowFacePunchToTakePictures);
+        Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
       print(e);
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
   Future<void> initDetectFace()async{
     try{
-      if(cameraController.value.isStreamingImages)return;
-      cameraController.startImageStream((CameraImage image) {
+      if(cameraController!.value.isStreamingImages)return;
+      cameraController!.startImageStream((CameraImage image) {
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
-        detect(image, FirebaseVision.instance.faceDetector().processImage, rotation)
+        detect(image, FirebaseVision.instance.faceDetector().processImage, rotation!)
             .then((dynamic result) {
           setState(() {faces = result;});
           _isDetecting = false;
         },
         ).catchError((e) {print(e);_isDetecting = false;},);
-      }).catchError((e){print(e);showMessage(e.toString());});
+      }).catchError((e){print(e); Tools.showErrorMessage(context, e.toString());});
     }on CameraException catch(e){
       print(e);
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
       print(e);
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
   Future<void> cameraClose()async{
     try{
       if (cameraController!=null) {
-        if(cameraController.value.isStreamingImages){
-          await cameraController.stopImageStream();
+        if(cameraController!.value.isStreamingImages){
+          await cameraController!.stopImageStream();
         }
         await faceDetector.close();
         await Future.delayed(Duration(milliseconds: 100));
@@ -129,63 +127,51 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       }
     }on CameraException catch(e){
       print(e);
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
       print(e);
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
 
-  showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(onPressed: (){},label: S.of(context).close,textColor: Colors.white,),
-        )
-    );
-  }
-
   Widget faceRect() {
-    if (faces == null || cameraController == null || !cameraController.value.isInitialized) {
+    if (faces == null || cameraController == null || !cameraController!.value.isInitialized) {
       return SizedBox();
     }
     CustomPainter painter;
-    final Size imageSize = Size(cameraController.value.previewSize.height, cameraController.value.previewSize.width,);
+    final Size imageSize = Size(cameraController!.value.previewSize!.height, cameraController!.value.previewSize!.width,);
     if (faces is! List<Face>) return SizedBox();
-    painter = FaceDetectorPainter(imageSize, faces);
+    painter = FaceDetectorPainter(imageSize, faces!);
     return CustomPaint(painter: painter,);
   }
 
   Future<void> takePhoto() async {
     try {
-      if (!cameraController.value.isInitialized) {
+      if (!cameraController!.value.isInitialized) {
         return null;
       }
-      if (cameraController.value.isTakingPicture) {
+      if (cameraController!.value.isTakingPicture) {
         return ;
       }
-      if(faces==null || faces.isEmpty){
-        showMessage(S.of(context).thereIsNotAnyFaces);
+      if(faces==null || faces!.isEmpty){
+        Tools.showErrorMessage(context, S.of(context).thereIsNotAnyFaces);
         return null;
       }
-      if(cameraController.value.isStreamingImages){
-        await cameraController.stopImageStream();
+      if(cameraController!.value.isStreamingImages){
+        await cameraController!.stopImageStream();
       }
       await Future.delayed(Duration(milliseconds: 100));
-      XFile file = await cameraController.takePicture();
+      XFile file = await cameraController!.takePicture();
       print(file.path);
       setState(() {_photoPath = file.path;});
       await _punchWithFace(file.path);
       await File(file.path).delete().catchError(print);
     } on CameraException catch (e) {
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
       print(e);
     } catch(e){
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
       print(e);
     }
   }
@@ -194,20 +180,19 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.deniedForever) {
-      showMessage(S.of(context).locationPermissionDenied);
+      Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
       return null;
     }
     if (permission == LocationPermission.denied) {
       await showLocationPermissionDialog(context);
       permission = await Geolocator.requestPermission();
       if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
-        showMessage(S.of(context).locationPermissionDenied);
+        Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
         return null;
       }
     }
     Geolocator.getCurrentPosition().timeout(Duration(seconds: 5)).then((value){currentPosition = value;}).catchError(print);
   }
-
 
   _punchWithFace(String path)async{
     try{
@@ -219,7 +204,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
           longitude: currentPosition?.longitude
       );
       if(result is String){
-        showMessage(result);
+        Tools.showErrorMessage(context, result);
       }else{
         User employee = User.fromJson(result['employee']);
         Punch punch = Punch.fromJson(result['punch']);
@@ -239,7 +224,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       }
     }catch(e){
       print("[EmployeeLogin.punchWithFace] $e");
-      showMessage(e.toString());
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 
@@ -385,7 +370,6 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     double height = MediaQuery.of(context).size.height;
     final deviceRatio = MediaQuery.of(context).size.aspectRatio;
     return Scaffold(
-      key: _scaffoldKey,
       body: WillPopScope(
         onWillPop: ()async{
           await cameraClose();
@@ -404,15 +388,15 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
                 height: height,
               ),
             ):
-            (cameraController!=null && cameraController.value.isInitialized)?Transform.scale(
-                scale: cameraController.value.aspectRatio/deviceRatio,
+            (cameraController != null && cameraController!.value.isInitialized)?Transform.scale(
+                scale: cameraController!.value.aspectRatio/deviceRatio,
                 child: Center(
                     child: AspectRatio(
-                        aspectRatio: cameraController.value.aspectRatio,
+                        aspectRatio: cameraController!.value.aspectRatio,
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            CameraPreview(cameraController),
+                            CameraPreview(cameraController!),
                             Platform.isIOS? faceRect():
                             Transform(
                               alignment: Alignment.center,
@@ -451,7 +435,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
             Positioned(
               top: MediaQuery.of(context).padding.top+30,
               right: 0,
-              child: RaisedButton(
+              child: MaterialButton(
                 onPressed: ()async{
                   await cameraClose();
                   Navigator.pop(context);
@@ -460,7 +444,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
                 shape: CircleBorder(),
                 padding: EdgeInsets.zero,
                 color: Colors.black87,
-                child: Icon(Icons.close,color: Color(primaryColor),),
+                child: Icon(Icons.close, color: Color(primaryColor),),
               ),
             )
           ],

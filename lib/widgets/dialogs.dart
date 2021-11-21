@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/notification.dart';
+import '/lang/l10n.dart';
+import '/models/notification.dart';
 import '../models/app_const.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
@@ -41,7 +41,6 @@ Future<bool> pinCodeCheckDialog(String pin, BuildContext context)async{
                         Navigator.pop(context);
                       }else{
                         setState(() {hasError = true;});
-                        return false;
                       }
                     },
                     pinBoxWidth: 40,
@@ -91,14 +90,14 @@ showNotificationDialog(AppNotification notification, BuildContext context){
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
               contentPadding: EdgeInsets.all(0),
-              title: Text(notification.type.replaceAll('_', ' ').toUpperCase(),style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+              title: Text('${notification.type?.replaceAll('_', ' ').toUpperCase()}',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
               content: Container(
                 padding: EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(notification.body,style: TextStyle(fontSize: 16),),
+                    Text('${notification.body}',style: TextStyle(fontSize: 16),),
                   ],
                 ),
               ),
@@ -153,7 +152,7 @@ Future<bool> showLocationPermissionDialog(BuildContext context)async{
   return allow;
 }
 
-showWelcomeDialog({String userName, bool isPunchIn, BuildContext context})async{
+showWelcomeDialog({required String userName, required bool isPunchIn, required BuildContext context})async{
   await showDialog(
     context: context,
     builder: (_context){
