@@ -83,7 +83,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             EmployeeDocument(),
             if(user.canNTCTracking)
               NFCScanPage(),
-            if(user.hasSchedule())
+            if(user.hasSchedule() || user.hasCall())
               EmployeeSchedule(),
             if(user.canManageDispatch())
               EmployeeDispatch(),
@@ -114,7 +114,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 activeIcon: Image.asset("assets/images/nfc.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
             ),
-          if(user.hasSchedule())
+          if(user.hasSchedule() || user.hasCall())
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),

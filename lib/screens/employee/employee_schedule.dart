@@ -23,6 +23,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   EmployeeCall _call;
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
+  User user;
 
   @override
   void initState() {
@@ -104,7 +105,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   Widget _scheduleLine(){
-    if(schedules.isEmpty) return SizedBox();
+    if(schedules.isEmpty || !user.hasSchedule()) return SizedBox();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -194,7 +195,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   Widget _callLine(){
-    if(calls.isEmpty) return SizedBox();
+    if(calls.isEmpty || !user.hasCall()) return SizedBox();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -695,6 +696,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   Widget build(BuildContext context) {
     projects = context.watch<WorkModel>().projects;
     tasks = context.watch<WorkModel>().tasks;
+    user = context.watch<UserModel>().user;
+
     return Container(
       child: Column(
         children: [
