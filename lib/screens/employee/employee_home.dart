@@ -122,7 +122,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 activeIcon: Image.asset("assets/images/nfc.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
             ),
-          if(user!.hasSchedule())
+          if(user.hasSchedule())
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),

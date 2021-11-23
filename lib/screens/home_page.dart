@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               context.read<UserModel>().changeAppLanguage(l.toString());
             },
             child: Container(
-              child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
+              child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black87),),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,

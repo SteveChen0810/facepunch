@@ -1,5 +1,6 @@
 import 'package:facepunch/widgets/project_picker.dart';
 import 'package:facepunch/widgets/task_picker.dart';
+import 'package:facepunch/widgets/utils.dart';
 
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
@@ -52,7 +53,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
       schedules = user.schedules;
       calls = user.calls;
     }else{
-      _showMessage(result);
+      Tools.showErrorMessage(context, result);
     }
     _refreshController.refreshCompleted();
     if(mounted)setState(() { _schedule = null; _call = null; });
@@ -383,7 +384,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     setState(() { _schedule = oldValue;});
     final result = await context.read<RevisionModel>().sendScheduleRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     setState(() { _schedule = null;});
-    if(result != null) _showMessage(result);
+    if(result != null) Tools.showErrorMessage(context, result);
   }
 
   _showCallRevisionDialog(EmployeeCall c){
@@ -583,11 +584,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     setState(() { _call = oldValue;});
     final result = await context.read<RevisionModel>().sendCallRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     setState(() { _call = null;});
-    if(result != null) _showMessage(result);
-  }
-
-  _showMessage(String message){
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(message)));
+    if(result != null) Tools.showErrorMessage(context, result);
   }
 
   @override

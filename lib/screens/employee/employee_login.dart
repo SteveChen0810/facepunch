@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import '/lang/l10n.dart';
 import '/models/company_model.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,7 +11,6 @@ import '/screens/employee/employee_home.dart';
 import '/models/app_const.dart';
 import '/widgets/face_painter.dart';
 import '/widgets/utils.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -24,7 +24,7 @@ class EmployeeLogin extends StatefulWidget {
 }
 
 class _EmployeeLoginState extends State<EmployeeLogin> {
-  final FaceDetector faceDetector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
+  final FaceDetector faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
       mode: FaceDetectorMode.fast,
       enableLandmarks: true,
       enableClassification: true,
@@ -34,7 +34,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   List<Face>? faces;
   CameraController? cameraController;
   CameraLensDirection _direction = CameraLensDirection.front;
-  ImageRotation? rotation;
+  InputImageRotation? rotation;
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
   bool _isDetecting = false;
   String _photoPath="";
@@ -97,7 +97,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       cameraController!.startImageStream((CameraImage image) {
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
-        detect(image, FirebaseVision.instance.faceDetector().processImage, rotation!)
+        detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!)
             .then((dynamic result) {
           setState(() {faces = result;});
           _isDetecting = false;
@@ -197,22 +197,17 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     ?Center(child: CircularProgressIndicator(),)
                     :ClipRect(
                       child: Transform.scale(
-                          scale: 1/cameraController!.value.aspectRatio,
+                          scale: cameraController!.value.aspectRatio,
                           child: Center(
-                              child: AspectRatio(
-                                  aspectRatio: cameraController!.value.aspectRatio,
-                                  child: Stack(
-                                    fit: StackFit.expand,
-                                    children: [
-                                      CameraPreview(cameraController!),
-                                      Platform.isIOS?faceRect():
-                                      Transform(
+                              child: CameraPreview(
+                                cameraController!,
+                                child: Platform.isIOS
+                                    ? faceRect()
+                                    : Transform(
                                         alignment: Alignment.center,
                                         transform: Matrix4.rotationY(math.pi),
                                         child: faceRect(),
-                                      )
-                                    ],
-                                  )
+                                      ),
                               )
                           )
                       ),

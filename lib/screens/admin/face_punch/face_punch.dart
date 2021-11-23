@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'dart:math' as math;
@@ -25,9 +25,9 @@ class FacePunchScreen extends StatefulWidget {
   _FacePunchScreenState createState() => _FacePunchScreenState();
 }
 
-class _FacePunchScreenState extends State<FacePunchScreen> {
+class _FacePunchScreenState extends State<FacePunchScreen>{
 
-  final FaceDetector faceDetector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
+  final FaceDetector faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
     mode: FaceDetectorMode.fast,
     enableLandmarks: true,
     enableClassification: true,
@@ -37,7 +37,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
   List<Face>? faces;
   CameraController? cameraController;
   CameraLensDirection _direction = CameraLensDirection.front;
-  ImageRotation? rotation;
+  InputImageRotation? rotation;
   final RoundedLoadingButtonController _btnController = RoundedLoadingButtonController();
   bool _isDetecting = false;
   bool hasError = false;
@@ -72,10 +72,12 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     }
   }
 
-  _initializeCamera() async {
+  _initializeCamera({CameraDescription? description}) async {
     try{
       if(_isCameraAllowed){
-        CameraDescription description = await getCamera(_direction);
+        if(description == null){
+          description = await getCamera(_direction);
+        }
         rotation = rotationIntToImageRotation(description.sensorOrientation);
         cameraController = CameraController(
           description,
@@ -88,7 +90,7 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
-      print(e);
+      print('[FacePunchScreen._initializeCamera]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -99,18 +101,22 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       cameraController!.startImageStream((CameraImage image) {
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
-        detect(image, FirebaseVision.instance.faceDetector().processImage, rotation!)
-            .then((dynamic result) {
+        detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!).then((dynamic result) {
           setState(() {faces = result;});
           _isDetecting = false;
-        },
-        ).catchError((e) {print(e);_isDetecting = false;},);
-      }).catchError((e){print(e); Tools.showErrorMessage(context, e.toString());});
+        }).catchError((e) {
+          print('[FacePunch.initDetectFace.detect]$e');
+        _isDetecting = false;
+        },);
+      }).catchError((e){
+        print('[FacePunch.initDetectFace.startImageStream]$e');
+      Tools.showErrorMessage(context, e.toString());
+      });
     }on CameraException catch(e){
-      print(e);
+      print('[FacePunch.initDetectFace]$e');
       Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
-      print(e);
+      print('[FacePunch.initDetectFace]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -126,10 +132,10 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         await cameraController?.dispose();
       }
     }on CameraException catch(e){
-      print(e);
+      print('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
-      print(e);
+      print('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -163,16 +169,17 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
       }
       await Future.delayed(Duration(milliseconds: 100));
       XFile file = await cameraController!.takePicture();
-      print(file.path);
       setState(() {_photoPath = file.path;});
       await _punchWithFace(file.path);
-      await File(file.path).delete().catchError(print);
+      await File(file.path).delete().catchError((e){
+        print('[FacePunch.takePhoto.delete]$e');
+      });
     } on CameraException catch (e) {
       Tools.showErrorMessage(context, e.toString());
-      print(e);
+      print('[FacePunch.takePhoto]$e');
     } catch(e){
       Tools.showErrorMessage(context, e.toString());
-      print(e);
+      print('[FacePunch.takePhoto]$e');
     }
   }
 
@@ -191,7 +198,9 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
         return null;
       }
     }
-    Geolocator.getCurrentPosition().timeout(Duration(seconds: 5)).then((value){currentPosition = value;}).catchError(print);
+    Geolocator.getCurrentPosition().timeout(Duration(seconds: 5)).then((value){currentPosition = value;}).catchError((e){
+      print('[FacePunchScreen.getCurrentPosition]$e');
+    });
   }
 
   _punchWithFace(String path)async{
@@ -364,91 +373,113 @@ class _FacePunchScreenState extends State<FacePunchScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  double _cameraScale(){
+    return MediaQuery.of(context).size.height/720;
+  }
+
+  Widget _body(){
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    final deviceRatio = MediaQuery.of(context).size.aspectRatio;
+
+    Widget closeButton = Positioned(
+      top: MediaQuery.of(context).padding.top+30,
+      right: 0,
+      child: MaterialButton(
+        onPressed: ()async{
+          await cameraClose();
+          Navigator.pop(context);
+        },
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: CircleBorder(),
+        padding: EdgeInsets.zero,
+        color: Colors.black87,
+        child: Icon(Icons.close, color: Color(primaryColor),),
+      ),
+    );
+    Widget captureButton = Positioned(
+      bottom: 30,
+      left: 0,
+      right: 0,
+      child: RoundedLoadingButton(
+        child: Text(_photoPath.isEmpty?S.of(context).takePicture.toUpperCase():S.of(context).tryAgain,
+          style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),
+        ),
+        controller: _btnController,
+        width: width-80,
+        onPressed: ()async{
+          if(_photoPath.isEmpty){
+            await takePhoto();
+            _btnController.reset();
+          }else{
+            await initDetectFace();
+            setState(() {_photoPath="";});
+            _btnController.reset();
+          }
+        },
+        height: 40,
+        color: Colors.black87,
+      ),
+    );
+
+    if(_photoPath.isNotEmpty){
+      return Stack(
+        children: [
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationY(math.pi),
+            child: Image.file(
+              File(_photoPath),
+              fit: BoxFit.cover,
+              width: width,
+              height: height,
+            ),
+          ),
+          closeButton,
+          captureButton
+        ],
+      );
+    }
+    if(cameraController != null && cameraController!.value.isInitialized){
+      return Stack(
+        children: [
+          Transform.scale(
+            scale: _cameraScale(),
+            child: Center(
+              child: CameraPreview(
+                cameraController!,
+                child: Platform.isIOS
+                    ? faceRect()
+                    : Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.rotationY(math.pi),
+                        child: faceRect(),
+                      ),
+              ),
+            ),
+          ),
+          closeButton,
+          captureButton
+        ],
+      );
+    }
+    return Stack(
+      children: [
+        Center(child: CircularProgressIndicator(),),
+        closeButton,
+        captureButton
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: WillPopScope(
         onWillPop: ()async{
           await cameraClose();
           return true;
         },
-        child: Stack(
-          children: [
-            _photoPath.isNotEmpty?
-            Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.rotationY(math.pi),
-              child: Image.file(
-                File(_photoPath),
-                fit: BoxFit.cover,
-                width: width,
-                height: height,
-              ),
-            ):
-            (cameraController != null && cameraController!.value.isInitialized)?Transform.scale(
-                scale: cameraController!.value.aspectRatio/deviceRatio,
-                child: Center(
-                    child: AspectRatio(
-                        aspectRatio: cameraController!.value.aspectRatio,
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CameraPreview(cameraController!),
-                            Platform.isIOS? faceRect():
-                            Transform(
-                              alignment: Alignment.center,
-                              transform: Matrix4.rotationY(math.pi),
-                              child: faceRect(),
-                            )
-                          ],
-                        )
-                    )
-                )
-            ):Center(child: CircularProgressIndicator(),),
-            Positioned(
-              bottom: 30,
-              left: 0,
-              right: 0,
-              child: RoundedLoadingButton(
-                child: Text(_photoPath.isEmpty?S.of(context).takePicture.toUpperCase():S.of(context).tryAgain,
-                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),
-                ),
-                controller: _btnController,
-                width: width/2,
-                onPressed: ()async{
-                  if(_photoPath.isEmpty){
-                    await takePhoto();
-                    _btnController.reset();
-                  }else{
-                    await initDetectFace();
-                    setState(() {_photoPath="";});
-                    _btnController.reset();
-                  }
-                },
-                height: 40,
-                color: Colors.black87,
-              ),
-            ),
-            Positioned(
-              top: MediaQuery.of(context).padding.top+30,
-              right: 0,
-              child: MaterialButton(
-                onPressed: ()async{
-                  await cameraClose();
-                  Navigator.pop(context);
-                },
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: CircleBorder(),
-                padding: EdgeInsets.zero,
-                color: Colors.black87,
-                child: Icon(Icons.close, color: Color(primaryColor),),
-              ),
-            )
-          ],
-        ),
+        child: _body(),
       ),
       resizeToAvoidBottomInset: false,
     );

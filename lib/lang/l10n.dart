@@ -1922,11 +1922,9 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   bool shouldReload(AppLocalizationDelegate old) => false;
 
   bool _isSupported(Locale locale) {
-    if (locale != null) {
-      for (Locale supportedLocale in supportedLocales) {
-        if (supportedLocale.languageCode == locale.languageCode) {
-          return true;
-        }
+    for (Locale supportedLocale in supportedLocales) {
+      if (supportedLocale.languageCode == locale.languageCode) {
+        return true;
       }
     }
     return false;

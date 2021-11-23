@@ -1,5 +1,5 @@
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 
 
 class FaceDetectorPainter extends CustomPainter {

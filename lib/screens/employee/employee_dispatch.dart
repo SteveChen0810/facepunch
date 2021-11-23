@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/widgets/project_picker.dart';
 import 'package:facepunch/widgets/task_picker.dart';
 import 'package:facepunch/widgets/utils.dart';
