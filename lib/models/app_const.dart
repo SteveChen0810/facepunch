@@ -78,6 +78,7 @@ class AppConst{
 
 class GlobalData{
   static String token = '';
+  static String lang = 'en';
 }
 
 const int primaryColor = 0xFF09d55b;

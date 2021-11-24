@@ -2,15 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-class BaseProvider extends BaseModel with ChangeNotifier{
+
+import 'app_const.dart';
+class BaseProvider with ChangeNotifier, HttpRequest{
 
 }
 
-class BaseModel{
+class HttpRequest{
+
   Future<http.Response> sendPostRequest(String url, String? token, Map<dynamic, dynamic> data)async{
     Map<String, String> headers = {};
     headers['Accept'] = 'application/json';
     headers['Content-Type'] = 'application/json';
+    headers['app_version'] = '${AppConst.currentVersion}';
+    headers['lang'] = GlobalData.lang;
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }
@@ -25,6 +30,8 @@ class BaseModel{
     Map<String, String> headers = {};
     headers['Accept'] = 'application/json';
     headers['Content-Type'] = 'application/json';
+    headers['app_version'] = '${AppConst.currentVersion}';
+    headers['lang'] = GlobalData.lang;
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }

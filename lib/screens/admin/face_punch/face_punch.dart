@@ -21,6 +21,7 @@ import '/widgets/face_painter.dart';
 import '/widgets/utils.dart';
 
 class FacePunchScreen extends StatefulWidget {
+
   @override
   _FacePunchScreenState createState() => _FacePunchScreenState();
 }

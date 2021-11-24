@@ -29,8 +29,10 @@ class UserModel extends BaseProvider{
           if(user != null){
             if(user?.language == 'Spanish'){
               locale = 'es';
+              GlobalData.lang = locale;
             }else if(user?.language=='French'){
               locale = 'fr';
+              GlobalData.lang = locale;
             }
             GlobalData.token = user!.token!;
           }
@@ -55,6 +57,7 @@ class UserModel extends BaseProvider{
       }else{
         locale = 'en';
       }
+      GlobalData.lang = locale;
       notifyListeners();
     }catch(e){
       print("[UserModel.saveUserToLocal] $e");
@@ -367,6 +370,7 @@ class UserModel extends BaseProvider{
 
   changeAppLanguage(String lang){
     locale = lang;
+    GlobalData.lang = lang;
     notifyListeners();
   }
 
@@ -418,7 +422,7 @@ class UserModel extends BaseProvider{
   }
 }
 
-class User extends BaseModel{
+class User with HttpRequest{
   int? id;
   String? name;
   String? email;

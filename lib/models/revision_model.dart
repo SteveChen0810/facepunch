@@ -129,7 +129,7 @@ class RevisionModel extends BaseProvider {
   }
 }
 
-class Revision extends BaseModel{
+class Revision with HttpRequest{
   int? id;
   int? userId;
   int? punchId;

@@ -188,7 +188,7 @@ class WorkHistory{
   }
 }
 
-class WorkSchedule extends BaseModel{
+class WorkSchedule with HttpRequest{
   int? id;
   int? userId;
   int? projectId;
@@ -403,7 +403,7 @@ class WorkSchedule extends BaseModel{
   }
 }
 
-class EmployeeCall extends BaseModel{
+class EmployeeCall with HttpRequest{
   int? id;
   int? userId;
   int? projectId;
