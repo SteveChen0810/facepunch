@@ -134,7 +134,6 @@ class _SelectStateState extends State<SelectState> {
        this.widget.onStateChanged!(value);
     });
     await getCity();
-    print(_selectedState);
   }
 
   void _onSelectedCity(String? value) {
@@ -142,7 +141,6 @@ class _SelectStateState extends State<SelectState> {
       _selectedCity = value;
        this.widget.onCityChanged!(value);
     });
-    print(_selectedCity);
   }
 
   @override

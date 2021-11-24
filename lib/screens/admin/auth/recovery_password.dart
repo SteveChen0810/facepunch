@@ -1,9 +1,10 @@
-import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '/lang/l10n.dart';
+import '/models/app_const.dart';
+import '/models/user_model.dart';
+import '/widgets/utils.dart';
 
 class RecoveryPasswordScreen extends StatefulWidget{
 
@@ -28,7 +29,7 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
         showMessage("Email is invalid.");
       }
     }catch(e){
-      print("[RecoveryPasswordScreen.recoveryPassword]");
+      Tools.consoleLog("[RecoveryPasswordScreen.recoveryPassword.err]$e");
     }
   }
 

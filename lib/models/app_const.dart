@@ -72,8 +72,10 @@ class AppConst{
   static final String addEditCall = baseUrl+"add-edit-call";
 
   static final String getAppVersions = baseUrl+"get-app-versions";
+  static final String submitMobileLog = baseUrl+"submit-mobile-log";
 
-  static final int currentVersion = 34;
+  static const String LOG_FILE_NAME = "app_log.txt";
+  static const int currentVersion = 34;
 }
 
 class GlobalData{

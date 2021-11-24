@@ -91,7 +91,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
-      print('[FacePunchScreen._initializeCamera]$e');
+      Tools.consoleLog('[FacePunchScreen._initializeCamera]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -106,18 +106,18 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           setState(() {faces = result;});
           _isDetecting = false;
         }).catchError((e) {
-          print('[FacePunch.initDetectFace.detect]$e');
+          Tools.consoleLog('[FacePunch.initDetectFace.detect]$e');
         _isDetecting = false;
         },);
       }).catchError((e){
-        print('[FacePunch.initDetectFace.startImageStream]$e');
+        Tools.consoleLog('[FacePunch.initDetectFace.startImageStream]$e');
       Tools.showErrorMessage(context, e.toString());
       });
     }on CameraException catch(e){
-      print('[FacePunch.initDetectFace]$e');
+      Tools.consoleLog('[FacePunch.initDetectFace]$e');
       Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
-      print('[FacePunch.initDetectFace]$e');
+      Tools.consoleLog('[FacePunch.initDetectFace]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -133,10 +133,10 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         await cameraController?.dispose();
       }
     }on CameraException catch(e){
-      print('[FacePunch.cameraClose]$e');
+      Tools.consoleLog('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
-      print('[FacePunch.cameraClose]$e');
+      Tools.consoleLog('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -173,14 +173,14 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       setState(() {_photoPath = file.path;});
       await _punchWithFace(file.path);
       await File(file.path).delete().catchError((e){
-        print('[FacePunch.takePhoto.delete]$e');
+        Tools.consoleLog('[FacePunch.takePhoto.delete]$e');
       });
     } on CameraException catch (e) {
       Tools.showErrorMessage(context, e.toString());
-      print('[FacePunch.takePhoto]$e');
+      Tools.consoleLog('[FacePunch.takePhoto]$e');
     } catch(e){
       Tools.showErrorMessage(context, e.toString());
-      print('[FacePunch.takePhoto]$e');
+      Tools.consoleLog('[FacePunch.takePhoto]$e');
     }
   }
 
@@ -200,7 +200,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       }
     }
     Geolocator.getCurrentPosition().timeout(Duration(seconds: 5)).then((value){currentPosition = value;}).catchError((e){
-      print('[FacePunchScreen.getCurrentPosition]$e');
+      Tools.consoleLog('[FacePunchScreen.getCurrentPosition]$e');
     });
   }
 
@@ -233,7 +233,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         setState(() {_photoPath="";});
       }
     }catch(e){
-      print("[EmployeeLogin.punchWithFace] $e");
+      Tools.consoleLog("[EmployeeLogin.punchWithFace] $e");
       Tools.showErrorMessage(context, e.toString());
     }
   }

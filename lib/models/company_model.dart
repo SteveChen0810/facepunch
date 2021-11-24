@@ -1,9 +1,10 @@
+import 'package:localstorage/localstorage.dart';
+
 import 'base_model.dart';
 import 'user_model.dart';
 import 'dart:convert';
 import 'app_const.dart';
-import 'package:localstorage/localstorage.dart';
-
+import '/widgets/utils.dart';
 class CompanyModel extends BaseProvider{
   final LocalStorage storage = LocalStorage('companies');
   Company? myCompany;
@@ -26,13 +27,13 @@ class CompanyModel extends BaseProvider{
   getCompanyFromServer()async{
     try{
       final res = await sendGetRequest(AppConst.getMyCompany, GlobalData.token);
-      print("[CompanyModel.getCompanyFromServer] ${res.body}");
+      Tools.consoleLog("[CompanyModel.getCompanyFromServer.res] ${res.body}");
       if(res.statusCode==200){
         myCompany = Company.fromJson(jsonDecode(res.body));
         await saveCompanyToLocal();
       }
     }catch(e){
-      print("[CompanyModel.getCompanyFromServer] $e");
+      Tools.consoleLog("[CompanyModel.getCompanyFromServer.err] $e");
     }
     notifyListeners();
   }
@@ -43,7 +44,7 @@ class CompanyModel extends BaseProvider{
       if(storageReady)
         await storage.setItem('my_company',myCompany?.toJson());
     }catch(e){
-      print("[CompanyModel.saveCompanyToLocal] $e");
+      Tools.consoleLog("[CompanyModel.saveCompanyToLocal.err] $e");
     }
   }
 
@@ -57,7 +58,7 @@ class CompanyModel extends BaseProvider{
         }
       }
     }catch(e){
-      print("[CompanyModel.getCompanyFromLocal] $e");
+      Tools.consoleLog("[CompanyModel.getCompanyFromLocal.err] $e");
     }
     notifyListeners();
   }
@@ -69,7 +70,7 @@ class CompanyModel extends BaseProvider{
       var userData = user.toJson();
       if(photo != null){ userData['photo'] = photo; }
       final res = await sendPostRequest(AppConst.addEditEmployee, GlobalData.token, userData);
-      print("[CompanyModel.createEditEmployee] ${res.body}");
+      Tools.consoleLog("[CompanyModel.createEditEmployee.res] ${res.body}");
       if(res.statusCode==200){
         if(user.id != null){
           user = users.firstWhere((u) => u.id == user.id);
@@ -87,7 +88,7 @@ class CompanyModel extends BaseProvider{
         result =  jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
-      print("[CompanyModel.createEditEmployee] $e");
+      Tools.consoleLog("[CompanyModel.createEditEmployee.err] $e");
       result = e.toString();
     }
     return result;
@@ -96,7 +97,7 @@ class CompanyModel extends BaseProvider{
   Future<String?> getCompanyUsers()async{
     try{
       var res = await sendGetRequest(AppConst.getCompanyEmployees, GlobalData.token);
-      print("[CompanyModel.getCompanyUsers] ${res.body}");
+      Tools.consoleLog("[CompanyModel.getCompanyUsers.res] ${res.body}");
       if(res.statusCode==200){
         users.clear();
         for(var json in jsonDecode(res.body))
@@ -107,7 +108,7 @@ class CompanyModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[CompanyModel.getCompanyUsers] $e");
+      Tools.consoleLog("[CompanyModel.getCompanyUsers.err] $e");
       return e.toString();
     }
   }
@@ -116,7 +117,7 @@ class CompanyModel extends BaseProvider{
     String result = 'Oops, Unknown Errors!';
     try{
       var res = await sendPostRequest( AppConst.deleteEmployee, GlobalData.token, {'user_id' : userId});
-      print("[CompanyModel.deleteEmployee] ${res.body}");
+      Tools.consoleLog("[CompanyModel.deleteEmployee.res] ${res.body}");
       if(res.statusCode==200){
         users.removeWhere((u) => u.id==userId);
         notifyListeners();
@@ -125,7 +126,7 @@ class CompanyModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[CompanyModel.deleteEmployee] $e");
+      Tools.consoleLog("[CompanyModel.deleteEmployee.err] $e");
     }
     return result;
   }
@@ -148,7 +149,7 @@ class CompanyModel extends BaseProvider{
             'phone' : phone
           }
       );
-      print("[CompanyModel.updateCompany] ${res.body}");
+      Tools.consoleLog("[CompanyModel.updateCompany.res] ${res.body}");
       if(res.statusCode==200){
         myCompany = Company.fromJson(jsonDecode(res.body));
         await saveCompanyToLocal();
@@ -157,7 +158,7 @@ class CompanyModel extends BaseProvider{
         result =  jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
-      print("[CompanyModel.updateCompany] $e");
+      Tools.consoleLog("[CompanyModel.updateCompany.err] $e");
     }
     return result;
   }
@@ -165,7 +166,7 @@ class CompanyModel extends BaseProvider{
   Future<String?> getCompanySettingsFromServer()async{
     try{
       var res = await sendGetRequest(AppConst.getCompanySettings, GlobalData.token);
-      print("[CompanyModel.getCompanySettings] ${res.body}");
+      Tools.consoleLog("[CompanyModel.getCompanySettings.res] ${res.body}");
       if(res.statusCode==200){
         myCompanySettings = CompanySettings.fromJson(jsonDecode(res.body));
         await saveCompanySettingsToLocal();
@@ -174,7 +175,7 @@ class CompanyModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[CompanyModel.getCompanySettings] $e");
+      Tools.consoleLog("[CompanyModel.getCompanySettings.err] $e");
       return e.toString();
     }
   }
@@ -190,7 +191,7 @@ class CompanyModel extends BaseProvider{
         }
       }
     }catch(e){
-      print("[CompanyModel.getCompanyFromLocal] $e");
+      Tools.consoleLog("[CompanyModel.getCompanyFromLocal.err] $e");
     }
     notifyListeners();
   }
@@ -202,14 +203,14 @@ class CompanyModel extends BaseProvider{
         await storage.setItem('company_settings', myCompanySettings?.toJson());
       notifyListeners();
     }catch(e){
-      print("[CompanyModel.saveCompanySettingsToLocal] $e");
+      Tools.consoleLog("[CompanyModel.saveCompanySettingsToLocal.err] $e");
     }
   }
 
   Future<String?> updateCompanySetting(CompanySettings settings)async{
     try{
       var res = await sendPostRequest(AppConst.updateCompanySettings, GlobalData.token, settings.toJson());
-      print("[CompanyModel.updateCompanySetting] ${res.body}");
+      Tools.consoleLog("[CompanyModel.updateCompanySetting.res] ${res.body}");
       if(res.statusCode==200){
         myCompanySettings = settings;
         saveCompanySettingsToLocal();
@@ -218,7 +219,7 @@ class CompanyModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[CompanyModel.updateCompanySetting] $e");
+      Tools.consoleLog("[CompanyModel.updateCompanySetting.err] $e");
       return e.toString();
     }
   }
@@ -237,7 +238,7 @@ class CompanyModel extends BaseProvider{
             'punch_time':punchTime,
           }
       );
-      print("[CompanyModel.punchByAdmin] ${res.body}");
+      Tools.consoleLog("[CompanyModel.punchByAdmin.res] ${res.body}");
       if(res.statusCode==200){
         final punch = Punch.fromJson(jsonDecode(res.body));
         users.firstWhere((u) => u.id==userId).lastPunch = punch;
@@ -247,7 +248,7 @@ class CompanyModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[CompanyModel.punchByAdmin] $e");
+      Tools.consoleLog("[CompanyModel.punchByAdmin.err] $e");
       return e.toString();
     }
   }
@@ -279,7 +280,7 @@ class Company {
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print("[User.fromJson] $e");
+      Tools.consoleLog("[User.fromJson.err] $e");
     }
   }
 
@@ -354,7 +355,7 @@ class CompanySettings{
       hasGeolocationPunch = json['has_geolocation_punch']!=null && json['has_geolocation_punch']=='1';
       useOwnData = json['use_own_data']!=null && json['use_own_data']=='1';
     }catch(e){
-      print('[CompanySettings.fromJson]$e');
+      Tools.consoleLog('[CompanySettings.fromJson.err]$e');
     }
   }
 

@@ -137,7 +137,7 @@ class _AdminSettingState extends State<AdminSetting> {
         setState(() {});
       }
     }catch(e){
-      print("[SettingScreen.updateUser] $e");
+      Tools.consoleLog("[SettingScreen.updateUser.err] $e");
     }
   }
 
@@ -162,7 +162,7 @@ class _AdminSettingState extends State<AdminSetting> {
         Tools.showErrorMessage(context, result);
       }
     }catch(e){
-      print("[SettingScreen.updateUser] $e");
+      Tools.consoleLog("[SettingScreen.updateCompany.err] $e");
     }
   }
 
@@ -401,7 +401,6 @@ class _AdminSettingState extends State<AdminSetting> {
                           onCountryChanged: (value) {
                             FocusScope.of(context).requestFocus(FocusNode());
                             country = value;
-                            print(value);
                           },
                           onStateChanged:(value) {
                             FocusScope.of(context).requestFocus(FocusNode());

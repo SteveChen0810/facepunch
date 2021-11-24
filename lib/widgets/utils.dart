@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:facepunch/models/app_const.dart';
+import 'package:path_provider/path_provider.dart';
 import '/lang/l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +34,7 @@ InputImageData buildMetaData(
     inputImageFormat: InputImageFormatMethods.fromRawValue(image.format.raw) ?? InputImageFormat.NV21,
     size: Size(image.width.toDouble(), image.height.toDouble()),
     imageRotation: rotation,
-    planeData: image.planes.map(
-          (Plane plane) {
+    planeData: image.planes.map((Plane plane) {
         return InputImagePlaneMetadata(
           bytesPerRow: plane.bytesPerRow,
           height: plane.height,
@@ -78,7 +80,7 @@ class Tools {
       //   autoStart: true,
       // );
     }catch(e){
-      print('[playSound]$e');
+      Tools.consoleLog('[Tools.playSound]$e');
     }
   }
 
@@ -108,9 +110,12 @@ class Tools {
 
   static Future<void> consoleLog(String log)async{
     try{
+      final directory = await getApplicationDocumentsDirectory();
+      final logFile = File('${directory.path}/${AppConst.LOG_FILE_NAME}');
+      logFile.writeAsString('\n[${DateTime.now()}]$log', mode: FileMode.writeOnlyAppend);
       print(log);
     }catch(e){
-      print(e);
+      print('[consoleLog]$e');
     }
   }
 }

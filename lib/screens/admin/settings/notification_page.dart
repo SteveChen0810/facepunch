@@ -511,7 +511,7 @@ class _NotificationPageState extends State<NotificationPage> {
         );
       }
     }catch(e){
-      print('[NotificationPage._showRevisionDialog]$e');
+      Tools.consoleLog('[NotificationPage._showRevisionDialog]$e');
       content = Text(e.toString(), style: TextStyle(color: Colors.red),);
     }
     showDialog(

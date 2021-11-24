@@ -87,7 +87,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
       }
     }on CameraException catch(e){
-      print(e);
+      Tools.consoleLog('[EmployeeLogin._initializeCamera.err]$e');
     }
   }
 
@@ -102,10 +102,10 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           setState(() {faces = result;});
           _isDetecting = false;
         },
-        ).catchError((e) {print(e);_isDetecting = false;},);
-      }).catchError((e){print(e);Tools.showErrorMessage(context, e.toString());});
+        ).catchError((e) {Tools.consoleLog(e);_isDetecting = false;},);
+      }).catchError((e){Tools.consoleLog(e);Tools.showErrorMessage(context, e.toString());});
     }on CameraException catch(e){
-      print(e);
+      Tools.consoleLog('[EmployeeLogin.initDetectFace.err]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -117,7 +117,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         await cameraController?.dispose();
       }
     }on CameraException catch(e){
-      print(e);
+      Tools.consoleLog('[EmployeeLogin.cameraClose.err]$e');
       Tools.showErrorMessage(context, e.toString());
     }
   }
@@ -139,10 +139,9 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       }
       await Future.delayed(new Duration(milliseconds: 100));
       XFile file = await cameraController!.takePicture();
-      print(file.path);
       setState(() {_photoPath = file.path;});
     } on CameraException catch (e) {
-      print(e);
+      Tools.consoleLog('[EmployeeLogin.takePhoto.err]$e');
     }
   }
 
@@ -156,7 +155,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         Tools.showErrorMessage(context, result);
       }
     }catch(e){
-      print("[EmployeeLogin.loginWithFace] $e");
+      Tools.consoleLog("[EmployeeLogin.loginWithFace.err] $e");
       Tools.showErrorMessage(context, e.toString());
     }
     return false;
@@ -173,7 +172,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       painter = FaceDetectorPainter(imageSize, faces!);
       return CustomPaint(painter: painter,);
     }catch(e){
-      print("[EmployeeLogin.faceRect] $e");
+      Tools.consoleLog("[EmployeeLogin.faceRect.err] $e");
       return SizedBox();
     }
   }
@@ -263,7 +262,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         ],
       );
     }catch(e){
-      print("[EmployeeLogin.loginWithFaceWidget] $e");
+      Tools.consoleLog("[EmployeeLogin.loginWithFaceWidget.err] $e");
       return SizedBox();
     }
   }

@@ -1,16 +1,15 @@
-import 'package:facepunch/widgets/utils.dart';
-
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
 import '/screens/employee/employee_login.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'admin/admin_home.dart';
 import 'admin/auth/login.dart';
 import 'admin/face_punch/start_face_punch.dart';
 import 'employee/employee_home.dart';
+import '/widgets/utils.dart';
 
 class HomePage extends StatefulWidget{
 
@@ -114,10 +113,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   alignment: Alignment.bottomCenter,
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      width: imageSize,
-                      height: imageSize,
+                    child: GestureDetector(
+                      onLongPress: ()async{
+                        String? result = await context.read<UserModel>().submitMobileLog();
+                        if(result!=null){
+                          Tools.showErrorMessage(context, result);
+                        }
+                      },
+                      child: Image.asset(
+                        "assets/images/logo.png",
+                        width: imageSize,
+                        height: imageSize,
+                      ),
                     ),
                   ),
                 ),

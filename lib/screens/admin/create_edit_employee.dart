@@ -68,7 +68,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         if(widget.employee?.start != null)_startDate = DateTime.tryParse(widget.employee!.start!);
         if(widget.employee?.birthday != null)_birthDay = DateTime.tryParse(widget.employee!.birthday!);
       }catch(e){
-       print("[CreateEditEmployee.initState] $e");
+       Tools.consoleLog("[CreateEditEmployee.initState] $e");
       }
     }
   }
@@ -237,7 +237,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         Tools.showErrorMessage(context, result);
       }
     }catch(e){
-      print("[createEditEmployee] $e");
+      Tools.consoleLog("[createEditEmployee] $e");
       Tools.showErrorMessage(context, e.toString());
     }
   }

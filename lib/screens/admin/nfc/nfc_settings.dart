@@ -52,7 +52,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
         if(companySettings?.lastUpdated != null)_lastUpdated = DateTime.parse(companySettings!.lastUpdated!);
       }
     }catch(e){
-      print('[NFCSettingPage._init]$e');
+      Tools.consoleLog('[NFCSettingPage._init]$e');
     }
   }
 
@@ -251,7 +251,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                               }
                               setState((){isSavingContainer=false;});
                             }catch(e){
-                              print('[showContainerDialog.onPressed]$e');
+                              Tools.consoleLog('[showContainerDialog.onPressed]$e');
                               Navigator.pop(_context);
                             }
                           },
@@ -849,7 +849,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         }
                       }
                     }catch(e){
-                      print('[NFCSettingPage.onSave] $e');
+                      Tools.consoleLog('[NFCSettingPage.onSave] $e');
                       Tools.showErrorMessage(context, e.toString());
                     }
                   },

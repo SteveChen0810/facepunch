@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'base_model.dart';
 import 'package:localstorage/localstorage.dart';
+
+import 'base_model.dart';
 import 'revision_model.dart';
 import 'app_const.dart';
+import '/widgets/utils.dart';
 
 class NotificationModel extends BaseProvider {
   final LocalStorage storage = LocalStorage('notifications');
@@ -15,7 +17,7 @@ class NotificationModel extends BaseProvider {
           AppConst.getRevisionRequest,
           GlobalData.token
       );
-      print("[NotificationModel.getNotificationFromServer] ${res.body}");
+      Tools.consoleLog("[NotificationModel.getNotificationFromServer.res] ${res.body}");
       final body = jsonDecode(res.body);
       if(res.statusCode==200){
         revisions.clear();
@@ -25,7 +27,7 @@ class NotificationModel extends BaseProvider {
         notifyListeners();
       }
     }catch(e){
-      print("[NotificationModel.getNotificationFromServer] $e");
+      Tools.consoleLog("[NotificationModel.getNotificationFromServer.res] $e");
     }
   }
 
@@ -58,14 +60,14 @@ class AppNotification {
       }else{
         notification = json; // iOS real device
       }
-      print("[AppNotification.fromJsonFirebase] $notification");
+      Tools.consoleLog("[AppNotification.fromJsonFirebase.res] $notification");
       body = notification['body'];
       title = notification['title'];
       type = notification['notify_type'];
       seen = false;
       date = DateTime.now().toString();
     } catch (e) {
-      print("AppNotification.fromJsonFirebase--$e");
+      Tools.consoleLog("[AppNotification.fromJsonFirebase.err]$e");
     }
   }
 
@@ -78,7 +80,7 @@ class AppNotification {
       type = json['notify_type'];
       seen = json['seen'];
     } catch (e) {
-      print("AppNotification.fromLocalStorage--$e");
+      Tools.consoleLog("[AppNotification.fromLocalStorage.err]$e");
     }
   }
 

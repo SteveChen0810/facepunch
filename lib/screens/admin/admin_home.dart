@@ -267,11 +267,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   _onMessage(RemoteMessage message){
     try{
-      AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
-      Tools.playSound();
-      showNotificationDialog(newNotification, context,);
+      if(mounted){
+        AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
+        Tools.playSound();
+        showNotificationDialog(newNotification, context,);
+      }
     }catch(e){
-      print('[_onMessage]$e');
+      Tools.consoleLog('[AdminHome._onMessage]$e');
     }
   }
 
@@ -295,7 +297,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       setState(() { loadingUser=0; });
       if(result != null)Tools.showErrorMessage(context, result);
     }catch(e){
-      print('[_manualPunch]$e');
+      Tools.consoleLog('[_manualPunch]$e');
       setState(() {loadingUser=0;});
     }
   }

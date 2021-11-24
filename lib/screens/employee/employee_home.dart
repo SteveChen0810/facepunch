@@ -58,11 +58,13 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
 
   _onMessage(RemoteMessage message){
     try{
-      AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
-      Tools.playSound();
-      showNotificationDialog(newNotification, context,);
+      if(mounted){
+        AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
+        Tools.playSound();
+        showNotificationDialog(newNotification, context,);
+      }
     }catch(e){
-      print('[_onMessage]$e');
+      Tools.consoleLog('[EmployeeHome._onMessage]$e');
     }
   }
 

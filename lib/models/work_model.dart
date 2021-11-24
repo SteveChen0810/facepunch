@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 
 import '/lang/l10n.dart';
 import 'base_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import 'package:flutter/material.dart';
-
 import 'app_const.dart';
+import '/widgets/utils.dart';
 
 class WorkModel extends BaseProvider{
   List<Project> projects = [];
@@ -17,7 +17,7 @@ class WorkModel extends BaseProvider{
         AppConst.getProjectsAndTasks,
         GlobalData.token,
       );
-      print('[WorkModel.getProjects]${res.body}');
+      Tools.consoleLog('[WorkModel.getProjects.res]${res.body}');
       if(res.statusCode==200){
         projects.clear();
         for(var project in jsonDecode(res.body)['projects']){
@@ -30,7 +30,7 @@ class WorkModel extends BaseProvider{
         notifyListeners();
       }
     }catch(e){
-      print('[WorkModel.getProjects]$e');
+      Tools.consoleLog('[WorkModel.getProjects.err]$e');
     }
   }
 
@@ -44,14 +44,14 @@ class WorkModel extends BaseProvider{
             'project_id': projectId,
           }
       );
-      print('[ScheduleTask.startShopTracking]${res.body}');
+      Tools.consoleLog('[ScheduleTask.startShopTracking.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[ScheduleTask.startShopTracking]$e');
+      Tools.consoleLog('[ScheduleTask.startShopTracking.err]$e');
       return e.toString();
     }
   }
@@ -73,7 +73,7 @@ class Project{
       name = json['name'];
       code = json['code'];
     }catch(e){
-      print('[Project.fromJson]$e');
+      Tools.consoleLog('[Project.fromJson.err]$e');
     }
   }
 
@@ -92,7 +92,7 @@ class ScheduleTask{
       name = json['name'];
       code = json['code'];
     }catch(e){
-      print('[ScheduleTask.fromJson]$e');
+      Tools.consoleLog('[ScheduleTask.fromJson.err]$e');
     }
   }
 }
@@ -135,7 +135,7 @@ class WorkHistory{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print('[WorkHistory.fromJson]$e');
+      Tools.consoleLog('[WorkHistory.fromJson.err]$e');
     }
   }
 
@@ -147,7 +147,7 @@ class WorkHistory{
       if(endTime == null)return 0.0;
       return endTime.difference(startTime).inMinutes/60;
     }catch(e){
-      print('[WorkHistory.workHour]$e');
+      Tools.consoleLog('[WorkHistory.workHour.err]$e');
     }
     return 0.0;
   }
@@ -237,7 +237,7 @@ class WorkSchedule with HttpRequest{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print('[WorkSchedule.fromJson]$e');
+      Tools.consoleLog('[WorkSchedule.fromJson.err]$e');
     }
   }
 
@@ -314,14 +314,14 @@ class WorkSchedule with HttpRequest{
         token??GlobalData.token,
         { 'id' : id }
       );
-      print('[WorkSchedule.startSchedule]${res.body}');
+      Tools.consoleLog('[WorkSchedule.startSchedule.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[WorkModel.startSchedule]$e');
+      Tools.consoleLog('[WorkModel.startSchedule.err]$e');
       return e.toString();
     }
   }
@@ -333,14 +333,14 @@ class WorkSchedule with HttpRequest{
         GlobalData.token,
         {'id':id}
       );
-      print('[WorkSchedule.endSchedule]${res.body}');
+      Tools.consoleLog('[WorkSchedule.endSchedule.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[WorkModel.endSchedule]$e');
+      Tools.consoleLog('[WorkModel.endSchedule.err]$e');
       return e.toString();
     }
   }
@@ -352,14 +352,14 @@ class WorkSchedule with HttpRequest{
           GlobalData.token,
           { 'id':id }
       );
-      print('[WorkSchedule.deleteSchedule]${res.body}');
+      Tools.consoleLog('[WorkSchedule.deleteSchedule.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[WorkModel.deleteSchedule]$e');
+      Tools.consoleLog('[WorkModel.deleteSchedule.err]$e');
       return e.toString();
     }
   }
@@ -371,14 +371,14 @@ class WorkSchedule with HttpRequest{
           GlobalData.token,
           toJson(),
       );
-      print('[WorkSchedule.editSchedule]${res.body}');
+      Tools.consoleLog('[WorkSchedule.editSchedule.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[WorkModel.editSchedule]$e');
+      Tools.consoleLog('[WorkModel.editSchedule.err]$e');
       return e.toString();
     }
   }
@@ -390,14 +390,14 @@ class WorkSchedule with HttpRequest{
           GlobalData.token,
           toJson()
       );
-      print('[WorkSchedule.addSchedule]${res.body}');
+      Tools.consoleLog('[WorkSchedule.addSchedule.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[WorkModel.addSchedule]$e');
+      Tools.consoleLog('[WorkModel.addSchedule.err]$e');
       return e.toString();
     }
   }
@@ -453,7 +453,7 @@ class EmployeeCall with HttpRequest{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print('[EmployeeCall.fromJson]$e');
+      Tools.consoleLog('[EmployeeCall.fromJson.err]$e');
     }
   }
 
@@ -509,14 +509,14 @@ class EmployeeCall with HttpRequest{
           token,
           {'id':id}
       );
-      print('[EmployeeCall.startCall]${res.body}');
+      Tools.consoleLog('[EmployeeCall.startCall.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[EmployeeCall.startSchedule]$e');
+      Tools.consoleLog('[EmployeeCall.startSchedule.err]$e');
       return e.toString();
     }
   }
@@ -528,14 +528,14 @@ class EmployeeCall with HttpRequest{
         GlobalData.token,
         toJson(),
       );
-      print('[EmployeeCall.addEditCall]${res.body}');
+      Tools.consoleLog('[EmployeeCall.addEditCall.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[EmployeeCall.addEditCall]$e');
+      Tools.consoleLog('[EmployeeCall.addEditCall.err]$e');
       return e.toString();
     }
   }
@@ -582,7 +582,7 @@ class EmployeeBreak{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print('[EmployeeBreak.fromJson]$e');
+      Tools.consoleLog('[EmployeeBreak.fromJson.err]$e');
     }
   }
 

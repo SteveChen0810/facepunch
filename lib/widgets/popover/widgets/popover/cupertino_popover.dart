@@ -407,7 +407,7 @@ class _CupertionPopoverContextRenderObject extends RenderShiftedBox {
   double get scale => _scale;
   double _scale;
   set scale(double value) {
-    // print('scale:${_scale.value}');
+    // Tools.consoleLog('scale:${_scale.value}');
     // if (_scale == value)
     //   return;
     _scale = value;

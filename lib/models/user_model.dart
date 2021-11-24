@@ -1,15 +1,18 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:localstorage/localstorage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:collection/collection.dart';
+import 'package:path_provider/path_provider.dart';
+import 'work_model.dart';
+import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import 'base_model.dart';
 import 'revision_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'app_const.dart';
-import 'package:localstorage/localstorage.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:collection/collection.dart';
-import 'work_model.dart';
-
 
 class UserModel extends BaseProvider{
   User? user;
@@ -30,7 +33,7 @@ class UserModel extends BaseProvider{
             if(user?.language == 'Spanish'){
               locale = 'es';
               GlobalData.lang = locale;
-            }else if(user?.language=='French'){
+            }else if(user?.language == 'French'){
               locale = 'fr';
               GlobalData.lang = locale;
             }
@@ -39,7 +42,7 @@ class UserModel extends BaseProvider{
         }
       }
     }catch(e){
-      print("[UserModel.getUserFromLocal] $e");
+      Tools.consoleLog("[UserModel.getUserFromLocal.err] $e");
     }
     notifyListeners();
     return user;
@@ -60,7 +63,7 @@ class UserModel extends BaseProvider{
       GlobalData.lang = locale;
       notifyListeners();
     }catch(e){
-      print("[UserModel.saveUserToLocal] $e");
+      Tools.consoleLog("[UserModel.saveUserToLocal.err] $e");
     }
   }
 
@@ -77,7 +80,7 @@ class UserModel extends BaseProvider{
             'firebase_token': deviceToken??''
           }
       );
-      print("[UserModel.adminLogin] ${res.body}");
+      Tools.consoleLog("[UserModel.adminLogin.res] ${res.body}");
       if(res.statusCode == 200){
         user = User.fromJson(jsonDecode(res.body));
         GlobalData.token = user!.token!;
@@ -87,7 +90,7 @@ class UserModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[UserModel.adminLogin] $e");
+      Tools.consoleLog("[UserModel.adminLogin.err] $e");
     }
     return result;
   }
@@ -107,7 +110,7 @@ class UserModel extends BaseProvider{
             'firebase_token':deviceToken??''
           }
       );
-      print("[UserModel.adminRegister] ${res.body}");
+      Tools.consoleLog("[UserModel.adminRegister.res] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
         GlobalData.token = user!.token!;
@@ -117,7 +120,7 @@ class UserModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[UserModel.adminRegister] $e");
+      Tools.consoleLog("[UserModel.adminRegister.err] $e");
     }
     return result;
   }
@@ -130,7 +133,7 @@ class UserModel extends BaseProvider{
         user = null;
       }
     }catch(e){
-      print("[UserModel.logOut] $e");
+      Tools.consoleLog("[UserModel.logOut.err] $e");
     }
   }
 
@@ -141,14 +144,14 @@ class UserModel extends BaseProvider{
           null,
           { 'email':email }
       );
-      print("[UserModel.recoverPassword] ${res.body}");
+      Tools.consoleLog("[UserModel.recoverPassword.res] ${res.body}");
       if(res.statusCode==200){
         return "We have sent new password to your email.";
       }else{
         return jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
-      print("[UserModel.recoverPassword] $e");
+      Tools.consoleLog("[UserModel.recoverPassword.err] $e");
       return 'Oops, Unknown Errors!';
     }
   }
@@ -164,7 +167,7 @@ class UserModel extends BaseProvider{
             'verify_number' : number,
           }
       );
-      print("[UserModel.verifyEmailAddress] ${res.body}");
+      Tools.consoleLog("[UserModel.verifyEmailAddress.res] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
         GlobalData.token = user!.token!;
@@ -174,7 +177,7 @@ class UserModel extends BaseProvider{
         return jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
-      print("[UserModel.verifyEmailAddress] $e");
+      Tools.consoleLog("[UserModel.verifyEmailAddress.err] $e");
     }
     return result;
   }
@@ -186,7 +189,7 @@ class UserModel extends BaseProvider{
           AppConst.sendVerifyAgain,
           user?.token
       );
-      print("[UserModel.sendVerifyEmailAgain] ${res.body}");
+      Tools.consoleLog("[UserModel.sendVerifyEmailAgain.res] ${res.body}");
       if(res.statusCode==200){
         user?.emailVerifyNumber = jsonDecode(res.body)['number'];
         await saveUserToLocal();
@@ -195,7 +198,7 @@ class UserModel extends BaseProvider{
         result =  jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
-      print("[UserModel.sendVerifyEmailAgain] $e");
+      Tools.consoleLog("[UserModel.sendVerifyEmailAgain.err] $e");
     }
     return result;
   }
@@ -214,7 +217,7 @@ class UserModel extends BaseProvider{
             'last_name' : lName
           }
       );
-      print("[UserModel.updateUser] ${res.body}");
+      Tools.consoleLog("[UserModel.updateUser.res] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
         GlobalData.token = user!.token!;
@@ -224,7 +227,7 @@ class UserModel extends BaseProvider{
         return jsonDecode(res.body)['message'].toString();
       }
     }catch(e){
-      print("[UserModel.updateUser] $e");
+      Tools.consoleLog("[UserModel.updateUser.err] $e");
     }
     return result;
   }
@@ -233,7 +236,7 @@ class UserModel extends BaseProvider{
     String result = 'Oops, Unknown Errors!';
     try{
       String? deviceToken = await _firebaseMessaging.getToken();
-      print("[UserModel.loginWithFace.deviceToken] $deviceToken");
+      Tools.consoleLog("[UserModel.loginWithFace.deviceToken] $deviceToken");
       var res = await sendPostRequest(
           AppConst.loginWithFace,
           null,
@@ -242,7 +245,7 @@ class UserModel extends BaseProvider{
             'firebase_token': deviceToken??''
           }
       );
-      print("[UserModel.loginWithFace] ${res.body}");
+      Tools.consoleLog("[UserModel.loginWithFace.res] ${res.body}");
       if(res.statusCode==200){
         user = User.fromJson(jsonDecode(res.body));
         GlobalData.token = user!.token!;
@@ -252,7 +255,7 @@ class UserModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[UserModel.loginWithFace] $e");
+      Tools.consoleLog("[UserModel.loginWithFace.err] $e");
     }
     return result;
   }
@@ -269,14 +272,14 @@ class UserModel extends BaseProvider{
             'latitude':latitude
           }
       );
-      print("[UserModel.punchWithFace] ${res.body}");
+      Tools.consoleLog("[UserModel.punchWithFace.res] ${res.body}");
       if(res.statusCode==200){
         return jsonDecode(res.body);
       }else{
         result = jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[UserModel.punchWithFace] $e");
+      Tools.consoleLog("[UserModel.punchWithFace.err] $e");
     }
     return result;
   }
@@ -288,7 +291,7 @@ class UserModel extends BaseProvider{
           user?.token,
           {'date': date.toString()}
       );
-      print("[UserModel.getUserTimeSheetData] ${res.body}");
+      Tools.consoleLog("[UserModel.getUserTimeSheetData.res] ${res.body}");
       var body = jsonDecode(res.body);
       if(res.statusCode==200){
         List<Punch> punches = [];
@@ -306,7 +309,7 @@ class UserModel extends BaseProvider{
         return body['message']??'Something went wrong';
       }
     }catch(e){
-      print("[UserModel.getUserTimeSheetData] $e");
+      Tools.consoleLog("[UserModel.getUserTimeSheetData.err] $e");
       return e.toString() ;
     }
   }
@@ -318,7 +321,7 @@ class UserModel extends BaseProvider{
           user?.token,
           {'date': date.toString(),'user_id': employee.id.toString()}
       );
-      print("[UserModel.getEmployeeTimeSheetData] ${res.body}");
+      Tools.consoleLog("[UserModel.getEmployeeTimeSheetData.res] ${res.body}");
       var body = jsonDecode(res.body);
       if(res.statusCode==200){
         List<Punch> punches = [];
@@ -338,7 +341,7 @@ class UserModel extends BaseProvider{
         return body['message']??'Something went wrong';
       }
     }catch(e){
-      print("[UserModel.getEmployeeTimeSheetData] $e");
+      Tools.consoleLog("[UserModel.getEmployeeTimeSheetData.err] $e");
       return e.toString() ;
     }
   }
@@ -354,7 +357,7 @@ class UserModel extends BaseProvider{
         user?.token,
         {'token':token},
       );
-      print("[UserModel.notificationSetting] ${res.body}");
+      Tools.consoleLog("[UserModel.notificationSetting.res] ${res.body}");
       if(res.statusCode==200){
         user?.firebaseToken = token;
         saveUserToLocal();
@@ -363,7 +366,7 @@ class UserModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[UserModel.notificationSetting]");
+      Tools.consoleLog("[UserModel.notificationSetting.err]");
       return e.toString();
     }
   }
@@ -380,7 +383,7 @@ class UserModel extends BaseProvider{
           AppConst.getYearTotalHours,
           user?.token,
       );
-      print("[UserModel.getYearTotalHours] ${res.body}");
+      Tools.consoleLog("[UserModel.getYearTotalHours.res] ${res.body}");
       var body = jsonDecode(res.body);
       if(res.statusCode==200){
         yearTotalHours = body['total'];
@@ -390,7 +393,7 @@ class UserModel extends BaseProvider{
         return body['message']??'Something went wrong';
       }
     }catch(e){
-      print("[UserModel.getYearTotalHours] $e");
+      Tools.consoleLog("[UserModel.getYearTotalHours.err] $e");
       return e.toString() ;
     }
   }
@@ -398,12 +401,12 @@ class UserModel extends BaseProvider{
   Future<User?> getUserInfoFromServer(String token)async{
     try{
       var res = await sendGetRequest( AppConst.getUserInfo, token);
-      print('[UserModel.getUserInfoFromServer]${res.body}');
+      Tools.consoleLog('[UserModel.getUserInfoFromServer.res]${res.body}');
       if(res.statusCode == 200){
        return User.fromJson(jsonDecode(res.body));
       }
     }catch(e){
-      print('[UserModel.getUserInfoFromServer]$e');
+      Tools.consoleLog('[UserModel.getUserInfoFromServer.err]$e');
     }
     return null;
   }
@@ -411,14 +414,41 @@ class UserModel extends BaseProvider{
   Future<Map<String, dynamic>?> getAppVersions()async{
     try{
       var res = await sendGetRequest( AppConst.getAppVersions, null);
-      print('[UserModel.getAppVersions]${res.body}');
+      Tools.consoleLog('[UserModel.getAppVersions.res]${res.body}');
       if(res.statusCode == 200){
         return jsonDecode(res.body);
       }
     }catch(e){
-      print('[UserModel.getAppVersions]$e');
+      Tools.consoleLog('[UserModel.getAppVersions.err]$e');
     }
     return null;
+  }
+
+  Future<String?> submitMobileLog({String? comment})async{
+    try{
+      final directory = await getApplicationDocumentsDirectory();
+      final logFile = File('${directory.path}/${AppConst.LOG_FILE_NAME}');
+      if(await logFile.exists()){
+        String content = await logFile.readAsString();
+        Map<String, String> data = Map<String, String>();
+        data['log'] = content;
+        if(comment != null){
+          data['comment'] = comment;
+        }
+        final res = await sendPostRequest(AppConst.submitMobileLog, GlobalData.token, data);
+        Tools.consoleLog('[UserModel.submitMobileLog.res]${res.body}');
+        if(res.statusCode == 200){
+          logFile.deleteSync();
+          return "Thank you for submitting!";
+        }else{
+          return jsonDecode(res.body)['message'];
+        }
+      }
+      return "Nothing to report!";
+    }catch(e){
+      Tools.consoleLog('[UserModel.submitMobileLog.err]$e');
+      return e.toString();
+    }
   }
 }
 
@@ -552,7 +582,7 @@ class User with HttpRequest{
       hasAutoBreak = json['has_auto_break'] != null && json['has_auto_break'] == 1;
       active = json['active'] != null && json['active'] == 1;
     }catch(e){
-      print("[User.fromJson] $e");
+      Tools.consoleLog("[User.fromJson.err] $e");
     }
   }
 
@@ -724,14 +754,14 @@ class User with HttpRequest{
         GlobalData.token,
         {'punch_id':punchId,'value':value},
       );
-      print("[User.editPunch] ${res.body}");
+      Tools.consoleLog("[User.editPunch.res] ${res.body}");
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[User.editPunch] $e");
+      Tools.consoleLog("[User.editPunch.err] $e");
       return e.toString();
     }
   }
@@ -743,14 +773,14 @@ class User with HttpRequest{
         GlobalData.token,
         {'punch_id':punchId},
       );
-      print("[User.deletePunch] ${res.body}");
+      Tools.consoleLog("[User.deletePunch.res] ${res.body}");
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[User.deletePunch] $e");
+      Tools.consoleLog("[User.deletePunch.err] $e");
       return e.toString();
     }
   }
@@ -762,14 +792,14 @@ class User with HttpRequest{
         GlobalData.token,
         work.toJson(),
       );
-      print("[User.editWork] ${res.body}");
+      Tools.consoleLog("[User.editWork.res] ${res.body}");
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[User.editWork] $e");
+      Tools.consoleLog("[User.editWork.err] $e");
       return e.toString();
     }
   }
@@ -781,14 +811,14 @@ class User with HttpRequest{
         GlobalData.token,
         {'id':workId},
       );
-      print("[User.deleteWork] ${res.body}");
+      Tools.consoleLog("[User.deleteWork.res] ${res.body}");
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[User.deleteWork] $e");
+      Tools.consoleLog("[User.deleteWork.err] $e");
       return e.toString();
     }
   }
@@ -830,7 +860,7 @@ class User with HttpRequest{
           token,
           {'date':date}
       );
-      print('[WorkModel.getDailySchedule]${res.body}');
+      Tools.consoleLog('[WorkModel.getDailySchedule.res]${res.body}');
       var body = jsonDecode(res.body);
       if(res.statusCode==200){
         schedules.clear();
@@ -846,7 +876,7 @@ class User with HttpRequest{
         return body['message']??'Something went wrong.';
       }
     }catch(e){
-      print('[WorkModel.getDailySchedule]$e');
+      Tools.consoleLog('[WorkModel.getDailySchedule.err]$e');
       return e.toString();
     }
   }
@@ -857,7 +887,7 @@ class User with HttpRequest{
           AppConst.getRevisionNotifications,
           token
       );
-      print('[User.getRevisionNotifications]${res.body}');
+      Tools.consoleLog('[User.getRevisionNotifications.res]${res.body}');
       final body = jsonDecode(res.body);
       if(res.statusCode==200){
         revisions.clear();
@@ -869,7 +899,7 @@ class User with HttpRequest{
         return body['message']??'Something went wrong.';
       }
     }catch(e){
-      print('[User.getRevisionNotifications]$e');
+      Tools.consoleLog('[User.getRevisionNotifications.err]$e');
       return e.toString();
     }
   }
@@ -884,7 +914,7 @@ class User with HttpRequest{
             'id' : id.toString()
           }
       );
-      print('[WorkModel.getDailyCall]${res.body}');
+      Tools.consoleLog('[WorkModel.getDailyCall.res]${res.body}');
       var body = jsonDecode(res.body);
       if(res.statusCode == 200){
         calls.clear();
@@ -896,7 +926,7 @@ class User with HttpRequest{
         return body['message']??'Something went wrong.';
       }
     }catch(e){
-      print('[WorkModel.getDailyCall]$e');
+      Tools.consoleLog('[WorkModel.getDailyCall.err]$e');
       return e.toString();
     }
   }
@@ -908,14 +938,14 @@ class User with HttpRequest{
         GlobalData.token,
         {'id':breakId},
       );
-      print("[User.deleteBreak] ${res.body}");
+      Tools.consoleLog("[User.deleteBreak.res] ${res.body}");
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[User.deleteBreak] $e");
+      Tools.consoleLog("[User.deleteBreak.err] $e");
       return e.toString();
     }
   }
@@ -971,7 +1001,7 @@ class Punch{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print("[Punch.fromJson] $e");
+      Tools.consoleLog("[Punch.fromJson.err] $e");
     }
   }
 

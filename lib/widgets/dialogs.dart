@@ -1,9 +1,10 @@
-import 'dart:io';
+import 'package:flutter/material.dart';
 
+import 'dart:io';
+import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '/models/notification.dart';
 import '../models/app_const.dart';
-import 'package:flutter/material.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -56,17 +57,15 @@ Future<bool> pinCodeCheckDialog(String pin, BuildContext context)async{
                   if(hasError)
                     Text(S.of(context).pinCodeNotCorrect,style: TextStyle(color: Colors.red),),
                   SizedBox(height: 20,),
-                  ButtonTheme(
+                  MaterialButton(
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    color: Colors.black87,
                     minWidth: MediaQuery.of(context).size.width*0.6,
                     height: 40,
                     splashColor: Color(primaryColor),
-                    child: RaisedButton(
-                      onPressed: ()=>Navigator.pop(context),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      color: Colors.black87,
-                      child: Text(S.of(context).close,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
-                    ),
+                    onPressed: ()=>Navigator.pop(context),
+                    child: Text(S.of(context).close,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
                   SizedBox(height: 10,),
                 ],
@@ -102,12 +101,11 @@ showNotificationDialog(AppNotification notification, BuildContext context){
                 ),
               ),
               actions: [
-                FlatButton(
+                TextButton(
                   onPressed: ()async{
                     Navigator.pop(_context);
                   },
                   child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
               ],
             );
@@ -115,7 +113,7 @@ showNotificationDialog(AppNotification notification, BuildContext context){
       ),
     );
   }catch(e){
-    print("[showRevisionNotificationDialog] $e");
+    Tools.consoleLog("[showRevisionNotificationDialog] $e");
   }
 }
 
@@ -139,12 +137,11 @@ Future<bool> showLocationPermissionDialog(BuildContext context)async{
         ),
       ),
       actions: [
-        FlatButton(
+        TextButton(
           onPressed: ()async{
             Navigator.pop(context);
           },
           child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
       ],
     ),
@@ -160,7 +157,7 @@ showWelcomeDialog({required String userName, required bool isPunchIn, required B
         try{
           Navigator.of(_context).pop();
         }catch(e){
-          print(e);
+          Tools.consoleLog('[Dialogs.showWelcomeDialog.err]$e');
         }
       });
       return Align(

@@ -1,8 +1,10 @@
-import 'base_model.dart';
 import 'package:localstorage/localstorage.dart';
+
+import 'base_model.dart';
 import 'dart:convert';
 import 'app_const.dart';
 import 'user_model.dart';
+import '/widgets/utils.dart';
 
 class HarvestModel extends BaseProvider{
   final LocalStorage storage = LocalStorage('harvest');
@@ -44,14 +46,14 @@ class HarvestModel extends BaseProvider{
       }
       notifyListeners();
     } catch (err) {
-      print("[getHarvestDataFromLocal] $err");
+      Tools.consoleLog("[HarvestModel.getHarvestDataFromLocal.err] $err");
     }
   }
 
   Future<String?> getHarvestDataFromServer()async{
     try{
       final res = await sendGetRequest(AppConst.getHarvestData,GlobalData.token);
-      print('[getHarvestDataFromServer] ${res.body}');
+      Tools.consoleLog('[HarvestModel.getHarvestDataFromServer.res] ${res.body}');
       final body = jsonDecode(res.body);
       if(res.statusCode==200){
         fields.clear();
@@ -72,7 +74,7 @@ class HarvestModel extends BaseProvider{
         return body['message']??'Something want wrong.';
       }
     }catch(e){
-      print('[getHarvestDataFromServer] $e');
+      Tools.consoleLog('[HarvestModel.getHarvestDataFromServer.err] $e');
       return e.toString();
     }
   }
@@ -87,14 +89,14 @@ class HarvestModel extends BaseProvider{
       }
       notifyListeners();
     } catch (e) {
-      print("[saveFieldsToLocal] $e");
+      Tools.consoleLog("[HarvestModel.saveFieldsToLocal.err] $e");
     }
   }
 
   Future<String?> createOrUpdateField(Field field)async{
     try{
       final res = await sendPostRequest(AppConst.createOrUpdateFiled,GlobalData.token,field.toJson());
-      print('[HarvestModel.createOrUpdateField] ${res.body}');
+      Tools.consoleLog('[HarvestModel.createOrUpdateField.res] ${res.body}');
       if(res.statusCode==200){
         if(field.id == null){
           field = Field.fromJson(jsonDecode(res.body));
@@ -106,7 +108,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.createOrUpdateField] $e');
+      Tools.consoleLog('[HarvestModel.createOrUpdateField.err] $e');
      return e.toString();
     }
   }
@@ -114,7 +116,7 @@ class HarvestModel extends BaseProvider{
   Future<String?> deleteField(Field field)async{
     try{
       final res = await sendPostRequest(AppConst.deleteField,GlobalData.token,field.toJson());
-      print('[HarvestModel.deleteField] ${res.body}');
+      Tools.consoleLog('[HarvestModel.deleteField.res] ${res.body}');
       if(res.statusCode==200){
         fields.remove(field);
         tasks.removeWhere((t) => t.fieldId == field.id);
@@ -124,7 +126,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.deleteField] $e');
+      Tools.consoleLog('[HarvestModel.deleteField.err] $e');
       return e.toString();
     }
   }
@@ -136,7 +138,7 @@ class HarvestModel extends BaseProvider{
           GlobalData.token,
           container.toJson()
       );
-      print('[HarvestModel.createOrUpdateContainer] ${res.body}');
+      Tools.consoleLog('[HarvestModel.createOrUpdateContainer.res] ${res.body}');
       if(res.statusCode==200){
         if(container.id == null){
           container = HContainer.fromJson(jsonDecode(res.body));
@@ -148,7 +150,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.createOrUpdateContainer] $e');
+      Tools.consoleLog('[HarvestModel.createOrUpdateContainer.err] $e');
       return e.toString();
     }
   }
@@ -160,7 +162,7 @@ class HarvestModel extends BaseProvider{
           GlobalData.token,
           container.toJson()
       );
-      print('[HarvestModel.deleteContainer] ${res.body}');
+      Tools.consoleLog('[HarvestModel.deleteContainer.res] ${res.body}');
       if(res.statusCode==200){
         containers.remove(container);
         tasks.removeWhere((t) => t.containerId == container.id);
@@ -170,7 +172,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.deleteContainer] $e');
+      Tools.consoleLog('[HarvestModel.deleteContainer.err] $e');
       return e.toString();
     }
   }
@@ -182,7 +184,7 @@ class HarvestModel extends BaseProvider{
         GlobalData.token,
         task.toJson(),
       );
-      print('[deleteTask]${res.body}');
+      Tools.consoleLog('[HarvestModel.deleteTask.res]${res.body}');
       if(res.statusCode==200){
         tasks.remove(task);
         saveHarvestDataToLocal();
@@ -191,7 +193,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[deleteTask] $e');
+      Tools.consoleLog('[HarvestModel.deleteTask.err] $e');
       return e.toString();
     }
   }
@@ -203,7 +205,7 @@ class HarvestModel extends BaseProvider{
         GlobalData.token,
         task.toJson(),
       );
-      print('[createOrUpdateTask]${res.body}');
+      Tools.consoleLog('[HarvestModel.createOrUpdateTask.res]${res.body}');
       if(res.statusCode==200){
         final newTask = HTask.fromJson(jsonDecode(res.body));
         tasks.removeWhere((t) => t.id==newTask.id);
@@ -217,7 +219,7 @@ class HarvestModel extends BaseProvider{
       }
       return null;
     }catch(e){
-      print('[HarvestModel.createOrUpdateContainer] $e');
+      Tools.consoleLog('[HarvestModel.createOrUpdateContainer.err] $e');
       return e.toString();
     }
   }
@@ -230,7 +232,7 @@ class HarvestModel extends BaseProvider{
         GlobalData.token,
         {'date':date},
       );
-      print('[getHarvestsOfDate] ${res.body}');
+      Tools.consoleLog('[HarvestModel.getHarvestsOfDate.res] ${res.body}');
       if(res.statusCode==200){
         for(var json in jsonDecode(res.body)){
           harvests.add(Harvest.fromJson(json));
@@ -238,7 +240,7 @@ class HarvestModel extends BaseProvider{
         return harvests;
       }
     }catch(e){
-      print('[HarvestModel.getHarvestsOfDate] $e');
+      Tools.consoleLog('[HarvestModel.getHarvestsOfDate.err] $e');
     }
     return [];
   }
@@ -256,14 +258,14 @@ class HarvestModel extends BaseProvider{
           'nfc':nfc
         },
       );
-      print('[HarvestModel.addHarvest] ${res.body}');
+      Tools.consoleLog('[HarvestModel.addHarvest.res] ${res.body}');
       if(res.statusCode==200){
         return Harvest.fromJson(jsonDecode(res.body));
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.addHarvest] $e');
+      Tools.consoleLog('[HarvestModel.addHarvest.err] $e');
     }
     return null;
   }
@@ -275,14 +277,14 @@ class HarvestModel extends BaseProvider{
         GlobalData.token,
         {'id':id}
       );
-      print('[HarvestModel.deleteHarvest] ${res.body}');
+      Tools.consoleLog('[HarvestModel.deleteHarvest.res] ${res.body}');
       if(res.statusCode==200){
         return Harvest.fromJson(jsonDecode(res.body));
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.deleteHarvest] $e');
+      Tools.consoleLog('[HarvestModel.deleteHarvest.err] $e');
     }
     return null;
   }
@@ -297,7 +299,7 @@ class HarvestModel extends BaseProvider{
           'field':field,
         },
       );
-      print('[HarvestModel.getEmployeeHarvestStats]${res.body}');
+      Tools.consoleLog('[HarvestModel.getEmployeeHarvestStats.res]${res.body}');
       if(res.statusCode==200){
         List<HarvestEmployeeStats> eStats = [];
         final json = jsonDecode(res.body);
@@ -309,7 +311,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[HarvestModel.getEmployeeHarvestStats]$e');
+      Tools.consoleLog('[HarvestModel.getEmployeeHarvestStats.err]$e');
       return e.toString();
     }
   }
@@ -324,14 +326,14 @@ class HarvestModel extends BaseProvider{
           'field':field,
         },
       );
-      print('[getCompanyHarvestStats]${res.body}');
+      Tools.consoleLog('[HarvestModel.getCompanyHarvestStats.res]${res.body}');
       if(res.statusCode==200){
         return HarvestCompanyStats.fromJson(jsonDecode(res.body));
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[getEmployeeHarvestStats]$e');
+      Tools.consoleLog('[HarvestModel.getEmployeeHarvestStats.err]$e');
       return e.toString();
     }
   }
@@ -343,7 +345,7 @@ class HarvestModel extends BaseProvider{
         GlobalData.token,
         {'date':date},
       );
-      print('[getDateHarvestStats]${res.body}');
+      Tools.consoleLog('[HarvestModel.getDateHarvestStats.res]${res.body}');
       if(res.statusCode==200){
         List<HarvestDateStats> dateStats = [];
         for(var stats in jsonDecode(res.body))
@@ -353,7 +355,7 @@ class HarvestModel extends BaseProvider{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[getDateHarvestStats]$e');
+      Tools.consoleLog('[HarvestModel.getDateHarvestStats.err]$e');
       return e.toString();
     }
   }
@@ -386,7 +388,7 @@ class Harvest{
       if(json['field']!=null)field = Field.fromJson(json['field']);
       if(json['container']!=null)container = HContainer.fromJson(json['container']);
     }catch(e){
-      print("[Field.fromJson] $e");
+      Tools.consoleLog("[Field.fromJson.err] $e");
     }
   }
 
@@ -430,7 +432,7 @@ class HTask{
       if(json['field']!=null)field = Field.fromJson(json['field']);
       if(json['container']!=null)container = HContainer.fromJson(json['container']);
     }catch(e){
-      print("[Field.fromJson] $e");
+      Tools.consoleLog("[Field.fromJson.err] $e");
     }
   }
 
@@ -464,7 +466,7 @@ class HContainer{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print("[Field.fromJson] $e");
+      Tools.consoleLog("[Field.fromJson.err] $e");
     }
   }
 
@@ -514,7 +516,7 @@ class Field{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print("[Field.fromJson] $e");
+      Tools.consoleLog("[Field.fromJson.err] $e");
     }
   }
 
@@ -549,7 +551,7 @@ class HarvestEmployeeStats{
       time = double.tryParse(json['time'].toString())??0.0;
       quantity = double.tryParse(json['quantity'].toString())??0.0;
     }catch(e){
-      print('[HarvestEmployeeStats.fromJson]$e');
+      Tools.consoleLog('[HarvestEmployeeStats.fromJson.err]$e');
     }
   }
 
@@ -577,7 +579,7 @@ class HarvestCompanyStats{
       containersOfDate = json['date']['containers'];
       containersOfYear = json['year']['containers'];
     }catch(e){
-      print('[HarvestCompanyStats.fromJson]$e');
+      Tools.consoleLog('[HarvestCompanyStats.fromJson.err]$e');
     }
   }
 
@@ -606,7 +608,7 @@ class HarvestDateStats{
       fieldName = json['name'];
       containers = json['containers'];
     }catch(e){
-      print('[HarvestCompanyStats.fromJson]$e');
+      Tools.consoleLog('[HarvestCompanyStats.fromJson.err]$e');
     }
   }
 
@@ -619,7 +621,7 @@ class HarvestDateStats{
         }
       }
     }catch(e){
-      print(e);
+      Tools.consoleLog('[HarvestCompanyStats.getTotalQuantity.err]$e');
     }
     return quantity;
   }

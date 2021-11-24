@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'base_model.dart';
 import 'user_model.dart';
 import 'work_model.dart';
 import 'dart:convert';
 import 'app_const.dart';
+import '/widgets/utils.dart';
 
 class RevisionModel extends BaseProvider {
 
@@ -20,14 +22,14 @@ class RevisionModel extends BaseProvider {
             'description' : description
           }
       );
-      print("[RevisionModel.sendPunchRevisionRequest] ${res.body}");
+      Tools.consoleLog("[RevisionModel.sendPunchRevisionRequest.res] ${res.body}");
       if(res.statusCode==200){
         return "A revision request has been sent.";
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[RevisionModel.sendPunchRevisionRequest] $e");
+      Tools.consoleLog("[RevisionModel.sendPunchRevisionRequest.err] $e");
       return e.toString();
     }
   }
@@ -44,14 +46,14 @@ class RevisionModel extends BaseProvider {
             'description': description
           }
       );
-      print("[RevisionModel.sendBreakRevisionRequest] ${res.body}");
+      Tools.consoleLog("[RevisionModel.sendBreakRevisionRequest.res] ${res.body}");
       if(res.statusCode==200){
         return "A revision request has been sent.";
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[RevisionModel.sendBreakRevisionRequest] $e");
+      Tools.consoleLog("[RevisionModel.sendBreakRevisionRequest.err] $e");
       return e.toString();
     }
   }
@@ -68,14 +70,14 @@ class RevisionModel extends BaseProvider {
           'description': description
           }
       );
-      print("[RevisionModel.sendWorkRevisionRequest] ${res.body}");
+      Tools.consoleLog("[RevisionModel.sendWorkRevisionRequest.res] ${res.body}");
       if(res.statusCode==200){
         return "A revision request has been sent.";
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[RevisionModel.sendWorkRevisionRequest] $e");
+      Tools.consoleLog("[RevisionModel.sendWorkRevisionRequest.err] $e");
       return e.toString();
     }
   }
@@ -92,14 +94,14 @@ class RevisionModel extends BaseProvider {
           'description':description
         },
       );
-      print('[RevisionModel.sendScheduleRevision]${res.body}');
+      Tools.consoleLog('[RevisionModel.sendScheduleRevision.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[RevisionModel.sendScheduleRevision]$e');
+      Tools.consoleLog('[RevisionModel.sendScheduleRevision.err]$e');
       return e.toString();
     }
   }
@@ -116,14 +118,14 @@ class RevisionModel extends BaseProvider {
           'description':description
         },
       );
-      print('[RevisionModel.sendCallRevision]${res.body}');
+      Tools.consoleLog('[RevisionModel.sendCallRevision.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[RevisionModel.sendCallRevision]$e');
+      Tools.consoleLog('[RevisionModel.sendCallRevision.err]$e');
       return e.toString();
     }
   }
@@ -197,7 +199,7 @@ class Revision with HttpRequest{
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
-      print("[Revision.fromJson] $e");
+      Tools.consoleLog("[Revision.fromJson.err] $e");
     }
   }
 
@@ -239,7 +241,7 @@ class Revision with HttpRequest{
           'description': description
         },
       );
-      print('[Revision.addDescription]${res.body}');
+      Tools.consoleLog('[Revision.addDescription.res]${res.body}');
       if(res.statusCode==200){
         this.description = description;
         return null;
@@ -247,7 +249,7 @@ class Revision with HttpRequest{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print('[Revision.addDescription]$e');
+      Tools.consoleLog('[Revision.addDescription.err]$e');
       return e.toString();
     }
   }
@@ -259,7 +261,7 @@ class Revision with HttpRequest{
           GlobalData.token,
           {'id':id.toString()}
       );
-      print("[Revision.accept] ${res.body}");
+      Tools.consoleLog("[Revision.accept.res] ${res.body}");
       if(res.statusCode==200){
         status = "accepted";
         return null;
@@ -267,7 +269,7 @@ class Revision with HttpRequest{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[Revision.acceptRevision] $e");
+      Tools.consoleLog("[Revision.accept.err] $e");
       return e.toString();
     }
   }
@@ -279,7 +281,7 @@ class Revision with HttpRequest{
           GlobalData.token,
           { 'id':id.toString() }
       );
-      print("[Revision.decline] ${res.body}");
+      Tools.consoleLog("[Revision.decline.res] ${res.body}");
       if(res.statusCode==200){
         status = "declined";
         return null;
@@ -287,7 +289,7 @@ class Revision with HttpRequest{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[Revision.decline] $e");
+      Tools.consoleLog("[Revision.decline.err] $e");
       return e.toString();
     }
   }
@@ -299,14 +301,14 @@ class Revision with HttpRequest{
           GlobalData.token,
           { 'id':id.toString() }
       );
-      print("[Revision.delete] ${res.body}");
+      Tools.consoleLog("[Revision.delete.res] ${res.body}");
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      print("[Revision.delete] $e");
+      Tools.consoleLog("[Revision.delete.err] $e");
       return e.toString();
     }
   }

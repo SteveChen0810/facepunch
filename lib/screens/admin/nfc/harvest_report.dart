@@ -130,7 +130,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
       if(avg >= lowValue) return mediumColor;
       return lowColor;
     }catch(e){
-      print('[getLogColor]$e');
+      Tools.consoleLog('[getLogColor]$e');
       return Colors.white;
     }
   }

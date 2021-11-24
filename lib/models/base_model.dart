@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -14,7 +14,8 @@ class HttpRequest{
     Map<String, String> headers = {};
     headers['Accept'] = 'application/json';
     headers['Content-Type'] = 'application/json';
-    headers['app_version'] = '${AppConst.currentVersion}';
+    headers['app-version'] = '${AppConst.currentVersion}';
+    headers['operating-system'] = Platform.operatingSystem;
     headers['lang'] = GlobalData.lang;
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
@@ -30,7 +31,8 @@ class HttpRequest{
     Map<String, String> headers = {};
     headers['Accept'] = 'application/json';
     headers['Content-Type'] = 'application/json';
-    headers['app_version'] = '${AppConst.currentVersion}';
+    headers['app-version'] = '${AppConst.currentVersion}';
+    headers['operating-system'] = Platform.operatingSystem;
     headers['lang'] = GlobalData.lang;
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;

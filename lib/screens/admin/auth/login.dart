@@ -1,9 +1,10 @@
-import '/lang/l10n.dart';
-
-import '/../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '/lang/l10n.dart';
+import '/../models/user_model.dart';
 import 'recovery_password.dart';
+import '/widgets/utils.dart';
 
 class AdminSignIn extends StatefulWidget{
 
@@ -54,7 +55,7 @@ class _AdminSignInState extends State<AdminSignIn> {
         }
       }
     }catch(e){
-      print("[LoginWidget.loginWithEmail] $e");
+      Tools.consoleLog("[LoginWidget.loginWithEmail.err] $e");
       setState(() {isLoading = false;});
     }
   }

@@ -10,6 +10,7 @@ import '/models/user_model.dart';
 import '/screens/admin/admin_home.dart';
 import '/screens/employee/employee_home.dart';
 import '/models/app_const.dart';
+import '/widgets/utils.dart';
 
 class SplashScreen extends StatefulWidget {
 
@@ -50,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
         }
       }
     }catch(e){
-      print("[SplashScreen._init]$e");
+      Tools.consoleLog("[SplashScreen._init.err]$e");
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
     }
   }

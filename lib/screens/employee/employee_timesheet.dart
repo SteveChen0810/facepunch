@@ -622,7 +622,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
       _refreshController.refreshCompleted();
       if(mounted)setState(() {});
     }catch(e){
-      print('[EmployeeTimeSheet._onRefresh]$e');
+      Tools.consoleLog('[EmployeeTimeSheet._onRefresh]$e');
     }
   }
 

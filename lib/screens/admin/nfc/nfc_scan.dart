@@ -214,7 +214,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
       }
       _startNfcRead();
     }catch(e){
-      print('[_addHarvest]$e');
+      Tools.consoleLog('[_addHarvest]$e');
       Tools.showErrorMessage(context, e.toString());
       setState(() {isLoading=false;});
     }
@@ -225,8 +225,6 @@ class _NFCScanPageState extends State<NFCScanPage>{
     NfcManager.instance.startSession(
       onDiscovered: (NfcTag tag) async {
         Tools.playSound();
-        print(tag.data);
-        print(tag.handle);
         NfcManager.instance.stopSession();
       },
       alertMessage: 'NFC Scanned!',
