@@ -1899,6 +1899,78 @@ class S {
       args: [],
     );
   }
+  String get bugReport{
+    return Intl.message(
+      'Bug Report',
+      name: 'bugReport',
+      desc: '',
+      args: [],
+    );
+  }
+  String get make{
+    return Intl.message(
+      'Make',
+      name: 'make',
+      desc: '',
+      args: [],
+    );
+  }
+  String get model{
+    return Intl.message(
+      'Model',
+      name: 'model',
+      desc: '',
+      args: [],
+    );
+  }
+  String get os{
+    return Intl.message(
+      'OS',
+      name: 'os',
+      desc: '',
+      args: [],
+    );
+  }
+  String get version{
+    return Intl.message(
+      'Version',
+      name: 'version',
+      desc: '',
+      args: [],
+    );
+  }
+  String get brand{
+    return Intl.message(
+      'Brand',
+      name: 'brand',
+      desc: '',
+      args: [],
+    );
+  }
+  String get name{
+    return Intl.message(
+      'Name',
+      name: 'name',
+      desc: '',
+      args: [],
+    );
+  }
+  String get system{
+    return Intl.message(
+      'System',
+      name: 'system',
+      desc: '',
+      args: [],
+    );
+  }
+  String get bugReportDescription{
+    return Intl.message(
+      'Include a description of your issue here...',
+      name: 'bugReportDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

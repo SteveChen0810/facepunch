@@ -424,27 +424,32 @@ class UserModel extends BaseProvider{
     return null;
   }
 
-  Future<String?> submitMobileLog({String? comment})async{
+  Future<String?> submitMobileLog({String? comment, required Map<String, dynamic> deviceInfo})async{
     try{
       final directory = await getApplicationDocumentsDirectory();
       final logFile = File('${directory.path}/${AppConst.LOG_FILE_NAME}');
+      String content = '';
       if(await logFile.exists()){
-        String content = await logFile.readAsString();
-        Map<String, String> data = Map<String, String>();
-        data['log'] = content;
-        if(comment != null){
-          data['comment'] = comment;
-        }
-        final res = await sendPostRequest(AppConst.submitMobileLog, GlobalData.token, data);
-        Tools.consoleLog('[UserModel.submitMobileLog.res]${res.body}');
-        if(res.statusCode == 200){
-          logFile.deleteSync();
-          return "Thank you for submitting!";
-        }else{
-          return jsonDecode(res.body)['message'];
-        }
+        content = await logFile.readAsString();
       }
-      return "Nothing to report!";
+      Map<String, dynamic> data = Map<String, dynamic>();
+      data['log'] = content;
+      if(comment != null){
+        data['comment'] = comment;
+      }
+      deviceInfo['app_version'] = AppConst.currentVersion;
+      deviceInfo['lang'] = GlobalData.lang;
+      data['device'] = deviceInfo;
+      data['user_id'] = user?.id;
+      data['company_id'] = user?.companyId;
+      final res = await sendPostRequest(AppConst.submitMobileLog, null, data);
+      Tools.consoleLog('[UserModel.submitMobileLog.res]${res.body}');
+      if(res.statusCode == 200){
+        logFile.deleteSync();
+        return "Thank you for submitting!";
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
     }catch(e){
       Tools.consoleLog('[UserModel.submitMobileLog.err]$e');
       return e.toString();
