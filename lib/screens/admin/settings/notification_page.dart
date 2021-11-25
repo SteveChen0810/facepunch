@@ -121,7 +121,7 @@ class _NotificationPageState extends State<NotificationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.w500),),
-            if(revision.newValue['project_id'] != revision.oldValue['project_id'])
+            if(revision.isChanged('project_id'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -141,10 +141,10 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['project_id'] == revision.oldValue['project_id'])
+            if(!revision.isChanged('project_id'))
               Text('  ${revision.oldValue['project_name']}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.w500),),
-            if(revision.newValue['task_id'] != revision.oldValue['task_id'])
+            if(revision.isChanged('task_id'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -164,9 +164,9 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['task_id'] == revision.oldValue['task_id'])
+            if(!revision.isChanged('task_id'))
               Text("  ${revision.oldValue['task_name']}"),
-            if(revision.newValue['start'] != revision.oldValue['start'])
+            if(revision.isChanged('start'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -185,14 +185,14 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['start'] == revision.oldValue['start'])
+            if(!revision.isChanged('start'))
               Row(
                 children: [
                   Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
                   Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
                 ],
               ),
-            if(revision.newValue['end'] != revision.oldValue['end'])
+            if(revision.isChanged('end'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -211,7 +211,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['end'] == revision.oldValue['end'])
+            if(!revision.isChanged('end'))
               Row(
                 children: [
                   Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
@@ -279,7 +279,7 @@ class _NotificationPageState extends State<NotificationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.w500),),
-            if(revision.newValue['project_id'] != revision.oldValue['project_id'])
+            if(revision.isChanged('project_id'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -299,10 +299,10 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['project_id'] == revision.oldValue['project_id'])
+            if(!revision.isChanged('project_id'))
               Text('  ${revision.oldValue['project_name']}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.w500),),
-            if(revision.newValue['task_id'] != revision.oldValue['task_id'])
+            if(revision.isChanged('task_id'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -322,9 +322,9 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['task_id'] == revision.oldValue['task_id'])
+            if(!revision.isChanged('task_id'))
               Text("  ${revision.oldValue['task_name']}"),
-            if(revision.newValue['priority'] != revision.oldValue['priority'])
+            if(revision.isChanged('priority'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -343,14 +343,14 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['priority'] == revision.oldValue['priority'])
+            if(!revision.isChanged('priority'))
               Row(
                 children: [
                   Text('${S.of(context).priority} : ', style: TextStyle(fontWeight: FontWeight.w500),),
                   Expanded(child: Text('${revision.oldValue['priority']}')),
                 ],
               ),
-            if(revision.newValue['start'] != revision.oldValue['start'])
+            if(revision.isChanged('start'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -369,14 +369,14 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['start'] == revision.oldValue['start'])
+            if(!revision.isChanged('start'))
               Row(
                 children: [
                   Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
                   Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
                 ],
               ),
-            if(revision.newValue['end'] != revision.oldValue['end'])
+            if(revision.isChanged('end'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -395,7 +395,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['end'] == revision.oldValue['end'])
+            if(!revision.isChanged('end'))
               Row(
                 children: [
                   Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
@@ -410,7 +410,7 @@ class _NotificationPageState extends State<NotificationPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.w500),),
-            if(revision.newValue['project_id'] != revision.oldValue['project_id'])
+            if(revision.isChanged('project_id'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -430,10 +430,10 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['project_id'] == revision.oldValue['project_id'])
+            if(!revision.isChanged('project_id'))
               Text('  ${revision.oldValue['project_name']}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.w500),),
-            if(revision.newValue['task_id'] != revision.oldValue['task_id'])
+            if(revision.isChanged('task_id'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -453,9 +453,9 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['task_id'] == revision.oldValue['task_id'])
+            if(!revision.isChanged('task_id'))
               Text("  ${revision.oldValue['task_name']}"),
-            if(revision.newValue['start'] != revision.oldValue['start'])
+            if(revision.isChanged('start'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -474,14 +474,14 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['start'] == revision.oldValue['start'])
+            if(!revision.isChanged('start'))
               Row(
                 children: [
                   Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
                   Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
                 ],
               ),
-            if(revision.newValue['end'] != revision.oldValue['end'])
+            if(revision.isChanged('end'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -500,7 +500,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   ),
                 ],
               ),
-            if(revision.newValue['end'] == revision.oldValue['end'])
+            if(!revision.isChanged('end'))
               Row(
                 children: [
                   Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
