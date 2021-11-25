@@ -173,6 +173,8 @@ class _BugReportPageState extends State<BugReportPage>{
                       setState(() {isSubmitting = false;});
                       if(result != null){
                         Tools.showErrorMessage(context, result);
+                      }else{
+                        Tools.showSuccessMessage(context, S.of(context).thankYouForReporting);
                       }
                     }
                   }catch(e){

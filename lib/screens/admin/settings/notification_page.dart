@@ -42,21 +42,23 @@ class _NotificationPageState extends State<NotificationPage> {
       return Slidable(
         endActionPane: ActionPane(
           motion: ScrollMotion(),
+          extentRatio: 0.2,
           children: [
-            SlidableAction(
-              label: S.of(context).delete,
-              backgroundColor: Colors.red,
-              icon: Icons.delete,
-              onPressed: (v)async{
+            CustomSlidableAction(
+              onPressed: (BuildContext context)async{
                 setState(() { _revision = revision;});
                 String? result = await revision.delete();
                 setState(() { _revision = null;});
+                if(!mounted)return;
                 if(result == null){
                   context.read<NotificationModel>().removeRevision(revision);
                 }else{
                   Tools.showErrorMessage(context, result);
                 }
               },
+              child: Icon(Icons.delete),
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
           ]
         ),

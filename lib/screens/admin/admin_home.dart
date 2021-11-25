@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/screens/bug_report_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -321,14 +322,22 @@ class _AdminHomePageState extends State<AdminHomePage> {
         backgroundColor: Color(primaryColor),
         actions: [
           IconButton(
+              icon: Icon(Icons.bug_report),
+              color: Colors.white,
+              iconSize: 35,
+              onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>BugReportPage()));
+              }
+          ),
+          IconButton(
               icon: Icon(Icons.logout),
-              color: Colors.black87,
+              color: Colors.white,
               iconSize: 35,
               onPressed: ()async{
                 await context.read<UserModel>().logOut();
                 await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
               }
-          )
+          ),
         ],
       ),
       body: WillPopScope(

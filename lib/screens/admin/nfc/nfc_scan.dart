@@ -492,19 +492,21 @@ class _NFCScanPageState extends State<NFCScanPage>{
                           Slidable(
                             endActionPane: ActionPane(
                               motion: ScrollMotion(),
+                              extentRatio: 0.15,
                               children: [
                                 SlidableAction(
-                                  label: S.of(context).delete,
                                   backgroundColor: Colors.red,
                                   foregroundColor: Colors.white,
                                   icon: Icons.delete,
                                   onPressed: (c)async{
-                                    setState(() {harvests.remove(harvest);});
-                                    context.read<HarvestModel>().deleteHarvest(harvest.id).then((message){
-                                      if(mounted && message!=null && (message is String)){
-                                        Tools.showErrorMessage(context, message);
-                                      }
-                                    });
+                                    if(await confirmDeleting(context, S.of(context).deleteHarvestConfirm)){
+                                      setState(() {harvests.remove(harvest);});
+                                      context.read<HarvestModel>().deleteHarvest(harvest.id).then((message){
+                                        if(mounted && message!=null && (message is String)){
+                                          Tools.showErrorMessage(context, message);
+                                        }
+                                      });
+                                    }
                                   },
                                 )
                               ],

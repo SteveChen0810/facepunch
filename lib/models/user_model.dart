@@ -446,9 +446,9 @@ class UserModel extends BaseProvider{
       Tools.consoleLog('[UserModel.submitMobileLog.res]${res.body}');
       if(res.statusCode == 200){
         logFile.deleteSync();
-        return "Thank you for submitting!";
+        return null;
       }else{
-        return jsonDecode(res.body)['message'];
+        return jsonDecode(res.body)['message']??"Something went wrong.";
       }
     }catch(e){
       Tools.consoleLog('[UserModel.submitMobileLog.err]$e');

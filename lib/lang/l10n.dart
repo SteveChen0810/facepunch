@@ -2035,6 +2035,24 @@ class S {
       args: [],
     );
   }
+  String get deleteHarvestConfirm{
+    return Intl.message(
+      'Are you sure to delete this harvest?',
+      name: 'deleteHarvestConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get thankYouForReporting{
+    return Intl.message(
+      'Thank you for reporting.',
+      name: 'thankYouForReporting',
+      desc: '',
+      args: [],
+    );
+  }
+
+
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
