@@ -27,6 +27,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   EmployeeCall? _call;
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
+  User? user;
 
   @override
   void initState() {
@@ -108,7 +109,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   Widget _scheduleLine(){
-    if(schedules.isEmpty) return SizedBox();
+    if(schedules.isEmpty || user == null || !user!.hasSchedule()) return SizedBox();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -198,7 +199,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   Widget _callLine(){
-    if(calls.isEmpty) return SizedBox();
+    if(calls.isEmpty || user == null || !user!.hasCall()) return SizedBox();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Column(
@@ -591,6 +592,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   Widget build(BuildContext context) {
     projects = context.watch<WorkModel>().projects;
     tasks = context.watch<WorkModel>().tasks;
+    user = context.watch<UserModel>().user;
     return Container(
       child: Column(
         children: [
@@ -608,18 +610,14 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     setState(() {
                       selectedDate = selectedDate.subtract(Duration(days: 1));
                     });
                     _refreshController.requestRefresh();
                   },
-                  shape: CircleBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   child: Icon(Icons.arrow_back_ios_outlined,color: Colors.black,size: 30,),
-                  padding: EdgeInsets.all(4),
-                  minWidth: 0,
                 ),
                 SizedBox(width: 10,),
                 MaterialButton(
@@ -630,18 +628,14 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                   child: Text(selectedDate.toString().split(' ')[0],style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
                 ),
                 SizedBox(width: 10,),
-                FlatButton(
+                TextButton(
                   onPressed: (){
                     setState(() {
                       selectedDate = selectedDate.add(Duration(days: 1));
                     });
                     _refreshController.requestRefresh();
                   },
-                  shape: CircleBorder(),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   child: Icon(Icons.arrow_forward_ios_outlined,color: Colors.black,size: 30,),
-                  padding: EdgeInsets.all(4),
-                  minWidth: 0,
                 ),
               ],
             ),

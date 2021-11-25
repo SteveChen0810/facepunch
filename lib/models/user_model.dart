@@ -844,6 +844,10 @@ class User with HttpRequest{
     return ['call', 'call_shop_daily', 'call_shop_tracking'].contains(type);
   }
 
+  bool hasNTCTracking(){
+    return canNTCTracking??false;
+  }
+
   String pdfUrl(DateTime? startDate){
     DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";

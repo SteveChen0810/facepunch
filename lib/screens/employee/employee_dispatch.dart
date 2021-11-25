@@ -351,7 +351,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     employees = context.watch<CompanyModel>().users.where((u) => u.hasCall()).toList();
     projects = context.watch<WorkModel>().projects;
     tasks = context.watch<WorkModel>().tasks;
-    if(selectedUser==null && employees.isNotEmpty){
+    if(selectedUser == null && employees.isNotEmpty){
       selectedUser = employees.first;
     }
     return Container(
