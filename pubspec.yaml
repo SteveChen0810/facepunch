@@ -44,6 +44,7 @@ dependencies:
   nfc_manager: ^3.1.0
   image_cropper: ^1.4.1
   device_info: ^2.0.3
+  assets_audio_player: ^3.0.3+6
 dev_dependencies:
   flutter_test:
     sdk: flutter

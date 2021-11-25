@@ -4,12 +4,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:camera/camera.dart';
-import 'package:facepunch/models/app_const.dart';
 import 'package:path_provider/path_provider.dart';
-import '/lang/l10n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
+import '/models/app_const.dart';
+import '/lang/l10n.dart';
 
 typedef HandleDetection = Future<List<Face>> Function(InputImage image);
 
@@ -76,10 +77,10 @@ InputImageRotation rotationIntToImageRotation(int rotation) {
 class Tools {
   static Future<void> playSound()async{
     try{
-      // AssetsAudioPlayer().open(
-      //   Audio("assets/sound/sound.mp3"),
-      //   autoStart: true,
-      // );
+      AssetsAudioPlayer().open(
+        Audio("assets/sound/sound.mp3"),
+        autoStart: true,
+      );
     }catch(e){
       Tools.consoleLog('[Tools.playSound]$e');
     }
