@@ -306,6 +306,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _reportTime,
+      initialEntryMode: TimePickerEntryMode.input
     );
     if(picked!=null){
       setState(() {

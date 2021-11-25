@@ -1971,6 +1971,14 @@ class S {
       args: [],
     );
   }
+  String get punchTime{
+    return Intl.message(
+      'Punch Time',
+      name: 'punchTime',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

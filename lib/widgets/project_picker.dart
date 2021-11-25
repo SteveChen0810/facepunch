@@ -20,9 +20,9 @@ class _ProjectPickerState extends State<ProjectPicker> {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black54),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(5),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       clipBehavior: Clip.hardEdge,
       margin: EdgeInsets.only(top: 4),
       child: DropdownButton<Project>(

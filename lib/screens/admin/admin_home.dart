@@ -282,6 +282,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       final TimeOfDay? picked = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+        initialEntryMode: TimePickerEntryMode.input,
         helpText: 'Confirm Punch Time'
       );
       if(picked==null)return;

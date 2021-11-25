@@ -42,13 +42,14 @@ class CupertinoPopoverButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        if (onTap != null && onTap!()) {
-          return;
+        if (onTap != null) {
+          onTap!();
         }
+      },
+      onLongPress: (){
         var offset = _WidgetUtil.getWidgetLocalToGlobal(context);
         var bounds = _WidgetUtil.getWidgetBounds(context);
         var body;

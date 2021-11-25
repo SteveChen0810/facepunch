@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:facepunch/widgets/project_picker.dart';
 import 'package:facepunch/widgets/task_picker.dart';
 import 'package:facepunch/widgets/utils.dart';
@@ -87,7 +88,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                   Text("${call.priority}",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("${PunchDateUtils.get12TimeString(call.start)} ~ ${PunchDateUtils.get12TimeString(call.end)}",
+                  Text("${call.startTime()} ~ ${call.endTime()}",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -130,18 +131,6 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     super.dispose();
   }
 
-  Future<DateTime?> _selectTime(String createdAt)async{
-    DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
-    );
-    if(picked!=null){
-      return DateTime(createdDate.year,createdDate.month,createdDate.day,picked.hour,picked.minute,createdDate.second);
-    }
-    return null;
-  }
-
   _showCallDialog(EmployeeCall? c){
     if(projects.isEmpty || tasks.isEmpty || selectedUser==null)return;
     EmployeeCall call = EmployeeCall(
@@ -162,12 +151,13 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
 
     showDialog(
         context: context,
-        builder:(_)=> AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
-          content: StatefulBuilder(
-              builder: (BuildContext _context, StateSetter _setState){
-                return Container(
+        builder:(_)=> StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
                   width: MediaQuery.of(context).size.width-50,
                   padding: const EdgeInsets.all(16.0),
                   child: SingleChildScrollView(
@@ -199,6 +189,22 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                           onSelected: (v) {
                             _setState((){call.taskId = v?.id; call.taskName = v?.name;});
                             FocusScope.of(context).requestFocus(FocusNode());
+                          },
+                        ),
+                        SizedBox(height: 16,),
+                        TimeEditorFiled(
+                          label: S.of(context).startTime,
+                          initTime: call.start,
+                          onChanged: (v){
+                            _setState(() { call.start = v;});
+                          },
+                        ),
+                        SizedBox(height: 16,),
+                        TimeEditorFiled(
+                          label: S.of(context).endTime,
+                          initTime: call.end,
+                          onChanged: (v){
+                            _setState(() { call.end = v;});
                           },
                         ),
                         SizedBox(height: 8,),
@@ -244,45 +250,13 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                             ],
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                            Text("${PunchDateUtils.getTimeString(call.start)}"),
-                            TextButton(
-                                onPressed: ()async{
-                                  DateTime? pickedTime = await _selectTime(call.start!);
-                                  if(pickedTime != null){
-                                    _setState(() { call.start = pickedTime.toString();});
-                                  }
-                                },
-                                child: Icon(Icons.edit,color: Color(primaryColor))
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                            Text("${PunchDateUtils.getTimeString(call.end)}"),
-                            TextButton(
-                                onPressed: ()async{
-                                  DateTime? pickedTime = await _selectTime(call.end!);
-                                  if(pickedTime!=null){
-                                    _setState(() { call.end = pickedTime.toString();});
-                                  }
-                                },
-                                child: Icon(Icons.edit,color: Color(primaryColor))
-                            ),
-                          ],
-                        ),
                         Text(S.of(context).todo,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                         TextField(
                           maxLines: 2,
                           minLines: 2,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 6,vertical: 2)
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 6,vertical: 2)
                           ),
                           controller: _todo,
                           onChanged: (v){
@@ -303,38 +277,36 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                             call.note = v;
                           },
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                                onPressed: (){
-                                  Navigator.of(_context).pop();
-                                },
-                                child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
-                            ),
-                            TextButton(
-                                onPressed: ()async{
-                                  Navigator.of(_context).pop();
-                                  setState(() {
-                                    if(c == null){
-                                      calls.add(call);
-                                      _call = call;
-                                    }else{
-                                      _call = c;
-                                    }
-                                  });
-                                  _addEditCall(call);
-                                },
-                                child: Text(S.of(context).save, style: TextStyle(color: Colors.green),)
-                            ),
-                          ],
-                        )
                       ],
                     ),
                   ),
-                );
-              }
-          ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: (){
+                        Navigator.of(_context).pop();
+                      },
+                      child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
+                  ),
+                  TextButton(
+                      onPressed: ()async{
+                        if(call.start == null || call.end == null) return;
+                        Navigator.of(_context).pop();
+                        setState(() {
+                          if(c == null){
+                            calls.add(call);
+                            _call = call;
+                          }else{
+                            _call = c;
+                          }
+                        });
+                        _addEditCall(call);
+                      },
+                      child: Text(S.of(context).save, style: TextStyle(color: Colors.green),)
+                  ),
+                ],
+              );
+            }
         )
     );
   }

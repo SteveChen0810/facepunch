@@ -1,3 +1,4 @@
+import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:facepunch/widgets/project_picker.dart';
 import 'package:facepunch/widgets/task_picker.dart';
 import 'package:facepunch/widgets/utils.dart';
@@ -7,7 +8,6 @@ import '/models/app_const.dart';
 import '/models/revision_model.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
-import '/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -90,7 +90,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('${s.shift?.toUpperCase()}',),
-                  Text("${PunchDateUtils.get12TimeString(s.start)} ~ ${PunchDateUtils.get12TimeString(s.end)}",
+                  Text("${s.startTime()} ~ ${s.endTime()}",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -158,7 +158,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                     "${call.priority}",
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  Text("${PunchDateUtils.get12TimeString(call.start)} ~ ${PunchDateUtils.get12TimeString(call.end)}",
+                  Text("${call.startTime()} ~ ${call.endTime()}",
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ],
@@ -222,18 +222,6 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     super.dispose();
   }
 
-  Future<DateTime?> _selectTime(String createdAt)async{
-    DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
-    );
-    if(picked!=null){
-      return DateTime(createdDate.year,createdDate.month,createdDate.day,picked.hour,picked.minute,createdDate.second);
-    }
-    return null;
-  }
-
   _showScheduleRevisionDialog(WorkSchedule s){
     final schedule = WorkSchedule.fromJson(s.toJson());
     String description = '';
@@ -241,13 +229,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
 
     showDialog(
         context: context,
-        builder:(_)=> AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
-          scrollable: true,
-          content: StatefulBuilder(
-              builder: (BuildContext _context, StateSetter _setState){
-                return Container(
+        builder:(_)=> StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
                   width: MediaQuery.of(context).size.width-50,
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -292,39 +280,21 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                             ],
                           ),
                         ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                          Text("${PunchDateUtils.get12TimeString(schedule.start)}"),
-                          TextButton(
-                              onPressed: ()async{
-                                DateTime? pickedTime = await _selectTime(schedule.start!);
-                                if(pickedTime != null){
-                                  _setState(() { schedule.start = pickedTime.toString();});
-                                }
-                              },
-                              child: Icon(Icons.edit,color: Color(primaryColor))
-                          ),
-                        ],
+                      SizedBox(height: 16,),
+                      TimeEditorFiled(
+                        label: S.of(context).startTime,
+                        initTime: schedule.start,
+                        onChanged: (v){
+                          _setState(() { schedule.start = v; });
+                        },
                       ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                          Text("${PunchDateUtils.get12TimeString(schedule.end)}"),
-                          TextButton(
-                              onPressed: ()async{
-                                DateTime? pickedTime = await _selectTime(schedule.end!);
-                                if(pickedTime!=null){
-                                  _setState(() { schedule.end = pickedTime.toString();});
-                                }
-                              },
-                              child: Icon(Icons.edit,color: Color(primaryColor))
-                          ),
-                        ],
+                      SizedBox(height: 16,),
+                      TimeEditorFiled(
+                        label: S.of(context).endTime,
+                        initTime: schedule.end,
+                        onChanged: (v){
+                          _setState(() { schedule.end = v; });
+                        },
                       ),
                       SizedBox(height: 8,),
                       TextField(
@@ -341,42 +311,39 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                           _setState(() {description = v;});
                         },
                       ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                              onPressed: (){
-                                Navigator.of(_context).pop();
-                              },
-                              child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
-                          ),
-                          TextButton(
-                              onPressed: (){
-                                if(schedule.projectId == null){
-                                  _setState(() { errorMessage = S.of(context).selectProject;});
-                                  return ;
-                                }
-                                if(schedule.taskId == null){
-                                  _setState(() { errorMessage = S.of(context).selectTask;});
-                                  return ;
-                                }
-                                if(description.isNotEmpty){
-                                  Navigator.of(_context).pop();
-                                  _sendScheduleRevision(schedule, s, description);
-                                }else{
-                                  _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
-                                }
-                              },
-                              child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
-                          ),
-                        ],
-                      )
                     ],
                   ),
-                );
-              }
-          ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: (){
+                        Navigator.of(_context).pop();
+                      },
+                      child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        if(schedule.start == null || schedule.end == null) return ;
+                        if(schedule.projectId == null){
+                          _setState(() { errorMessage = S.of(context).selectProject;});
+                          return ;
+                        }
+                        if(schedule.taskId == null){
+                          _setState(() { errorMessage = S.of(context).selectTask;});
+                          return ;
+                        }
+                        if(description.isNotEmpty){
+                          Navigator.of(_context).pop();
+                          _sendScheduleRevision(schedule, s, description);
+                        }else{
+                          _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                        }
+                      },
+                      child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
+                  ),
+                ],
+              );
+            }
         )
     );
   }
@@ -395,13 +362,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
 
     showDialog(
         context: context,
-        builder:(_)=> AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
-          scrollable: true,
-          content: StatefulBuilder(
-              builder: (BuildContext _context, StateSetter _setState){
-                return Container(
+        builder:(_)=> StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
                   width: MediaQuery.of(context).size.width-50,
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -433,7 +400,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                             SizedBox(height: 8,),
                             Text(S.of(context).task,style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
                             TaskPicker(
-                                tasks: tasks,
+                              tasks: tasks,
                               taskId: call.taskId,
                               onSelected: (v) {
                                 _setState((){
@@ -445,39 +412,21 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                          Text("${PunchDateUtils.get12TimeString(call.start)}"),
-                          TextButton(
-                              onPressed: ()async{
-                                DateTime? pickedTime = await _selectTime(call.start!);
-                                if(pickedTime != null){
-                                  _setState(() { call.start = pickedTime.toString();});
-                                }
-                              },
-                              child: Icon(Icons.edit,color: Color(primaryColor))
-                          ),
-                        ],
+                      SizedBox(height: 16,),
+                      TimeEditorFiled(
+                        label: S.of(context).startTime,
+                        initTime: call.start,
+                        onChanged: (v){
+                          _setState(() { call.start = v; });
+                        },
                       ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12,fontWeight: FontWeight.w500),),
-                          Text("${PunchDateUtils.get12TimeString(call.end)}"),
-                          TextButton(
-                              onPressed: ()async{
-                                DateTime? pickedTime = await _selectTime(call.end!);
-                                if(pickedTime != null){
-                                  _setState(() { call.end = pickedTime.toString();});
-                                }
-                              },
-                              child: Icon(Icons.edit,color: Color(primaryColor))
-                          ),
-                        ],
+                      SizedBox(height: 16,),
+                      TimeEditorFiled(
+                        label: S.of(context).endTime,
+                        initTime: call.end,
+                        onChanged: (v){
+                          _setState(() { call.end = v; });
+                        },
                       ),
                       SizedBox(height: 8,),
                       Container(
@@ -536,47 +485,42 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         onChanged: (v){
                           _setState(() {description = v;});
                         },
-                      ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                              onPressed: (){
-                                Navigator.of(_context).pop();
-                              },
-                              child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
-                          ),
-                          TextButton(
-                              onPressed: (){
-                                if(call.projectId == null){
-                                  _setState(() { errorMessage = S.of(context).selectProject;});
-                                  return ;
-                                }
-                                if(call.taskId == null){
-                                  _setState(() { errorMessage = S.of(context).selectTask;});
-                                  return ;
-                                }
-                                if(call.priority == null){
-                                  _setState(() { errorMessage = S.of(context).selectPriority;});
-                                  return ;
-                                }
-                                if(description.isNotEmpty){
-                                  Navigator.of(_context).pop();
-                                  _sendCallRevision(call, c, description);
-                                }else{
-                                  _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
-                                }
-                              },
-                              child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
-                          ),
-                        ],
                       )
                     ],
                   ),
-                );
-              }
-          ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: ()=>Navigator.of(_context).pop(),
+                      child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        if(call.start == null || call.end == null) return;
+                        if(call.projectId == null){
+                          _setState(() { errorMessage = S.of(context).selectProject;});
+                          return ;
+                        }
+                        if(call.taskId == null){
+                          _setState(() { errorMessage = S.of(context).selectTask;});
+                          return ;
+                        }
+                        if(call.priority == null){
+                          _setState(() { errorMessage = S.of(context).selectPriority;});
+                          return ;
+                        }
+                        if(description.isNotEmpty){
+                          Navigator.of(_context).pop();
+                          _sendCallRevision(call, c, description);
+                        }else{
+                          _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                        }
+                      },
+                      child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
+                  ),
+                ],
+              );
+            }
         )
     );
   }

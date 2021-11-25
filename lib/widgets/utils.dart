@@ -118,4 +118,17 @@ class Tools {
       print('[consoleLog]$e');
     }
   }
+
+  static Future<DateTime?> pickTime(BuildContext context, String initTime)async{
+    DateTime initDate = DateTime.parse(initTime);
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: initDate.hour, minute: initDate.minute),
+      initialEntryMode: TimePickerEntryMode.input,
+    );
+    if(picked!=null){
+      return DateTime(initDate.year, initDate.month, initDate.day, picked.hour, picked.minute, initDate.second);
+    }
+    return null;
+  }
 }

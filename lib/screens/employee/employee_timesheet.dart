@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/screens/bug_report_page.dart';
+import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:facepunch/widgets/project_picker.dart';
 import 'package:facepunch/widgets/task_picker.dart';
 import 'package:facepunch/widgets/utils.dart';
@@ -207,7 +208,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 
   _showPunchRevisionDialog(Punch punch){
     if(punch.createdAt == null) return;
-    String correctTime = punch.createdAt!;
+    String? correctTime = punch.createdAt!;
     String description = '';
     String? errorMessage;
     bool _isSending = false;
@@ -218,47 +219,35 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
         onWillPop: ()async{
           return !_isSending;
         },
-        child: AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
-          scrollable: true,
-          content: StatefulBuilder(
-              builder: (BuildContext _context, StateSetter _setState){
-                return Container(
+        child: StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
                   width: MediaQuery.of(context).size.width-50,
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
-                      SizedBox(height: 8,),
-                      Row(
-                        children: [
-                          Text("${S.of(context).correctPunchTime}: "),
-                          Text("${PunchDateUtils.getTimeString(correctTime)}",style: TextStyle(fontWeight: FontWeight.bold),),
-                          TextButton(
-                              onPressed: ()async{
-                                FocusScope.of(context).requestFocus(FocusNode());
-                                DateTime? pickedTime = await _selectTime(correctTime);
-                                if(pickedTime != null){
-                                  _setState(() { correctTime = pickedTime.toString();});
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(Icons.edit,color: Color(primaryColor),),
-                              )
-                          ),
-                        ],
+                      Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),),
+                      SizedBox(height: 16,),
+                      TimeEditorFiled(
+                        label: S.of(context).correctPunchTime,
+                        initTime: correctTime,
+                        onChanged: (v){
+                          _setState(() { correctTime = v;});
+                        },
                       ),
                       SizedBox(height: 8,),
                       TextField(
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          isDense: true,
-                          labelText: S.of(context).description,
-                          alignLabelWithHint: true,
-                          errorText: errorMessage
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: S.of(context).description,
+                            alignLabelWithHint: true,
+                            errorText: errorMessage
                         ),
                         minLines: 3,
                         maxLines: null,
@@ -266,36 +255,31 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                           _setState(() {description = v;});
                         },
                       ),
-                      SizedBox(height: 8,),
-                      MaterialButton(
-                        onPressed: ()async{
-                          if(!_isSending){
-                            if(description.isNotEmpty){
-                              _setState(() { _isSending=true; });
-                              await _sendPunchRevisionRequest(punch.id, correctTime, punch.createdAt, description);
-                              Navigator.pop(_context);
-                            }else{
-                              _setState(() {
-                                errorMessage = S.of(context).youMustWriteDescription;
-                              });
-                            }
-                          }
-                        },
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        color: Colors.black87,
-                        minWidth: MediaQuery.of(context).size.width*0.6,
-                        height: 40,
-                        splashColor: Color(primaryColor),
-                        child: _isSending
-                            ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
-                            :Text(S.of(context).submit,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
-                      ),
                     ],
                   ),
-                );
-              }
-          ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: ()async{
+                      if(!_isSending && correctTime != null){
+                        if(description.isNotEmpty){
+                          _setState(() { _isSending=true; });
+                          await _sendPunchRevisionRequest(punch.id, correctTime!, punch.createdAt, description);
+                          Navigator.pop(_context);
+                        }else{
+                          _setState(() {
+                            errorMessage = S.of(context).youMustWriteDescription;
+                          });
+                        }
+                      }
+                    },
+                    child: _isSending
+                        ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
+                        :Text(S.of(context).submit,style: TextStyle(color: Colors.red ),),
+                  )
+                ],
+              );
+            }
         ),
       )
     );
@@ -307,119 +291,103 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     String? errorMessage;
     bool _isSending = false;
     TextEditingController _length = TextEditingController(text: newBreak.length.toString());
+
     showDialog(
         context: context,
         builder:(_)=> WillPopScope(
           onWillPop: ()async{
             return !_isSending;
           },
-          child: AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            insetPadding: EdgeInsets.zero,
-            scrollable: true,
-            content: StatefulBuilder(
-                builder: (BuildContext _context, StateSetter _setState){
-                  return Container(
-                    width: MediaQuery.of(context).size.width-50,
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
-                        SizedBox(height: 8,),
-                        Row(
-                          children: [
-                            Text("${S.of(context).correctBreakTime}: "),
-                            Text("${PunchDateUtils.getTimeString(newBreak.start)}",style: TextStyle(fontWeight: FontWeight.bold),),
-                            TextButton(
-                                onPressed: ()async{
-                                  FocusScope.of(context).requestFocus(FocusNode());
-                                  DateTime? pickedTime = await _selectTime(newBreak.start!);
-                                  if(pickedTime != null){
-                                    _setState(() { newBreak.start = pickedTime.toString();});
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(Icons.edit,color: Color(primaryColor),),
-                                )
-                            ),
-                          ],
+          child: StatefulBuilder(
+            builder: (_context, StateSetter _setState) {
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
+                  width: MediaQuery.of(context).size.width-50,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
+                      SizedBox(height: 12,),
+                      TimeEditorFiled(
+                        label: S.of(context).correctBreakTime,
+                        initTime: newBreak.start,
+                        onChanged: (v){
+                          _setState(() { newBreak.start = v;});
+                        },
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        key: Key('break_length_input_${newBreak.id}'),
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: "${S.of(context).length} (m)",
+                            alignLabelWithHint: true
                         ),
-                        SizedBox(height: 8,),
-                        TextField(
-                          key: Key('break_length_input_${newBreak.id}'),
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                              labelText: "${S.of(context).length} (m)",
-                              alignLabelWithHint: true
-                          ),
-                          keyboardType: TextInputType.number,
-                          controller: _length,
-                          onChanged: (v){
-                            _setState(() {
-                              try{
-                                newBreak.length = int.parse(v);
-                                errorMessage = null;
-                              }catch(e){
-                                errorMessage = S.of(context).invalidBreakLength;
-                                newBreak.length = 0;
-                              }
-                            });
-                          },
-                        ),
-                        SizedBox(height: 8,),
-                        TextField(
-                          decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              isDense: true,
-                              labelText: S.of(context).description,
-                              alignLabelWithHint: true,
-                              errorText: errorMessage
-                          ),
-                          minLines: 3,
-                          maxLines: null,
-                          onChanged: (v){
-                            _setState(() { description = v;});
-                          },
-                        ),
-                        SizedBox(height: 8,),
-                        MaterialButton(
-                          onPressed: ()async{
-                            if(!_isSending){
-                              if(description.isEmpty){
-                                _setState(() {
-                                  errorMessage = S.of(context).youMustWriteDescription;
-                                });
-                                return;
-                              }
-                              if(newBreak.length == 0){
-                                _setState(() {
-                                  errorMessage = S.of(context).breakLengthCanNotBeZero;
-                                });
-                                return;
-                              }
-                              _setState(() { _isSending=true; });
-                              await _sendBreakRevisionRequest(employeeBreak, newBreak, description);
-                              Navigator.pop(_context);
+                        keyboardType: TextInputType.number,
+                        controller: _length,
+                        onChanged: (v){
+                          _setState(() {
+                            try{
+                              newBreak.length = int.parse(v);
+                              errorMessage = null;
+                            }catch(e){
+                              errorMessage = S.of(context).invalidBreakLength;
+                              newBreak.length = 0;
                             }
-                          },
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                          color: Colors.black87,
-                          minWidth: MediaQuery.of(context).size.width*0.6,
-                          height: 40,
-                          splashColor: Color(primaryColor),
-                          child: _isSending
-                              ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
-                              :Text(S.of(context).submit,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
+                          });
+                        },
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: S.of(context).description,
+                            alignLabelWithHint: true,
+                            errorText: errorMessage
                         ),
-                      ],
-                    ),
-                  );
-                }
-            ),
+                        minLines: 3,
+                        maxLines: null,
+                        onChanged: (v){
+                          _setState(() { description = v;});
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: ()async{
+                      if(!_isSending && newBreak.start != null){
+                        if(description.isEmpty){
+                          _setState(() {
+                            errorMessage = S.of(context).youMustWriteDescription;
+                          });
+                          return;
+                        }
+                        if(newBreak.length == 0){
+                          _setState(() {
+                            errorMessage = S.of(context).breakLengthCanNotBeZero;
+                          });
+                          return;
+                        }
+                        _setState(() { _isSending=true; });
+                        await _sendBreakRevisionRequest(employeeBreak, newBreak, description);
+                        Navigator.pop(_context);
+                      }
+                    },
+                    child: _isSending
+                        ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
+                        :Text(S.of(context).submit,style: TextStyle(color: Colors.red),),
+                  ),
+                ],
+              );
+            }
           ),
         )
     );
@@ -437,13 +405,13 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           onWillPop: ()async{
             return !_isSending;
           },
-          child: AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            insetPadding: EdgeInsets.zero,
-            scrollable: true,
-            content: StatefulBuilder(
-                builder: (BuildContext _context, StateSetter _setState){
-                  return Container(
+          child: StatefulBuilder(
+              builder: (BuildContext _context, StateSetter _setState){
+                return AlertDialog(
+                  contentPadding: EdgeInsets.zero,
+                  insetPadding: EdgeInsets.zero,
+                  scrollable: true,
+                  content: Container(
                     width: MediaQuery.of(context).size.width-50,
                     padding: EdgeInsets.all(8),
                     child: Column(
@@ -458,8 +426,8 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                               SizedBox(height: 8,),
                               Text(S.of(context).project,style: TextStyle(fontSize: 12),),
                               ProjectPicker(
-                                  projects: projects,
-                                  projectId: newWork.projectId,
+                                projects: projects,
+                                projectId: newWork.projectId,
                                 onSelected: (v) {
                                   _setState((){
                                     newWork.projectId = v?.id;
@@ -476,7 +444,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                               SizedBox(height: 6,),
                               Text(S.of(context).task, style: TextStyle(fontSize: 12),),
                               TaskPicker(
-                                  tasks: tasks,
+                                tasks: tasks,
                                 taskId: newWork.taskId,
                                 onSelected: (v) {
                                   _setState((){
@@ -487,39 +455,21 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                               ),
                             ],
                           ),
-                        SizedBox(height: 6,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12),),
-                            Text("${PunchDateUtils.getTimeString(newWork.start)}"),
-                            TextButton(
-                                onPressed: ()async{
-                                  DateTime? pickedTime = await _selectTime(newWork.start!);
-                                  if(pickedTime!=null){
-                                    _setState(() { newWork.start = pickedTime.toString();});
-                                  }
-                                },
-                                child: Icon(Icons.edit,color: Color(primaryColor))
-                            ),
-                          ],
+                        SizedBox(height: 12,),
+                        TimeEditorFiled(
+                          initTime: newWork.start,
+                          label: S.of(context).startTime,
+                          onChanged: (v){
+                            _setState(() { newWork.start = v; });
+                          },
                         ),
-                        SizedBox(height: 6,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12),),
-                            Text("${PunchDateUtils.getTimeString(newWork.end)}"),
-                            TextButton(
-                                onPressed: ()async{
-                                  DateTime? pickedTime = await _selectTime(newWork.end!);
-                                  if(pickedTime!=null){
-                                    _setState(() { newWork.end = pickedTime.toString();});
-                                  }
-                                },
-                                child: Icon(Icons.edit,color: Color(primaryColor))
-                            ),
-                          ],
+                        SizedBox(height: 12,),
+                        TimeEditorFiled(
+                          initTime: newWork.end,
+                          label: S.of(context).endTime,
+                          onChanged: (v){
+                            _setState(() { newWork.end = v; });
+                          },
                         ),
                         SizedBox(height: 8,),
                         TextField(
@@ -536,50 +486,32 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                             _setState(() {description = v;});
                           },
                         ),
-                        SizedBox(height: 10,),
-                        Center(
-                          child: MaterialButton(
-                            onPressed: ()async{
-                              if(!_isSending){
-                                if(description.isNotEmpty){
-                                  _setState(() { _isSending=true; });
-                                  await sendWorkRevisionRequest(work, newWork, description);
-                                  Navigator.pop(_context);
-                                }else{
-                                  _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
-                                }
-                              }
-                            },
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            color: Colors.black87,
-                            height: 40,
-                            minWidth: MediaQuery.of(context).size.width*0.6,
-                            child: _isSending
-                                ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
-                                :Text(S.of(context).submit,style: TextStyle(fontSize: 20,color: Colors.white),),
-                          ),
-                        )
                       ],
                     ),
-                  );
-                }
-            ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: ()async{
+                        if(!_isSending && newWork.start != null && newWork.end != null){
+                          if(description.isNotEmpty){
+                            _setState(() { _isSending=true; });
+                            await sendWorkRevisionRequest(work, newWork, description);
+                            Navigator.pop(_context);
+                          }else{
+                            _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                          }
+                        }
+                      },
+                      child: _isSending
+                          ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
+                          :Text(S.of(context).submit,style: TextStyle(color: Colors.red),),
+                    )
+                  ],
+                );
+              }
           ),
         )
     );
-  }
-
-  Future<DateTime?> _selectTime(String createdAt)async{
-    DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
-    );
-    if(picked!=null){
-      return DateTime(createdDate.year,createdDate.month,createdDate.day,picked.hour,picked.minute,createdDate.second);
-    }
-    return null;
   }
 
   _sendPunchRevisionRequest(int? punchId, String newValue, String? oldValue, String description)async{

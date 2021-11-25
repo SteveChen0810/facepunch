@@ -1,3 +1,5 @@
+import 'package:facepunch/models/app_const.dart';
+
 import '/lang/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -21,6 +23,8 @@ class _PDFFullScreenState extends State<PDFFullScreen> {
       appBar: AppBar(
         title: Text(S.of(context).timeSheet),
         centerTitle: true,
+        backgroundColor: Color(primaryColor),
+        elevation: 0,
       ),
       body: pdfError!=null?Center(
         child: Text(S.of(context).pdfNotGenerated),

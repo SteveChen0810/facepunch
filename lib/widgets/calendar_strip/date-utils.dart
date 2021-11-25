@@ -194,14 +194,6 @@ class PunchDateUtils {
     return DateFormat("kk:mm:ss").format(date);
   }
 
-  static String get12TimeString(time){
-    if(time==null)return '--:--';
-    if(time is String){
-      return DateFormat("hh:mm a").format(DateTime.parse(time));
-    }
-    return DateFormat("hh:mm a").format(time);
-  }
-
   static String toDateTime(time){
     if(time==null)return '--:--';
     if(time is String){

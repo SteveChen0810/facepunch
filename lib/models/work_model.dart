@@ -164,7 +164,7 @@ class WorkHistory{
   }
 
   String title(){
-    return '${projectName??''} - ${taskName??''}: ${(workHour().toStringAsFixed(2))} h';
+    return '${projectName??''} - ${taskName??''}';
   }
 
   toJson(){

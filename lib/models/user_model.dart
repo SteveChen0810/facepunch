@@ -1044,8 +1044,13 @@ class Punch{
   }
 
   String getTime(){
-    if(createdAt != null)return '--:--';
+    if(createdAt == null) return '--:--';
     return PunchDateUtils.getTimeString(DateTime.parse(createdAt!));
   }
+
+  bool hasLocation(){
+    return latitude != null && longitude != null;
+  }
+
 }
 
