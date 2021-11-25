@@ -2019,6 +2019,22 @@ class S {
       args: [],
     );
   }
+  String get invalidNFC{
+    return Intl.message(
+      'Can not find identifier from the NFC.',
+      name: 'invalidNFC',
+      desc: '',
+      args: [],
+    );
+  }
+  String get notAllowedNFC{
+    return Intl.message(
+      'Allow NFC permission.',
+      name: 'notAllowedNFC',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

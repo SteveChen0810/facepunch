@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:convert/convert.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -110,10 +111,10 @@ class Tools {
 
   static Future<void> consoleLog(String log)async{
     try{
+      print(log);
       final directory = await getApplicationDocumentsDirectory();
       final logFile = File('${directory.path}/${AppConst.LOG_FILE_NAME}');
       logFile.writeAsString('\n[${DateTime.now()}]$log', mode: FileMode.writeOnlyAppend);
-      print(log);
     }catch(e){
       print('[consoleLog]$e');
     }
@@ -130,5 +131,33 @@ class Tools {
       return DateTime(initDate.year, initDate.month, initDate.day, picked.hour, picked.minute, initDate.second);
     }
     return null;
+  }
+
+  static String? getNFCIdentifier(Map<String, dynamic> data){
+    try{
+      Uint8List? identifier;
+      data.forEach((k1, v1) {
+        if(k1 == 'identifier' && v1 is Uint8List){
+          identifier = v1;
+        }else if(v1 is Map){
+          v1.forEach((k2, v2) {
+            if(k2 == 'identifier' && v2 is Uint8List){
+              identifier = v2;
+            }else if(v2 is Map){
+              v2.forEach((k3, v3) {
+                if(k3 == 'identifier' && v3 is Uint8List){
+                  identifier = v3;
+                }
+              });
+            }
+          });
+        }
+      });
+      print(identifier);
+      if(identifier == null) return null;
+      return hex.encode(identifier!);
+    }catch(e){
+      consoleLog('[Tools.getNFCIdentifier]$e');
+    }
   }
 }

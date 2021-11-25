@@ -45,7 +45,9 @@ class _NFCScanPageState extends State<NFCScanPage>{
 
   @override
   void dispose() {
-    NfcManager.instance.stopSession();
+    NfcManager.instance.stopSession().catchError((e){
+      Tools.consoleLog('[NFCScanPage.NfcManager.instance.stopSession]$e');
+    });
     super.dispose();
   }
 
@@ -222,16 +224,29 @@ class _NFCScanPageState extends State<NFCScanPage>{
 
   _startNfcRead()async{
     if(isLoading) return;
-    NfcManager.instance.startSession(
-      onDiscovered: (NfcTag tag) async {
-        Tools.playSound();
-        NfcManager.instance.stopSession();
-      },
-      alertMessage: 'NFC Scanned!',
-      onError: (NfcError error)async{
-        Tools.showErrorMessage(context, error.message);
-      },
-    );
+    if(await NfcManager.instance.isAvailable()){
+      NfcManager.instance.startSession(
+        onDiscovered: (NfcTag tag) async {
+          Tools.playSound();
+          NfcManager.instance.stopSession();
+          Tools.consoleLog('[NFC Scanned][${tag.data}]');
+          String? nfc = Tools.getNFCIdentifier(tag.data);
+          if(nfc != null){
+            _addHarvest(nfc);
+          }else{
+            Tools.showErrorMessage(context, S.of(context).invalidNFC);
+          }
+        },
+        alertMessage: 'NFC Scanned!',
+        onError: (NfcError error)async{
+          Tools.showErrorMessage(context, error.message);
+        },
+      ).catchError((e){
+        Tools.consoleLog('[NFCScanPage._startNfcRead]$e');
+      });
+    }else{
+      Tools.showErrorMessage(context, S.of(context).notAllowedNFC);
+    }
   }
 
   _deleteHarvestTask(HTask task)async{

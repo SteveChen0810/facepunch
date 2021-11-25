@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/widgets/utils.dart';
+import 'package:nfc_manager/nfc_manager.dart';
+import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/models/company_model.dart';
@@ -240,6 +241,14 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       Tools.consoleLog("[createEditEmployee] $e");
       Tools.showErrorMessage(context, e.toString());
     }
+  }
+
+  @override
+  void dispose() {
+    NfcManager.instance.stopSession().catchError((e){
+      Tools.consoleLog('[CreateEditEmployee.NfcManager.instance.stopSession]$e');
+    });
+    super.dispose();
   }
 
   @override
@@ -601,18 +610,30 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                 ),
                 enabled: !isLoading,
-                onTap: (){
-                  // FlutterNfcReader.read().then((NfcData data)async{
-                  //   if(data!=null){
-                  //     if(data.id!=null && data.id.isNotEmpty){
-                  //       _nfc.text = data.id;
-                  //     }else{
-                  //       _nfc.text = data.content;
-                  //     }
-                  //   }
-                  // }).catchError((e){
-                  //   showMessage(e.toString());
-                  // });
+                onTap: ()async{
+                  if(await NfcManager.instance.isAvailable()){
+                    NfcManager.instance.startSession(
+                      onDiscovered: (NfcTag tag) async {
+                        Tools.playSound();
+                        NfcManager.instance.stopSession();
+                        Tools.consoleLog('[NFC Scanned][${tag.data}]');
+                        String? nfc = Tools.getNFCIdentifier(tag.data);
+                        if(nfc != null){
+                          _nfc.text = nfc;
+                        }else{
+                          Tools.showErrorMessage(context, S.of(context).invalidNFC);
+                        }
+                      },
+                      alertMessage: 'NFC Scanned!',
+                      onError: (NfcError error)async{
+                        Tools.showErrorMessage(context, error.message);
+                      },
+                    ).catchError((e){
+                      Tools.consoleLog('[CreateEditEmployee.NfcManager.startSession.err]$e');
+                    });
+                  }else{
+                    Tools.showErrorMessage(context, S.of(context).notAllowedNFC);
+                  }
                 },
                 maxLines: 1,
                 controller: _nfc,
