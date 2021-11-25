@@ -1979,6 +1979,46 @@ class S {
       args: [],
     );
   }
+  String get revisionHasBeenSent{
+    return Intl.message(
+      'A revision request has been sent.',
+      name: 'revisionHasBeenSent',
+      desc: '',
+      args: [],
+    );
+  }
+  String get sent{
+    return Intl.message(
+      'Sent',
+      name: 'sent',
+      desc: '',
+      args: [],
+    );
+  }
+  String get accepted{
+    return Intl.message(
+      'Accepted',
+      name: 'accepted',
+      desc: '',
+      args: [],
+    );
+  }
+  String get declined{
+    return Intl.message(
+      'Declined',
+      name: 'declined',
+      desc: '',
+      args: [],
+    );
+  }
+  String get tapToSubmitDescription{
+    return Intl.message(
+      'Tap to submit a description.',
+      name: 'tapToSubmitDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

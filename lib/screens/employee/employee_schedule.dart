@@ -281,17 +281,17 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                           ),
                         ),
                       SizedBox(height: 16,),
-                      TimeEditorFiled(
+                      TimeEditor(
                         label: S.of(context).startTime,
-                        initTime: schedule.start,
+                        initTime: s.start,
                         onChanged: (v){
                           _setState(() { schedule.start = v; });
                         },
                       ),
                       SizedBox(height: 16,),
-                      TimeEditorFiled(
+                      TimeEditor(
                         label: S.of(context).endTime,
-                        initTime: schedule.end,
+                        initTime: s.end,
                         onChanged: (v){
                           _setState(() { schedule.end = v; });
                         },
@@ -352,7 +352,11 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     setState(() { _schedule = oldValue;});
     final result = await context.read<RevisionModel>().sendScheduleRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     setState(() { _schedule = null;});
-    if(result != null) Tools.showErrorMessage(context, result);
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
+    }
   }
 
   _showCallRevisionDialog(EmployeeCall c){
@@ -413,17 +417,17 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         ),
                       ),
                       SizedBox(height: 16,),
-                      TimeEditorFiled(
+                      TimeEditor(
                         label: S.of(context).startTime,
-                        initTime: call.start,
+                        initTime: c.start,
                         onChanged: (v){
                           _setState(() { call.start = v; });
                         },
                       ),
                       SizedBox(height: 16,),
-                      TimeEditorFiled(
+                      TimeEditor(
                         label: S.of(context).endTime,
-                        initTime: call.end,
+                        initTime: c.end,
                         onChanged: (v){
                           _setState(() { call.end = v; });
                         },
@@ -529,7 +533,11 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     setState(() { _call = oldValue;});
     final result = await context.read<RevisionModel>().sendCallRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     setState(() { _call = null;});
-    if(result != null) Tools.showErrorMessage(context, result);
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
+    }
   }
 
   @override

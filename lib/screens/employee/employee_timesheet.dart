@@ -208,7 +208,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 
   _showPunchRevisionDialog(Punch punch){
     if(punch.createdAt == null) return;
-    String? correctTime = punch.createdAt!;
+    String? correctTime = punch.createdAt;
     String description = '';
     String? errorMessage;
     bool _isSending = false;
@@ -233,9 +233,9 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     children: [
                       Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),),
                       SizedBox(height: 16,),
-                      TimeEditorFiled(
+                      TimeEditor(
                         label: S.of(context).correctPunchTime,
-                        initTime: correctTime,
+                        initTime: punch.createdAt,
                         onChanged: (v){
                           _setState(() { correctTime = v;});
                         },
@@ -312,9 +312,9 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     children: [
                       Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
                       SizedBox(height: 12,),
-                      TimeEditorFiled(
+                      TimeEditor(
                         label: S.of(context).correctBreakTime,
-                        initTime: newBreak.start,
+                        initTime: employeeBreak.start,
                         onChanged: (v){
                           _setState(() { newBreak.start = v;});
                         },
@@ -456,17 +456,17 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                             ],
                           ),
                         SizedBox(height: 12,),
-                        TimeEditorFiled(
-                          initTime: newWork.start,
+                        TimeEditor(
                           label: S.of(context).startTime,
+                          initTime: work.start,
                           onChanged: (v){
                             _setState(() { newWork.start = v; });
                           },
                         ),
                         SizedBox(height: 12,),
-                        TimeEditorFiled(
-                          initTime: newWork.end,
+                        TimeEditor(
                           label: S.of(context).endTime,
+                          initTime: work.end,
                           onChanged: (v){
                             _setState(() { newWork.end = v; });
                           },
@@ -495,7 +495,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         if(!_isSending && newWork.start != null && newWork.end != null){
                           if(description.isNotEmpty){
                             _setState(() { _isSending=true; });
-                            await sendWorkRevisionRequest(work, newWork, description);
+                            await _sendWorkRevisionRequest(work, newWork, description);
                             Navigator.pop(_context);
                           }else{
                             _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
@@ -523,6 +523,8 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     );
     if(result != null){
       Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
     }
   }
 
@@ -534,10 +536,12 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     );
     if(result != null){
       Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
     }
   }
 
-  sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
+  _sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
     String? result = await context.read<RevisionModel>().sendWorkRevisionRequest(
         newWork: newWork,
         oldWork: oldWork,
@@ -545,6 +549,8 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     );
     if(result != null){
       Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
     }
   }
 

@@ -3,16 +3,17 @@ import 'package:facepunch/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class TimeEditorFiled extends StatefulWidget{
+class TimeEditor extends StatefulWidget{
   final String? initTime;
   final String? label;
   final ValueChanged<String?>? onChanged;
-  TimeEditorFiled({this.initTime, this.label, this.onChanged});
+
+  TimeEditor({this.initTime, this.label, this.onChanged});
   @override
-  _TimeEditorFiledState createState() => _TimeEditorFiledState();
+  _TimeEditorState createState() => _TimeEditorState();
 }
 
-class _TimeEditorFiledState extends State<TimeEditorFiled> {
+class _TimeEditorState extends State<TimeEditor> {
 
   late TextEditingController _controller;
   String? errorMessage;
@@ -84,6 +85,7 @@ class _TimeEditorFiledState extends State<TimeEditorFiled> {
 }
 
 class TimeInputFormatter extends TextInputFormatter {
+
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
@@ -93,7 +95,7 @@ class TimeInputFormatter extends TextInputFormatter {
       return newValue;
     }
 
-    var buffer = new StringBuffer();
+    var buffer = StringBuffer();
     for (int i = 0; i < newText.length; i++) {
       buffer.write(newText[i]);
       var nonZeroIndex = i + 1;
@@ -105,6 +107,6 @@ class TimeInputFormatter extends TextInputFormatter {
     var string = buffer.toString();
     return newValue.copyWith(
         text: string,
-        selection: new TextSelection.collapsed(offset: string.length));
+        selection: TextSelection.collapsed(offset: string.length));
   }
 }

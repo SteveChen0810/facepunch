@@ -1,13 +1,13 @@
-import 'package:facepunch/widgets/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:provider/provider.dart';
 
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/revision_model.dart';
 import '/models/user_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import 'package:flutter/material.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:provider/provider.dart';
+import '/widgets/utils.dart';
 
 class EmployeeNotification extends StatefulWidget {
 
@@ -40,7 +40,7 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
       Widget content = Text("Something went wrong.[${revision.id}]");
       if(revision.type == "schedule"){
         content = InkWell(
-          onTap: (){
+          onTap: revision.hasDescription()?null:(){
             if(_revision != null) return;
             _showRevisionDialog(revision);
           },
@@ -50,12 +50,13 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${revision.createdAt}'),
-                  Text('${revision.type?.toUpperCase()}')
+                  Text('${revision.type?.toUpperCase()}'),
+                  Text('${revision.getTime()}', style: TextStyle(fontWeight: FontWeight.w500),),
+                  revision.statusWidget(context),
                 ],
               ),
               Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.bold),),
-              if(revision.newValue['project_id'] != revision.oldValue['project_id'])
+              if(revision.isChanged('project_id'))
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -67,16 +68,16 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     ),
                     Row(
                       children: [
-                        Text("  ${S.of(context).correct}:    "),
+                        Text("  ${S.of(context).correct}: "),
                         Expanded(child: Text(revision.newValue['project_name'])),
                       ],
                     ),
                   ],
                 ),
-              if(revision.newValue['project_id'] == revision.oldValue['project_id'])
+              if(!revision.isChanged('project_id'))
                 Text('  ${revision.oldValue['project_name']}'),
               Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
-              if(revision.newValue['task_id'] != revision.oldValue['task_id'])
+              if(revision.isChanged('task_id'))
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -88,56 +89,430 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     ),
                     Row(
                       children: [
-                        Text("  ${S.of(context).correct}:    "),
+                        Text("  ${S.of(context).correct}: "),
                         Expanded(child: Text(revision.newValue['task_name'])),
                       ],
                     ),
                   ],
                 ),
-              if(revision.newValue['task_id'] == revision.oldValue['task_id'])
+              if(!revision.isChanged('task_id'))
                 Text("  ${revision.oldValue['task_name']}"),
-              if(revision.newValue['start'] != revision.oldValue['start'])
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if(revision.isChanged('start'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.bold),),
+                        Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${S.of(context).incorrect}: "),
+                                Text("${S.of(context).correct}: "),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(PunchDateUtils.getTimeString(revision.oldValue['start'])),
+                                Text(PunchDateUtils.getTimeString(revision.newValue['start'])),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  if(revision.isChanged('end'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.bold),),
+                        Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${S.of(context).incorrect}: "),
+                                Text("${S.of(context).correct}: "),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(PunchDateUtils.getTimeString(revision.oldValue['end'])),
+                                Text(PunchDateUtils.getTimeString(revision.newValue['end'])),
+                              ],
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              if(!revision.hasDescription())
+               Text('*${S.of(context).tapToSubmitDescription}*', style: TextStyle(color: Colors.red),)
+            ],
+          ),
+        );
+      }else if(revision.type == 'punch'){
+        content = Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${revision.type?.toUpperCase()}'),
+                Text('${revision.getTime()}', style: TextStyle(fontWeight: FontWeight.w500),),
+                revision.statusWidget(context),
+              ],
+            ),
+            Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${S.of(context).incorrectPunchTime}: '),
+                    Text('${S.of(context).correctPunchTime}: '),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(PunchDateUtils.getTimeString(revision.oldValue)),
+                    Text(PunchDateUtils.getTimeString(revision.newValue)),
+                  ],
+                ),
+              ],
+            )
+          ],
+        );
+      }else if(revision.type == 'work'){
+        content = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${revision.type?.toUpperCase()}'),
+                Text('${revision.getTime()}', style: TextStyle(fontWeight: FontWeight.w500),),
+                revision.statusWidget(context),
+              ],
+            ),
+            Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.bold),),
+            if(revision.isChanged('project_id'))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).incorrect}: "),
+                      Expanded(child: Text(revision.oldValue['project_name'])),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).correct}: "),
+                      Expanded(child: Text(revision.newValue['project_name'])),
+                    ],
+                  ),
+                ],
+              ),
+            if(!revision.isChanged('project_id'))
+              Text('  ${revision.oldValue['project_name']}'),
+            Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
+            if(revision.isChanged('task_id'))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).incorrect}: "),
+                      Expanded(child: Text(revision.oldValue['task_name'])),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).correct}: "),
+                      Expanded(child: Text(revision.newValue['task_name'])),
+                    ],
+                  ),
+                ],
+              ),
+            if(!revision.isChanged('task_id'))
+              Text("  ${revision.oldValue['task_name']}"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if(revision.isChanged('start'))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.bold),),
+                      Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("${S.of(context).incorrect}: "),
+                              Text("${S.of(context).correct}: "),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(PunchDateUtils.getTimeString(revision.oldValue['start'])),
+                              Text(PunchDateUtils.getTimeString(revision.newValue['start'])),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                if(revision.isChanged('end'))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.bold),),
+                      Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("${S.of(context).incorrect}: "),
+                              Text("${S.of(context).correct}: "),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(PunchDateUtils.getTimeString(revision.oldValue['end'])),
+                              Text(PunchDateUtils.getTimeString(revision.newValue['end'])),
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        );
+      }else if(revision.type == 'call'){
+        content = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${revision.type?.toUpperCase()}'),
+                Text('${revision.getTime()}', style: TextStyle(fontWeight: FontWeight.w500),),
+                revision.statusWidget(context),
+              ],
+            ),
+            Text(S.of(context).project, style: TextStyle(fontWeight: FontWeight.bold),),
+            if(revision.isChanged('project_id'))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).incorrect}: "),
+                      Expanded(child: Text(revision.oldValue['project_name'])),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).correct}:    "),
+                      Expanded(child: Text(revision.newValue['project_name'])),
+                    ],
+                  ),
+                ],
+              ),
+            if(!revision.isChanged('project_id'))
+              Text('  ${revision.oldValue['project_name']}'),
+            Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
+            if(revision.isChanged('task_id'))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).incorrect}: "),
+                      Expanded(child: Text(revision.oldValue['task_name'])),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).correct}: "),
+                      Expanded(child: Text(revision.newValue['task_name']))
+                    ],
+                  ),
+                ],
+              ),
+            if(!revision.isChanged('task_id'))
+              Text("  ${revision.oldValue['task_name']}"),
+            Text(S.of(context).priority, style: TextStyle(fontWeight: FontWeight.bold),),
+            if(revision.isChanged('priority'))
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 10,),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("${S.of(context).incorrect}: "),
+                      Text("${S.of(context).correct}:"),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${revision.oldValue['priority']}'),
+                      Text('${revision.newValue['priority']}')
+                    ],
+                  ),
+                ],
+              ),
+            if(!revision.isChanged('priority'))
+              Text("  ${revision.oldValue['priority']}"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if(revision.isChanged('start'))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.bold),),
+                      Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("${S.of(context).incorrect}: "),
+                              Text("${S.of(context).correct}: "),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(PunchDateUtils.getTimeString(revision.oldValue['start'])),
+                              Text(PunchDateUtils.getTimeString(revision.newValue['start'])),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                if(revision.isChanged('end'))
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.bold),),
+                      Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("${S.of(context).incorrect}: "),
+                              Text("${S.of(context).correct}: "),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text(PunchDateUtils.getTimeString(revision.oldValue['end'])),
+                              Text(PunchDateUtils.getTimeString(revision.newValue['end'])),
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        );
+      }else if(revision.type == 'break'){
+        content = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${revision.type?.toUpperCase()}'),
+                Text('${revision.getTime()}', style: TextStyle(fontWeight: FontWeight.w500),),
+                revision.statusWidget(context),
+              ],
+            ),
+            Text('${revision.oldValue['title']}', style: TextStyle(fontWeight: FontWeight.bold),),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(S.of(context).length, style: TextStyle(fontWeight: FontWeight.bold),),
+                    if(revision.isChanged('length'))
+                      Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${S.of(context).incorrect}: '),
+                              Text('${S.of(context).correct}: '),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${revision.oldValue['length']}M'),
+                              Text('${revision.newValue['length']}M'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    if(!revision.isChanged('length'))
+                      Text('  ${revision.oldValue['length']}M'),
+                  ],
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.bold),),
-                    Row(
-                      children: [
-                        Text("  ${S.of(context).incorrect}: "),
-                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text("  ${S.of(context).correct}:    "),
-                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['start']))),
-                      ],
-                    ),
+                    if(revision.isChanged('start'))
+                      Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${S.of(context).incorrect}: '),
+                              Text('${S.of(context).correct}: '),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('${PunchDateUtils.getTimeString(revision.oldValue['start'])}'),
+                              Text('${PunchDateUtils.getTimeString(revision.newValue['start'])}'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    if(!revision.isChanged('start'))
+                      Text('${revision.oldValue['start']}'),
                   ],
                 ),
-              if(revision.newValue['end'] != revision.oldValue['end'])
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.bold),),
-                    Row(
-                      children: [
-                        Text("  ${S.of(context).incorrect}: "),
-                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text("  ${S.of(context).correct}:    "),
-                        Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
-                      ],
-                    ),
-                  ],
-                ),
-            ],
-          ),
+              ],
+            )
+          ],
         );
       }
+
+
+
       if(revision == _revision){
         content = Center(
           child: Padding(
@@ -180,12 +555,13 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
     String? errorMessage;
     showDialog(
         context: context,
-        builder:(_)=> AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
-          content: StatefulBuilder(
-              builder: (BuildContext _context, StateSetter _setState){
-                return Container(
+        builder:(_)=> StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
                   width: MediaQuery.of(context).size.width-50,
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
@@ -198,6 +574,7 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                             style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
                           )
                       ),
+                      SizedBox(height: 8,),
                       TextField(
                         decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -212,39 +589,34 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                           _setState(() {description = v;});
                         },
                       ),
-                      SizedBox(height: 8,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                              onPressed: (){
-                                Navigator.of(_context).pop();
-                              },
-                              child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
-                          ),
-                          TextButton(
-                              onPressed: (){
-                                if(description.isNotEmpty){
-                                  setState(() {_revision = revision;});
-                                  Navigator.of(_context).pop();
-                                  _addDescription(revision, description);
-                                }else{
-                                  _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
-                                }
-                              },
-                              child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
-                          ),
-                        ],
-                      )
                     ],
                   ),
-                );
-              }
-          ),
+                ),
+                actions: [
+                  TextButton(
+                      onPressed: (){
+                        Navigator.of(_context).pop();
+                      },
+                      child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        if(description.isNotEmpty){
+                          setState(() {_revision = revision;});
+                          Navigator.of(_context).pop();
+                          _addDescription(revision, description);
+                        }else{
+                          _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                        }
+                      },
+                      child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
+                  ),
+                ],
+              );
+            }
         )
     );
   }
-
 
   _addDescription(Revision revision, description)async{
     String? result = await revision.addDescription(description);

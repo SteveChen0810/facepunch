@@ -201,4 +201,11 @@ class PunchDateUtils {
     }
     return DateFormat("MMM, d hh:mm a").format(time);
   }
+
+  static String toStandardDateTime(date){
+    if(date is String){
+      return DateFormat("y-MM-dd kk:mm:ss").format(DateTime.parse(date));
+    }
+    return DateFormat("y-MM-dd kk:mm:ss").format(date);
+  }
 }

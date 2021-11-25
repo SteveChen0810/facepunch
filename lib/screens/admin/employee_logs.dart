@@ -408,9 +408,9 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                           style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 14),
                         ),
                         SizedBox(height: 8,),
-                        TimeEditorFiled(
+                        TimeEditor(
                           label: S.of(context).punchTime,
-                          initTime: correctTime,
+                          initTime: punch.createdAt,
                           onChanged: (v){
                             _setState(() { correctTime = v;});
                           },
@@ -494,17 +494,17 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                         if(work.taskId == null)
                           Text(" ${work.taskName}",style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),),
                         SizedBox(height: 12,),
-                        TimeEditorFiled(
+                        TimeEditor(
                           label: S.of(context).startTime,
-                          initTime: work.start,
+                          initTime: w.start,
                           onChanged: (v){
                             _setState(() { work.start = v;});
                           },
                         ),
                         SizedBox(height: 12,),
-                        TimeEditorFiled(
+                        TimeEditor(
                           label: S.of(context).endTime,
-                          initTime: work.end,
+                          initTime: w.end,
                           onChanged: (v){
                             _setState(() { work.end = v;});
                           },

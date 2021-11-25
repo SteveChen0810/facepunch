@@ -192,17 +192,17 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                           },
                         ),
                         SizedBox(height: 16,),
-                        TimeEditorFiled(
+                        TimeEditor(
                           label: S.of(context).startTime,
-                          initTime: call.start,
+                          initTime: c?.start??selectedDate.toString(),
                           onChanged: (v){
                             _setState(() { call.start = v;});
                           },
                         ),
                         SizedBox(height: 16,),
-                        TimeEditorFiled(
+                        TimeEditor(
                           label: S.of(context).endTime,
-                          initTime: call.end,
+                          initTime: c?.end??selectedDate.toString(),
                           onChanged: (v){
                             _setState(() { call.end = v;});
                           },

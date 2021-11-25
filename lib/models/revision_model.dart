@@ -1,3 +1,5 @@
+import 'package:facepunch/lang/l10n.dart';
+import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 
 import 'base_model.dart';
@@ -24,7 +26,7 @@ class RevisionModel extends BaseProvider {
       );
       Tools.consoleLog("[RevisionModel.sendPunchRevisionRequest.res] ${res.body}");
       if(res.statusCode==200){
-        return "A revision request has been sent.";
+        return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
@@ -48,7 +50,7 @@ class RevisionModel extends BaseProvider {
       );
       Tools.consoleLog("[RevisionModel.sendBreakRevisionRequest.res] ${res.body}");
       if(res.statusCode==200){
-        return "A revision request has been sent.";
+        return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
@@ -72,7 +74,7 @@ class RevisionModel extends BaseProvider {
       );
       Tools.consoleLog("[RevisionModel.sendWorkRevisionRequest.res] ${res.body}");
       if(res.statusCode==200){
-        return "A revision request has been sent.";
+        return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
@@ -317,5 +319,50 @@ class Revision with HttpRequest{
     if(status == 'requested') return Colors.orange;
     if(status == 'accepted') return Colors.green;
     return Colors.red;
+  }
+
+  bool hasDescription(){
+    return description != null;
+  }
+
+  Widget statusWidget(BuildContext context){
+    String s = S.of(context).sent;
+    if(status == 'accepted'){
+      s = S.of(context).accepted;
+    }else if(status == 'declined'){
+      s = S.of(context).declined;
+    }
+    return Container(
+      decoration: BoxDecoration(
+        color: statusColor(),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      child: Text(s, style: TextStyle(color: Colors.white),),
+    );
+  }
+
+  String getTime(){
+    if(updatedAt == null || updatedAt!.length < 16) return '--:--';
+    return updatedAt!.substring(0, 16);
+  }
+
+  bool isChanged(String key){
+    if(this.newValue == null || this.oldValue == null)return false;
+    if(this.type == 'punch'){
+      return PunchDateUtils.toStandardDateTime(this.newValue) != PunchDateUtils.toStandardDateTime(this.oldValue);
+    }
+    var newValue = this.newValue[key];
+    var oldValue = this.oldValue[key];
+    if(newValue == null && oldValue == null)return false;
+    if(newValue == null || oldValue == null)return false;
+    if(this.isDateTime(newValue) && this.isDateTime(oldValue)){
+      return PunchDateUtils.toStandardDateTime(newValue) != PunchDateUtils.toStandardDateTime(oldValue);
+    }
+    return newValue != oldValue;
+  }
+
+  bool isDateTime(v){
+    return DateTime.tryParse(v.toString()) != null;
   }
 }
