@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facepunch/screens/bug_report_page.dart';
 import 'package:facepunch/widgets/project_picker.dart';
 import 'package:facepunch/widgets/task_picker.dart';
 import 'package:facepunch/widgets/utils.dart';
@@ -766,16 +767,25 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("${user!.getFullName()}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white),),
-                      IconButton(
-                          icon: Icon(Icons.logout),
-                          splashColor: Colors.white,
-                          padding: EdgeInsets.zero,
-                          iconSize: 25,
-                          onPressed: ()async{
-                            await context.read<UserModel>().logOut();
-                            await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                          }
-                      )
+                      Row(
+                        children: [
+                          IconButton(
+                              icon: Icon(Icons.bug_report, color: Colors.white,),
+                              padding: EdgeInsets.zero,
+                              iconSize: 25,
+                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>BugReportPage()))
+                          ),
+                          IconButton(
+                              icon: Icon(Icons.logout, color: Colors.white,),
+                              padding: EdgeInsets.zero,
+                              iconSize: 25,
+                              onPressed: ()async{
+                                await context.read<UserModel>().logOut();
+                                await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                              }
+                          )
+                        ],
+                      ),
                     ],
                   ),
                 ),
