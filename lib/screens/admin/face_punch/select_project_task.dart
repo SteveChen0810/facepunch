@@ -64,6 +64,7 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
               Text(S.of(context).project),
               ProjectPicker(
                 projects: projects,
+                projectId: selectedProject?.id,
                 onSelected: (v){
                   setState(() {
                     selectedProject = v;
@@ -73,6 +74,7 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
               Text(S.of(context).task),
               TaskPicker(
                 tasks: tasks,
+                taskId: selectedTask?.id,
                 onSelected: (v){
                   setState(() {
                     selectedTask = v;
