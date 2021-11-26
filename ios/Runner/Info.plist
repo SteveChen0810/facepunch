@@ -70,5 +70,11 @@
 	<false/>
 	<key>com.apple.security.network.client</key>
 	<true/>
+    <key>com.apple.developer.nfc.readersession.felica.systemcodes</key>
+    <array>
+    </array>
+    <key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+    <array>
+    </array>
 </dict>
 </plist>
