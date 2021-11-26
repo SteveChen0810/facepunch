@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -174,6 +175,8 @@ class Tools {
           return true;
         }
       }
+    } on PlatformException catch(e){
+      consoleLog('[Tools.getCameraPermission]$e');
     }catch(e){
       consoleLog('[Tools.getCameraPermission]$e');
     }
@@ -191,6 +194,8 @@ class Tools {
           return true;
         }
       }
+    }on PlatformException catch(e){
+      consoleLog('[Tools.checkLocationPermission]$e');
     }catch(e){
       consoleLog('[Tools.checkLocationPermission]$e');
     }
