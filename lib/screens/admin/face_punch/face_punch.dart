@@ -49,11 +49,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
   void initState() {
     super.initState();
     Tools.checkCameraPermission().then((value){
-      if(value && mounted){
-        setState(() {_isCameraAllowed = true;});
-        _initializeCamera();
-        _determinePosition();
-      }
+      setState(() {_isCameraAllowed = value;});
+      _initializeCamera();
+      _determinePosition();
     });
     Wakelock.enable();
   }
