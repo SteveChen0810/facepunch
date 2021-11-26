@@ -267,8 +267,8 @@ class _AdminSettingState extends State<AdminSetting> {
                               focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                               labelText: S.of(context).email,
                               labelStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.email_outlined,color: Colors.black87,size: 30,),
-                              suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
+                              suffixIcon: Icon(Icons.email_outlined, color: Colors.black87, size: 30,),
+                              suffixIconConstraints: BoxConstraints(minHeight: 30, maxHeight: 30),
                               isDense: true,
                               errorText: _emailError
                           ),
