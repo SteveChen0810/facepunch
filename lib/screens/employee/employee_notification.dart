@@ -63,19 +63,19 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     Row(
                       children: [
                         Text("  ${S.of(context).incorrect}: "),
-                        Expanded(child: Text(revision.oldValue['project_name'])),
+                        Expanded(child: Text(revision.projectTitle(isNewValue: false))),
                       ],
                     ),
                     Row(
                       children: [
                         Text("  ${S.of(context).correct}: "),
-                        Expanded(child: Text(revision.newValue['project_name'])),
+                        Expanded(child: Text(revision.projectTitle(isNewValue: true))),
                       ],
                     ),
                   ],
                 ),
               if(!revision.isChanged('project_id'))
-                Text('  ${revision.oldValue['project_name']}'),
+                Text('  ${revision.projectTitle(isNewValue: false)}'),
               Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
               if(revision.isChanged('task_id'))
                 Column(
@@ -84,19 +84,19 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                     Row(
                       children: [
                         Text("  ${S.of(context).incorrect}: "),
-                        Expanded(child: Text(revision.oldValue['task_name'])),
+                        Expanded(child: Text(revision.taskTitle(isNewValue: false))),
                       ],
                     ),
                     Row(
                       children: [
                         Text("  ${S.of(context).correct}: "),
-                        Expanded(child: Text(revision.newValue['task_name'])),
+                        Expanded(child: Text(revision.taskTitle(isNewValue: true))),
                       ],
                     ),
                   ],
                 ),
               if(!revision.isChanged('task_id'))
-                Text("  ${revision.oldValue['task_name']}"),
+                Text("  ${revision.taskTitle(isNewValue: false)}"),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -207,19 +207,19 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                   Row(
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     children: [
                       Text("  ${S.of(context).correct}: "),
-                      Expanded(child: Text(revision.newValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('project_id'))
-              Text('  ${revision.oldValue['project_name']}'),
+              Text('  ${revision.projectTitle(isNewValue: false)}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
             if(revision.isChanged('task_id'))
               Column(
@@ -228,19 +228,19 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                   Row(
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     children: [
                       Text("  ${S.of(context).correct}: "),
-                      Expanded(child: Text(revision.newValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('task_id'))
-              Text("  ${revision.oldValue['task_name']}"),
+              Text("  ${revision.taskTitle(isNewValue: false)}"),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -318,19 +318,19 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                   Row(
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('project_id'))
-              Text('  ${revision.oldValue['project_name']}'),
+              Text('  ${revision.projectTitle(isNewValue: false)}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.bold),),
             if(revision.isChanged('task_id'))
               Column(
@@ -339,19 +339,19 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
                   Row(
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     children: [
                       Text("  ${S.of(context).correct}: "),
-                      Expanded(child: Text(revision.newValue['task_name']))
+                      Expanded(child: Text(revision.taskTitle(isNewValue: true)))
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('task_id'))
-              Text("  ${revision.oldValue['task_name']}"),
+              Text("  ${revision.taskTitle(isNewValue: false)}"),
             Text(S.of(context).priority, style: TextStyle(fontWeight: FontWeight.bold),),
             if(revision.isChanged('priority'))
               Row(

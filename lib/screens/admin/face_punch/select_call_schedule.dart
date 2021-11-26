@@ -114,7 +114,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text('${call.projectName}'),
+                                    child: Text(call.projectTitle()),
                                   ),
                                 ],
                               ),
@@ -126,7 +126,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text('${call.taskName}'),
+                                    child: Text(call.taskTitle()),
                                   ),
                                 ],
                               ),
@@ -196,7 +196,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text('${schedule.projectName}'),
+                                    child: Text(schedule.projectTitle()),
                                   ),
                                 ],
                               ),
@@ -208,7 +208,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                                   Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    child: Text('${schedule.taskName}'),
+                                    child: Text(schedule.taskTitle()),
                                   ),
                                 ],
                               ),

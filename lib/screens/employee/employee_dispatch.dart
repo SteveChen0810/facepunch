@@ -1,8 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/widgets/TimeEditor.dart';
-import 'package:facepunch/widgets/project_picker.dart';
-import 'package:facepunch/widgets/task_picker.dart';
-import 'package:facepunch/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +8,10 @@ import '/models/app_const.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
-import '/widgets/calendar_strip/date-utils.dart';
+import '/widgets/TimeEditor.dart';
+import '/widgets/project_picker.dart';
+import '/widgets/task_picker.dart';
+import '/widgets/utils.dart';
 
 class EmployeeDispatch extends StatefulWidget{
 
@@ -56,7 +55,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     if(mounted)setState(() {_call = null;});
   }
 
-  Widget _scheduleItem(EmployeeCall call){
+  Widget _callItem(EmployeeCall call){
     try{
       if(call == _call){
         return Container(
@@ -79,8 +78,8 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
           padding: EdgeInsets.all(4),
           child: Column(
             children: [
-              Text(call.projectName??'',style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
-              Text(call.taskName??'',textAlign: TextAlign.center,),
+              Text(call.projectTitle(),style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
+              Text(call.taskTitle(),textAlign: TextAlign.center,),
               SizedBox(height: 12,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -106,7 +105,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     }
   }
 
-  Widget _scheduleLine(){
+  Widget _callLine(){
     if(calls.isEmpty){
       return Container(
           height: 200,
@@ -119,7 +118,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
       child: Column(
         children: [
           for(var call in calls)
-            _scheduleItem(call),
+            _callItem(call),
         ],
       ),
     );
@@ -383,7 +382,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
               child: CustomScrollView(
                 slivers: [
                   SliverList(delegate: SliverChildListDelegate([
-                    _scheduleLine(),
+                    _callLine(),
                     if(selectedUser!=null && selectedUser!.type != 'shop_tracking')
                       Padding(
                         padding: const EdgeInsets.all(8.0),

@@ -77,6 +77,10 @@ class Project{
     }
   }
 
+  bool hasCode(){
+    return code != null && code!.isNotEmpty;
+  }
+
 }
 
 class ScheduleTask{
@@ -94,6 +98,10 @@ class ScheduleTask{
     }catch(e){
       Tools.consoleLog('[ScheduleTask.fromJson.err]$e');
     }
+  }
+
+  bool hasCode(){
+    return code != null && code!.isNotEmpty;
   }
 }
 
@@ -502,7 +510,9 @@ class EmployeeCall with HttpRequest{
       'project_id':projectId,
       'task_id':taskId,
       'project_name':projectName,
+      'project_code':projectCode,
       'task_name':taskName,
+      'task_code':taskCode,
       'start':start,
       'end':end,
       'todo':todo,

@@ -131,20 +131,20 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('project_id'))
-              Text('  ${revision.oldValue['project_name']}'),
+              Text('  ${revision.projectTitle(isNewValue: false)}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.w500),),
             if(revision.isChanged('task_id'))
               Column(
@@ -154,20 +154,20 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('task_id'))
-              Text("  ${revision.oldValue['task_name']}"),
+              Text("  ${revision.taskTitle(isNewValue: false)}"),
             if(revision.isChanged('start'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,20 +289,20 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('project_id'))
-              Text('  ${revision.oldValue['project_name']}'),
+              Text('  ${revision.projectTitle(isNewValue: false)}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.w500),),
             if(revision.isChanged('task_id'))
               Column(
@@ -312,20 +312,20 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('task_id'))
-              Text("  ${revision.oldValue['task_name']}"),
+              Text("  ${revision.taskTitle(isNewValue: false)}"),
             if(revision.isChanged('priority'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,20 +420,20 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['project_name'])),
+                      Expanded(child: Text(revision.projectTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('project_id'))
-              Text('  ${revision.oldValue['project_name']}'),
+              Text('  ${revision.projectTitle(isNewValue: false)}'),
             Text(S.of(context).task, style: TextStyle(fontWeight: FontWeight.w500),),
             if(revision.isChanged('task_id'))
               Column(
@@ -443,20 +443,20 @@ class _NotificationPageState extends State<NotificationPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(revision.oldValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: false))),
                     ],
                   ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(revision.newValue['task_name'])),
+                      Expanded(child: Text(revision.taskTitle(isNewValue: true))),
                     ],
                   ),
                 ],
               ),
             if(!revision.isChanged('task_id'))
-              Text("  ${revision.oldValue['task_name']}"),
+              Text("  ${revision.taskTitle(isNewValue: false)}"),
             if(revision.isChanged('start'))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,3 +1,6 @@
+import 'package:facepunch/widgets/project_picker.dart';
+import 'package:facepunch/widgets/task_picker.dart';
+
 import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -59,76 +62,22 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(S.of(context).project),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black54),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-                margin: EdgeInsets.symmetric(vertical: 8),
-                clipBehavior: Clip.antiAlias,
-                child: DropdownButton<Project>(
-                  items: projects.map((Project value) {
-                    return DropdownMenuItem<Project>(
-                      value: value,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${value.name}', maxLines: 1, overflow: TextOverflow.ellipsis,),
-                          if(value.code != null && value.code!.isNotEmpty)
-                            Text('${value.code}', style: TextStyle(fontSize: 10),),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  value: selectedProject,
-                  isExpanded: true,
-                  isDense: false,
-                  underline: SizedBox(),
-                  hint: Text(S.of(context).selectProject),
-                  onChanged: (v) {
-                    setState(() {
-                      selectedProject = v;
-                    });
-                  },
-                ),
+              ProjectPicker(
+                projects: projects,
+                onSelected: (v){
+                  setState(() {
+                    selectedProject = v;
+                  });
+                },
               ),
               Text(S.of(context).task),
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black54),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-                margin: EdgeInsets.symmetric(vertical: 8),
-                clipBehavior: Clip.antiAlias,
-                child: DropdownButton<ScheduleTask>(
-                  items: tasks.map((ScheduleTask value) {
-                    return DropdownMenuItem<ScheduleTask>(
-                      value: value,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('${value.name}', maxLines: 1, overflow: TextOverflow.ellipsis,),
-                          if(value.code != null && value.code!.isNotEmpty)
-                            Text('${value.code}', style: TextStyle(fontSize: 10),),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  value: selectedTask,
-                  isExpanded: true,
-                  isDense: false,
-                  underline: SizedBox(),
-                  hint: Text(S.of(context).selectTask),
-                  onChanged: (v) {
-                    setState(() {
-                      selectedTask = v;
-                    });
-                  },
-                ),
+              TaskPicker(
+                tasks: tasks,
+                onSelected: (v){
+                  setState(() {
+                    selectedTask = v;
+                  });
+                },
               ),
             ],
           ),

@@ -83,8 +83,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
           padding: EdgeInsets.all(4),
           child: Column(
             children: [
-              Text(s.projectName??'',style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
-              Text(s.taskName??'',textAlign: TextAlign.center,),
+              Text(s.projectTitle(), style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
+              Text(s.taskTitle(), textAlign: TextAlign.center,),
               SizedBox(height: 12,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -164,13 +164,13 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                 ],
               ),
               Center(
-                child: Text(call.projectName??'',
+                child: Text(call.projectTitle(),
                   style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.white),
                   textAlign: TextAlign.center,
                 ),
               ),
               Center(
-                child: Text(call.taskName??'',
+                child: Text(call.taskTitle(),
                   style: TextStyle(color: Colors.white),
                   textAlign: TextAlign.center,
                 ),

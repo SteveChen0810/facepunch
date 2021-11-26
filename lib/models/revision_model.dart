@@ -365,4 +365,30 @@ class Revision with HttpRequest{
   bool isDateTime(v){
     return DateTime.tryParse(v.toString()) != null;
   }
+
+  String projectTitle({required bool isNewValue}){
+    if(isNewValue){
+      if(newValue != null && newValue is Map){
+        return '${newValue['project_name']} - ${newValue['project_code']}';
+      }
+    }else{
+      if(oldValue != null && oldValue is Map){
+        return '${oldValue['project_name']} - ${oldValue['project_code']}';
+      }
+    }
+    return '';
+  }
+
+  String taskTitle({required isNewValue}){
+    if(isNewValue){
+      if(newValue != null && newValue is Map){
+        return '${newValue['task_name']} - ${newValue['task_code']}';
+      }
+    }else{
+      if(oldValue != null && oldValue is Map){
+        return '${oldValue['task_name']} - ${oldValue['task_code']}';
+      }
+    }
+    return '';
+  }
 }
