@@ -179,4 +179,21 @@ class Tools {
     }
     return false;
   }
+
+  static Future<bool> checkLocationPermission()async{
+    try{
+      var status = await Permission.location.status;
+      if(status.isGranted){
+        return true;
+      }else{
+        status = await Permission.location.request();
+        if(status.isGranted){
+          return true;
+        }
+      }
+    }catch(e){
+      consoleLog('[Tools.checkLocationPermission]$e');
+    }
+    return false;
+  }
 }

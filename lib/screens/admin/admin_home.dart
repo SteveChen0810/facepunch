@@ -230,20 +230,17 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   _determinePosition() async {
-    LocationPermission permission;
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.deniedForever) {
-      Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
-    }
-    if (permission == LocationPermission.denied) {
-      await showLocationPermissionDialog(context);
-      permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse && permission != LocationPermission.always) {
+    Tools.checkLocationPermission().then((v){
+      if(v){
+        Geolocator.getCurrentPosition()
+            .then((value){currentPosition = value;})
+            .catchError((e){
+              Tools.consoleLog('[FacePunchScreen.getCurrentPosition]$e');
+            });
+      }else{
         Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
-        return null;
       }
-    }
-    currentPosition =  await Geolocator.getCurrentPosition();
+    });
   }
 
   initFireBaseNotification(){
