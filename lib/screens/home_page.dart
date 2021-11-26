@@ -1,4 +1,3 @@
-import 'package:facepunch/screens/bug_report_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/lang/l10n.dart';
@@ -68,10 +67,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        leading: InkWell(
-          onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (c)=>BugReportPage())),
-          child: Icon(Icons.bug_report_outlined, size: 30,),
-        ),
         actions: [
           PopupMenuButton(
             itemBuilder: (_)=><PopupMenuItem<String>>[

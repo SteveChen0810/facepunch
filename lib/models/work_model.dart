@@ -108,7 +108,9 @@ class WorkHistory{
   String? createdAt;
   String? updatedAt;
   String? taskName;
+  String? taskCode;
   String? projectName;
+  String? projectCode;
 
   WorkHistory({
     this.id,
@@ -118,7 +120,9 @@ class WorkHistory{
     this.start,
     this.end,
     this.taskName,
-    this.projectName
+    this.projectName,
+    this.taskCode,
+    this.projectCode
   });
 
   WorkHistory.fromJson(Map<String, dynamic> json){
@@ -129,7 +133,9 @@ class WorkHistory{
       projectId = json['project_id'];
       taskId = json['task_id'];
       taskName = json['task_name'];
+      taskCode = json['task_code'];
       projectName = json['project_name'];
+      projectCode = json['project_code'];
       start = json['start'];
       end = json['end'];
       createdAt = json['created_at'];
@@ -167,6 +173,14 @@ class WorkHistory{
     return '${projectName??''} - ${taskName??''}';
   }
 
+  String projectTitle(){
+    return '$projectName - $projectCode';
+  }
+
+  String taskTitle(){
+    return '$taskName - $taskCode';
+  }
+
   toJson(){
     return {
       'id':id,
@@ -177,7 +191,9 @@ class WorkHistory{
       'task_id' : taskId,
       'project_id' : projectId,
       'task_name':taskName,
+      'task_code':taskCode,
       'project_name':projectName,
+      'project_code':projectCode,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
@@ -194,7 +210,9 @@ class WorkSchedule with HttpRequest{
   int? projectId;
   int? taskId;
   String? projectName;
+  String? projectCode;
   String? taskName;
+  String? taskCode;
   String? start;
   String? end;
   String? shift;
@@ -210,7 +228,9 @@ class WorkSchedule with HttpRequest{
     this.projectId,
     this.taskId,
     this.projectName,
+    this.projectCode,
     this.taskName,
+    this.taskCode,
     this.start,
     this.end,
     this.shift,
@@ -227,7 +247,9 @@ class WorkSchedule with HttpRequest{
       projectId = json['project_id'];
       taskId = json['task_id'];
       projectName = json['project_name'];
+      projectCode = json['project_code'];
       taskName = json['task_name'];
+      taskCode = json['task_code'];
       start = json['start'];
       end = json['end'];
       shift = json['shift'];
@@ -248,7 +270,9 @@ class WorkSchedule with HttpRequest{
       'project_id':projectId,
       'task_id':taskId,
       'project_name':projectName,
+      'project_code':projectCode,
       'task_name':taskName,
+      'task_code':taskCode,
       'start':start,
       'end':end,
       'shift':shift,
@@ -284,6 +308,14 @@ class WorkSchedule with HttpRequest{
   String endTime(){
     if(start == null) return '--:--';
     return end!.substring(11, 16);
+  }
+
+  String projectTitle(){
+    return '$projectName - $projectCode';
+  }
+
+  String taskTitle(){
+    return '$taskName - $taskCode';
   }
 
   String? isValid(){
@@ -409,7 +441,9 @@ class EmployeeCall with HttpRequest{
   int? projectId;
   int? taskId;
   String? projectName;
+  String? projectCode;
   String? taskName;
+  String? taskCode;
   String? start;
   String? end;
   String? todo;
@@ -425,6 +459,8 @@ class EmployeeCall with HttpRequest{
     this.projectId,
     this.taskId,
     this.projectName,
+    this.projectCode,
+    this.taskCode,
     this.taskName,
     this.start,
     this.end,
@@ -443,7 +479,9 @@ class EmployeeCall with HttpRequest{
       projectId = json['project_id'];
       taskId = json['task_id'];
       projectName = json['project_name'];
+      projectCode = json['project_code'];
       taskName = json['task_name'];
+      taskCode = json['task_code'];
       start = json['start'];
       end = json['end'];
       todo = json['todo'];
@@ -556,6 +594,14 @@ class EmployeeCall with HttpRequest{
     ];
     if(id==null) return Colors.blue;
     return colors[id!%11];
+  }
+
+  String projectTitle(){
+    return '$projectName - $projectCode';
+  }
+
+  String taskTitle(){
+    return '$taskName - $taskCode';
   }
 }
 

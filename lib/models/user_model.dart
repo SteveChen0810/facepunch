@@ -440,9 +440,7 @@ class UserModel extends BaseProvider{
       deviceInfo['app_version'] = AppConst.currentVersion;
       deviceInfo['lang'] = GlobalData.lang;
       data['device'] = deviceInfo;
-      data['user_id'] = user?.id;
-      data['company_id'] = user?.companyId;
-      final res = await sendPostRequest(AppConst.submitMobileLog, null, data);
+      final res = await sendPostRequest(AppConst.submitMobileLog, user?.token, data);
       Tools.consoleLog('[UserModel.submitMobileLog.res]${res.body}');
       if(res.statusCode == 200){
         logFile.deleteSync();

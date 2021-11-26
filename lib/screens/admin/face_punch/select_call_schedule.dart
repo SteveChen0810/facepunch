@@ -118,6 +118,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                           ],
                         ),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Column(
@@ -199,6 +200,7 @@ class _SelectCallScheduleScreenState extends State<SelectCallScheduleScreen> {
                           ],
                         ),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Column(
