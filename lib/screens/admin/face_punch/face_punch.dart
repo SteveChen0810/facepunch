@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'dart:math' as math;
 import 'package:geolocator/geolocator.dart';
@@ -49,9 +48,12 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
   @override
   void initState() {
     super.initState();
-    cameraPermission().whenComplete((){
-      _initializeCamera();
-      _determinePosition();
+    Tools.checkCameraPermission().then((value){
+      if(value && mounted){
+        setState(() {_isCameraAllowed = true;});
+        _initializeCamera();
+        _determinePosition();
+      }
     });
     Wakelock.enable();
   }
@@ -63,21 +65,12 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     super.dispose();
   }
 
-  Future cameraPermission()async{
-    var status = await Permission.camera.status;
-    if(status.isGranted){
-      setState(() {_isCameraAllowed = true;});
-    }else{
-      status = await Permission.camera.request();
-      if(status.isGranted){setState(() {_isCameraAllowed = true;});}
-    }
-  }
-
   _initializeCamera({CameraDescription? description}) async {
     try{
       if(_isCameraAllowed){
         if(description == null){
           description = await getCamera(_direction);
+          if(!mounted)return;
         }
         rotation = rotationIntToImageRotation(description.sensorOrientation);
         cameraController = CameraController(
@@ -86,7 +79,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           enableAudio: false,
         );
         await cameraController!.initialize();
+        if(!mounted)return;
         await initDetectFace();
+        if(!mounted)return;
       }else{
         Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
       }
@@ -199,7 +194,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         return null;
       }
     }
-    Geolocator.getCurrentPosition().timeout(Duration(seconds: 5)).then((value){currentPosition = value;}).catchError((e){
+    Geolocator.getCurrentPosition().then((value){currentPosition = value;}).catchError((e){
       Tools.consoleLog('[FacePunchScreen.getCurrentPosition]$e');
     });
   }

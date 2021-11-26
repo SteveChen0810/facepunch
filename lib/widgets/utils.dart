@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '/models/app_const.dart';
 import '/lang/l10n.dart';
 
@@ -160,5 +161,22 @@ class Tools {
     }catch(e){
       consoleLog('[Tools.getNFCIdentifier]$e');
     }
+  }
+
+  static Future<bool> checkCameraPermission()async{
+    try{
+      var status = await Permission.camera.status;
+      if(status.isGranted){
+        return true;
+      }else{
+        status = await Permission.camera.request();
+        if(status.isGranted){
+          return true;
+        }
+      }
+    }catch(e){
+      consoleLog('[Tools.getCameraPermission]$e');
+    }
+    return false;
   }
 }

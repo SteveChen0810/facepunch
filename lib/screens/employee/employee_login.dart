@@ -12,7 +12,6 @@ import '/models/app_const.dart';
 import '/widgets/face_painter.dart';
 import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
@@ -45,7 +44,11 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   @override
   void initState() {
     super.initState();
-    cameraPermission();
+    Tools.checkCameraPermission().then((v){
+      if(v && mounted){
+        setState(() {_isCameraAllowed = true;});
+      }
+    });
     Wakelock.enable();
   }
 
@@ -54,18 +57,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
     cameraClose();
     Wakelock.disable();
     super.dispose();
-  }
-
-  cameraPermission()async{
-    var status = await Permission.camera.status;
-    if(status.isGranted){
-      if(mounted)setState(() {_isCameraAllowed = true;});
-    }else{
-      status = await Permission.camera.request();
-      if(status.isGranted){
-        if(mounted)setState(() {_isCameraAllowed = true;});
-      }
-    }
   }
 
   _initializeCamera() async {
