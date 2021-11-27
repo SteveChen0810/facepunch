@@ -71,6 +71,7 @@ class _SelectProjectTaskState extends State<SelectProjectTask> {
                   });
                 },
               ),
+              SizedBox(height: 20,),
               Text(S.of(context).task),
               TaskPicker(
                 tasks: tasks,

@@ -38,6 +38,8 @@ class UserModel extends BaseProvider{
               GlobalData.lang = locale;
             }
             GlobalData.token = user!.token!;
+          }else{
+            logOut();
           }
         }
       }
