@@ -36,7 +36,7 @@ class _ProjectPickerState extends State<ProjectPicker> {
               children: [
                 Text('${value.name}', maxLines: 1, overflow: TextOverflow.ellipsis,),
                 if(value.hasCode())
-                  Text('${value.code}', style: TextStyle(fontSize: 10),),
+                  Text('${value.code} ${value.address}', style: TextStyle(fontSize: 10),),
               ],
             ),
           );

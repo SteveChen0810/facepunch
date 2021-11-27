@@ -63,7 +63,7 @@ class Project{
   String? name;
   String? companyName;
   String? code;
-
+  String? address;
 
   Project.fromJson(Map<String, dynamic> json){
     try{
@@ -72,6 +72,7 @@ class Project{
       companyName = json['company_name'];
       name = json['name'];
       code = json['code'];
+      address = json['address'];
     }catch(e){
       Tools.consoleLog('[Project.fromJson.err]$e');
     }
@@ -219,6 +220,7 @@ class WorkSchedule with HttpRequest{
   int? taskId;
   String? projectName;
   String? projectCode;
+  String? projectAddress;
   String? taskName;
   String? taskCode;
   String? start;
@@ -237,6 +239,7 @@ class WorkSchedule with HttpRequest{
     this.taskId,
     this.projectName,
     this.projectCode,
+    this.projectAddress,
     this.taskName,
     this.taskCode,
     this.start,
@@ -256,6 +259,7 @@ class WorkSchedule with HttpRequest{
       taskId = json['task_id'];
       projectName = json['project_name'];
       projectCode = json['project_code'];
+      projectAddress = json['project_address'];
       taskName = json['task_name'];
       taskCode = json['task_code'];
       start = json['start'];
@@ -279,6 +283,7 @@ class WorkSchedule with HttpRequest{
       'task_id':taskId,
       'project_name':projectName,
       'project_code':projectCode,
+      'project_address':projectAddress,
       'task_name':taskName,
       'task_code':taskCode,
       'start':start,
@@ -319,7 +324,7 @@ class WorkSchedule with HttpRequest{
   }
 
   String projectTitle(){
-    return '$projectName - $projectCode';
+    return '$projectName - ${projectCode??''} \n $projectAddress'.trim();
   }
 
   String taskTitle(){
@@ -450,8 +455,10 @@ class EmployeeCall with HttpRequest{
   int? taskId;
   String? projectName;
   String? projectCode;
+  String? projectAddress;
   String? taskName;
   String? taskCode;
+  String? date;
   String? start;
   String? end;
   String? todo;
@@ -468,8 +475,10 @@ class EmployeeCall with HttpRequest{
     this.taskId,
     this.projectName,
     this.projectCode,
+    this.projectAddress,
     this.taskCode,
     this.taskName,
+    this.date,
     this.start,
     this.end,
     this.todo,
@@ -488,8 +497,10 @@ class EmployeeCall with HttpRequest{
       taskId = json['task_id'];
       projectName = json['project_name'];
       projectCode = json['project_code'];
+      projectAddress = json['project_address'];
       taskName = json['task_name'];
       taskCode = json['task_code'];
+      date = json['date'];
       start = json['start'];
       end = json['end'];
       todo = json['todo'];
@@ -511,8 +522,10 @@ class EmployeeCall with HttpRequest{
       'task_id':taskId,
       'project_name':projectName,
       'project_code':projectCode,
+      'project_address':projectAddress,
       'task_name':taskName,
       'task_code':taskCode,
+      'date':date,
       'start':start,
       'end':end,
       'todo':todo,
@@ -533,11 +546,13 @@ class EmployeeCall with HttpRequest{
   }
 
   DateTime? getStartTime(){
-    return DateTime.tryParse(start??'');
+    if(start == null) return null;
+    return DateTime.tryParse(start!);
   }
 
   DateTime? getEndTime(){
-    return DateTime.tryParse(end??'');
+    if(end == null) return null;
+    return DateTime.tryParse(end!);
   }
 
   String startTime(){
@@ -607,7 +622,7 @@ class EmployeeCall with HttpRequest{
   }
 
   String projectTitle(){
-    return '$projectName - $projectCode';
+    return '$projectName - ${projectCode??''} \n $projectAddress'.trim();
   }
 
   String taskTitle(){

@@ -369,11 +369,11 @@ class Revision with HttpRequest{
   String projectTitle({required bool isNewValue}){
     if(isNewValue){
       if(newValue != null && newValue is Map){
-        return '${newValue['project_name']} - ${newValue['project_code']}';
+        return '${newValue['project_name']} - ${newValue['project_code']??''} \n ${newValue['project_address']??''}'.trim();
       }
     }else{
       if(oldValue != null && oldValue is Map){
-        return '${oldValue['project_name']} - ${oldValue['project_code']}';
+        return '${oldValue['project_name']} - ${oldValue['project_code']??''} \n ${oldValue['project_address']??''}'.trim();
       }
     }
     return '';
@@ -382,11 +382,11 @@ class Revision with HttpRequest{
   String taskTitle({required isNewValue}){
     if(isNewValue){
       if(newValue != null && newValue is Map){
-        return '${newValue['task_name']} - ${newValue['task_code']}';
+        return '${newValue['task_name']} - ${newValue['task_code']??''}'.trim();
       }
     }else{
       if(oldValue != null && oldValue is Map){
-        return '${oldValue['task_name']} - ${oldValue['task_code']}';
+        return '${oldValue['task_name']} - ${oldValue['task_code']??''}'.trim();
       }
     }
     return '';

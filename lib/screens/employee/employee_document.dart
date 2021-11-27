@@ -19,6 +19,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
   DateTime endDate = DateTime.parse("${DateTime.now().year}-12-31");
   DateTime? selectedDate;
   String pdfError = "";
+  double? pdfHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -80,18 +81,26 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                   child: Container(
                     child: Column(
                       children: [
-                        pdfError.isNotEmpty?Container(
+                        if (pdfError.isNotEmpty) Container(
                           alignment: Alignment.center,
                           height: 200,
                           child: Text(S.of(context).pdfNotGenerated),
-                        ):Padding(
+                        ) else Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: SfPdfViewer.network(
-                            user!.pdfUrl(selectedDate),
-                            key: Key(user.pdfUrl(selectedDate)),
-                            onDocumentLoadFailed: (v){
-                                if(mounted)setState(() {pdfError = v.description;});
-                            },
+                          child: SizedBox(
+                            height: pdfHeight == null ? 200 : pdfHeight!,
+                            child: SfPdfViewer.network(
+                              user!.pdfUrl(selectedDate),
+                              key: Key(user.pdfUrl(selectedDate)),
+                              onDocumentLoadFailed: (v){
+                                  if(mounted)setState(() {pdfError = v.description;});
+                              },
+                              onDocumentLoaded: (v){
+                                setState(() {
+                                  pdfHeight = v.document.pageSettings.size.height/2;
+                                });
+                              },
+                            ),
                           ),
                         ),
                         if(settings!.hasHarvestReport??false)
