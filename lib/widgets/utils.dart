@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:convert/convert.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -201,4 +202,11 @@ class Tools {
     }
     return false;
   }
+
+  static String generateRandomString(int length){
+    const ch = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    Random r = Random();
+    return String.fromCharCodes(Iterable.generate(length, (_) => ch.codeUnitAt(r.nextInt(ch.length))));
+  }
+
 }

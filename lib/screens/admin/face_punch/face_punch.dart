@@ -134,7 +134,6 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-
   Widget faceRect() {
     if (faces == null || cameraController == null || !cameraController!.value.isInitialized) {
       return SizedBox();

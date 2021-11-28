@@ -6,6 +6,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:collection/collection.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'work_model.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
@@ -244,6 +245,7 @@ class UserModel extends BaseProvider{
           null,
           {
             'photo':photo,
+            'face_punch_key' : await getPunchKey(),
             'firebase_token': deviceToken??''
           }
       );
@@ -269,9 +271,10 @@ class UserModel extends BaseProvider{
           AppConst.punchWithFace,
           null,
           {
-            'photo':photo,
-            'longitude':longitude,
-            'latitude':latitude
+            'photo': photo,
+            'face_punch_key' : await getPunchKey(),
+            'longitude': longitude,
+            'latitude': latitude
           }
       );
       Tools.consoleLog("[UserModel.punchWithFace.res] ${res.body}");
@@ -454,6 +457,16 @@ class UserModel extends BaseProvider{
       Tools.consoleLog('[UserModel.submitMobileLog.err]$e');
       return e.toString();
     }
+  }
+
+  Future<String> getPunchKey()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? punchKey = prefs.getString('face_punch_key');
+    if(punchKey == null){
+      punchKey = Tools.generateRandomString(20);
+      prefs.setString('face_punch_key', punchKey);
+    }
+    return punchKey;
   }
 }
 
