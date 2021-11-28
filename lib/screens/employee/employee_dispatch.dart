@@ -137,8 +137,9 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
         projectName: projects.first.name,
         taskId: tasks.first.id,
         taskName: tasks.first.name,
-        start: selectedDate.toString(),
-        end: selectedDate.toString(),
+        date: selectedDate.toString().split(' ')[0],
+        start: null,
+        end: null,
         userId: selectedUser!.id,
         priority: 1,
     );
@@ -193,7 +194,8 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                         SizedBox(height: 16,),
                         TimeEditor(
                           label: S.of(context).startTime,
-                          initTime: c?.start??selectedDate.toString(),
+                          initTime: c?.start,
+                          isOptional: true,
                           onChanged: (v){
                             _setState(() { call.start = v;});
                           },
@@ -201,7 +203,8 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                         SizedBox(height: 16,),
                         TimeEditor(
                           label: S.of(context).endTime,
-                          initTime: c?.end??selectedDate.toString(),
+                          initTime: c?.end,
+                          isOptional: true,
                           onChanged: (v){
                             _setState(() { call.end = v;});
                           },
@@ -289,7 +292,6 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                   ),
                   TextButton(
                       onPressed: ()async{
-                        if(call.start == null || call.end == null) return;
                         Navigator.of(_context).pop();
                         setState(() {
                           if(c == null){

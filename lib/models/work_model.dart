@@ -324,11 +324,17 @@ class WorkSchedule with HttpRequest{
   }
 
   String projectTitle(){
+    if(isNoAvailable()) return '';
     return '$projectName - ${projectCode??''} \n $projectAddress'.trim();
   }
 
   String taskTitle(){
-    return '$taskName - $taskCode';
+    if(isNoAvailable()) return '$taskName';
+    return '$taskName - ${taskCode??''}';
+  }
+
+  bool isNoAvailable(){
+    return noAvailable != null && noAvailable!.isNotEmpty;
   }
 
   String? isValid(){

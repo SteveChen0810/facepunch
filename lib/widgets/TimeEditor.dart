@@ -6,9 +6,10 @@ import 'package:flutter/services.dart';
 class TimeEditor extends StatefulWidget{
   final String? initTime;
   final String? label;
+  final bool isOptional;
   final ValueChanged<String?>? onChanged;
 
-  TimeEditor({this.initTime, this.label, this.onChanged});
+  TimeEditor({this.initTime, this.label, this.onChanged, this.isOptional = false});
   @override
   _TimeEditorState createState() => _TimeEditorState();
 }
@@ -20,7 +21,7 @@ class _TimeEditorState extends State<TimeEditor> {
 
   @override
   void initState() {
-    String initTime = '00:00';
+    String initTime = '';
     if(widget.initTime != null && DateTime.tryParse(widget.initTime!) != null){
       initTime = PunchDateUtils.getTimeString(widget.initTime!);
     }
@@ -30,6 +31,12 @@ class _TimeEditorState extends State<TimeEditor> {
 
   String? validate(String time){
     try{
+      if(widget.isOptional && time.isEmpty){
+        if(widget.onChanged != null){
+          widget.onChanged!(null);
+        }
+        return null;
+      }
       String error = 'Invalid Time';
       if(time.length < 5 || !time.contains(':')){
         return error;

@@ -81,6 +81,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
           ),
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(4),
+          margin: EdgeInsets.symmetric(vertical: 1),
           child: Column(
             children: [
               Text(s.projectTitle(), style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),textAlign: TextAlign.center,),
@@ -100,9 +101,11 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
         ),
       );
     }catch(e){
+      Tools.consoleLog('[EmployeeSchedule._scheduleItem.err][${s.id}]$e');
       return Container(
         color: Colors.red,
         height: 30,
+        alignment: Alignment.center,
         child: Text(e.toString()),
       );
     }
@@ -248,7 +251,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                             style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),
                           )
                       ),
-                      if(schedule.noAvailable == null)
+                      if(!schedule.isNoAvailable())
                         Container(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,22 +420,6 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         ),
                       ),
                       SizedBox(height: 16,),
-                      TimeEditor(
-                        label: S.of(context).startTime,
-                        initTime: c.start,
-                        onChanged: (v){
-                          _setState(() { call.start = v; });
-                        },
-                      ),
-                      SizedBox(height: 16,),
-                      TimeEditor(
-                        label: S.of(context).endTime,
-                        initTime: c.end,
-                        onChanged: (v){
-                          _setState(() { call.end = v; });
-                        },
-                      ),
-                      SizedBox(height: 8,),
                       Container(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -500,7 +487,6 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                   ),
                   TextButton(
                       onPressed: (){
-                        if(call.start == null || call.end == null) return;
                         if(call.projectId == null){
                           _setState(() { errorMessage = S.of(context).selectProject;});
                           return ;

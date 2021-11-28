@@ -352,58 +352,6 @@ class _NotificationPageState extends State<NotificationPage> {
                   Expanded(child: Text('${revision.oldValue['priority']}')),
                 ],
               ),
-            if(revision.isChanged('start'))
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.w500),),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['start']))),
-                    ],
-                  ),
-                ],
-              ),
-            if(!revision.isChanged('start'))
-              Row(
-                children: [
-                  Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
-                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
-                ],
-              ),
-            if(revision.isChanged('end'))
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.w500),),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).incorrect}: "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
-                    ],
-                  ),
-                ],
-              ),
-            if(!revision.isChanged('end'))
-              Row(
-                children: [
-                  Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
-                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
-                ],
-              ),
           ],
         );
       }
