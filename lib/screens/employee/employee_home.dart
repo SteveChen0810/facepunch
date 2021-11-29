@@ -3,8 +3,6 @@ import '/models/work_model.dart';
 import '/screens/employee/employee_dispatch.dart';
 import '/widgets/dialogs.dart';
 import '/widgets/utils.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-
 import '/lang/l10n.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
@@ -32,31 +30,11 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   @override
   void initState() {
     super.initState();
-    initFireBaseNotification();
+    Tools.setupFirebaseNotification(_onMessage);
     _fetchData();
   }
 
-  initFireBaseNotification(){
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _onMessage(message);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _onMessage(message);
-    });
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message){
-      if(message != null)_onMessage(message);
-    });
-    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-  }
-
-  _onMessage(RemoteMessage message){
+  _onMessage(message){
     try{
       if(mounted){
         AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);

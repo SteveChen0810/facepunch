@@ -52,7 +52,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   @override
   void initState() {
     super.initState();
-    initFireBaseNotification();
+    Tools.setupFirebaseNotification(_onMessage);
     _determinePosition();
     _fetchCompanyData();
   }
@@ -243,32 +243,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
     });
   }
 
-  initFireBaseNotification(){
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _onMessage(message);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _onMessage(message);
-    });
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message){
-          if(message != null)_onMessage(message);
-    });
-    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-  }
-
-  _onMessage(RemoteMessage message){
+  _onMessage(message){
     try{
       if(mounted){
         AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
         Tools.playSound();
-        showNotificationDialog(newNotification, context,);
+        showNotificationDialog(newNotification, context);
       }
     }catch(e){
       Tools.consoleLog('[AdminHome._onMessage]$e');
