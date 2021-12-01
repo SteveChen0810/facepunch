@@ -90,11 +90,17 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         _isDetecting = true;
         detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!)
             .then((dynamic result) {
-          setState(() {faces = result;});
-          _isDetecting = false;
-        },
-        ).catchError((e) {Tools.consoleLog(e);_isDetecting = false;},);
-      }).catchError((e){Tools.consoleLog(e);Tools.showErrorMessage(context, e.toString());});
+              if(mounted)setState(() {faces = result;});
+              _isDetecting = false;
+            }).catchError((e) {
+              Tools.consoleLog('[EmployeeLogin.initDetectFace.detect.err]$e');
+              _isDetecting = false;
+              }
+            );
+      }).catchError((e){
+        Tools.consoleLog('[EmployeeLogin.initDetectFace.err]$e');
+        Tools.showErrorMessage(context, e.toString());}
+      );
     }on CameraException catch(e){
       Tools.consoleLog('[EmployeeLogin.initDetectFace.err]$e');
       Tools.showErrorMessage(context, e.toString());
@@ -181,6 +187,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                 Container(
                   width: size,
                   height: size,
+                  alignment: Alignment.center,
                   padding: EdgeInsets.all(8),
                   child: _photoPath.isEmpty
                     ?(cameraController==null || !cameraController!.value.isInitialized)
@@ -211,11 +218,14 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     ),
                   )
                 ),
-                Image.asset(
-                  "assets/images/overlay.png",
+                Container(
+                  alignment: Alignment.center,
                   width: size,
                   height: size,
-                  fit: BoxFit.fill,
+                  child: Image.asset(
+                    "assets/images/overlay.png",
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ],
             ),

@@ -466,6 +466,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         },
         child: _body(),
       ),
+      backgroundColor: Color(primaryColor),
       resizeToAvoidBottomInset: false,
     );
   }

@@ -74,7 +74,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "welcome" : MessageLookupByLibrary.simpleMessage("Welcome"),
     "bye" : MessageLookupByLibrary.simpleMessage("Bye"),
     "takePicture" : MessageLookupByLibrary.simpleMessage("Take Picture"),
-    "tryAgain" : MessageLookupByLibrary.simpleMessage("Try gain"),
+    "tryAgain" : MessageLookupByLibrary.simpleMessage("Try again"),
     "selectCompany" : MessageLookupByLibrary.simpleMessage("Please select your company."),
     "startFacePunch" : MessageLookupByLibrary.simpleMessage("Start Facepunch"),
     "addContainers" : MessageLookupByLibrary.simpleMessage("No container entered"),
