@@ -340,7 +340,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         schedules: [],
         employee: employee,
         punch: punch,
-        calls: [],
+        calls: calls,
       )));
     }else if(projects.isNotEmpty && tasks.isNotEmpty){
       await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectProjectTask(
