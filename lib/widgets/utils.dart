@@ -210,7 +210,11 @@ class Tools {
     return String.fromCharCodes(Iterable.generate(length, (_) => ch.codeUnitAt(r.nextInt(ch.length))));
   }
 
-  static void setupFirebaseNotification(Function onMessage){
+  static void setupFirebaseNotification(Function onMessage)async{
+    var status = await Permission.notification.status;
+    if(!status.isGranted){
+      await Permission.notification.request();
+    }
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       onMessage(message);
     });

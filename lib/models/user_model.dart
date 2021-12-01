@@ -861,6 +861,10 @@ class User with HttpRequest{
     return canNTCTracking??false;
   }
 
+  bool hasCode(){
+    return employeeCode != null && employeeCode!.isNotEmpty;
+  }
+
   String pdfUrl(DateTime? startDate){
     DateTime pdfDate = startDate??PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
     final pdfLink = "$firstName $lastName (${pdfDate.toString().split(" ")[0]} ~ ${pdfDate.add(Duration(days: 6)).toString().split(" ")[0]}).pdf";

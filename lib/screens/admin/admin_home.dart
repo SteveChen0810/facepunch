@@ -63,7 +63,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     await context.read<NotificationModel>().getNotificationFromServer();
   }
 
-  Widget userItem(User user, double width){
+  Widget userItem(User user){
     return CupertinoPopoverButton(
       popoverBoxShadow: [
         BoxShadow(color: Colors.black54,blurRadius: 5.0)
@@ -130,42 +130,55 @@ class _AdminHomePageState extends State<AdminHomePage> {
         return true;
       },
       child: Container(
-        alignment: Alignment.center,
         margin: EdgeInsets.all(3),
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
           border: Border.all(color: selectedUser?.id==user.id?Colors.red:Colors.transparent,width: 2)
         ),
-        child: ClipOval(
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              CachedNetworkImage(
-                imageUrl: "${AppConst.domainURL}images/user_avatars/${user.avatar}",
-                height: width/5,
-                width: width/5,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipOval(
+              child: Stack(
                 alignment: Alignment.center,
-                placeholder: (_,__)=>Image.asset("assets/images/person.png"),
-                errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),
-                fit: BoxFit.cover,
-              ),
-              if(user.lastPunch != null)
-                Positioned(
-                    bottom: 0,
-                    child: Container(
-                        width: width/5,
-                        color: Colors.black.withOpacity(0.5),
-                        alignment: Alignment.topCenter,
-                        padding: EdgeInsets.only(bottom: 3),
-                        child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch!.createdAt!))}",
-                          style: TextStyle(color: Colors.white,),
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: "${AppConst.domainURL}images/user_avatars/${user.avatar}",
+                    alignment: Alignment.center,
+                    placeholder: (_,__)=>Image.asset("assets/images/person.png"),
+                    errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),
+                    fit: BoxFit.cover,
+                  ),
+                  if(user.lastPunch != null)
+                    Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                            color: Colors.black.withOpacity(0.5),
+                            padding: EdgeInsets.only(bottom: 3),
+                            child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch!.createdAt!))}",
+                              style: TextStyle(color: Colors.white,),
+                              textAlign: TextAlign.center,
+                            )
                         )
-                    )
-                ),
-              if(user.id==loadingUser)
-                Center(child: CircularProgressIndicator()),
-            ],
-          ),
+                    ),
+                  if(user.id == loadingUser)
+                    Center(child: CircularProgressIndicator(color: Colors.green,)),
+                ],
+              ),
+            ),
+            if(user.hasCode())
+              Text('${user.employeeCode}',
+                style: TextStyle(fontSize: 10),
+                maxLines: 1,
+                textAlign: TextAlign.center,
+              ),
+            Expanded(
+              child: Text('${user.getFullName()}',
+                style: TextStyle(fontSize: 12), maxLines: 1, textAlign: TextAlign.center,),
+            ),
+          ],
         ),
       ),
     );
@@ -326,143 +339,144 @@ class _AdminHomePageState extends State<AdminHomePage> {
           child: Column(
             children: [
               Expanded(
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if(users.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
-                            child: SimpleAutoCompleteTextField(
-                              key: _searchKey,
-                              suggestions: users.map((e) => e.getFullName()).toList(),
-                              suggestionsAmount: 10,
-                              submitOnSuggestionTap: true,
-                              clearOnSubmit: false,
-                              textSubmitted: (v)async{
-                                setState(() {
-                                  selectedUser = users.firstWhereOrNull((u) => u.getFullName()==v);
-                                });
-                              },
-                              minLength: 1,
-                              keyboardType: TextInputType.name,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(5)),),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                isDense: true,
-                                hintText: S.of(context).searchEmployee
-                              ),
-                              autoFocus: false,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if(users.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
+                          child: SimpleAutoCompleteTextField(
+                            key: _searchKey,
+                            suggestions: users.map((e) => e.getFullName()).toList(),
+                            suggestionsAmount: 10,
+                            submitOnSuggestionTap: true,
+                            clearOnSubmit: false,
+                            textSubmitted: (v)async{
+                              setState(() {
+                                selectedUser = users.firstWhereOrNull((u) => u.getFullName()==v);
+                              });
+                            },
+                            minLength: 1,
+                            keyboardType: TextInputType.name,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(borderRadius: const BorderRadius.all(Radius.circular(5)),),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                              isDense: true,
+                              hintText: S.of(context).searchEmployee
                             ),
+                            autoFocus: false,
                           ),
-                        Expanded(
-                          child: SmartRefresher(
-                            enablePullDown: true,
-                            enablePullUp: false,
-                            header: WaterDropMaterialHeader(backgroundColor: Color(primaryColor),distance: 60,),
-                            controller: _refreshController,
-                            onRefresh: _onRefresh,
-                            child: CustomScrollView(
-                              slivers: [
+                        ),
+                      Expanded(
+                        child: SmartRefresher(
+                          enablePullDown: true,
+                          enablePullUp: false,
+                          header: WaterDropMaterialHeader(backgroundColor: Color(primaryColor),distance: 60,),
+                          controller: _refreshController,
+                          onRefresh: _onRefresh,
+                          child: CustomScrollView(
+                            slivers: [
+                              SliverList(
+                                delegate: SliverChildListDelegate(
+                                  [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(S.of(context).employeeLogIn,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                                    )
+                                  ]
+                                ),
+                              ),
+                              if(inUsers.isEmpty)
                                 SliverList(
                                   delegate: SliverChildListDelegate(
+                                      [
+                                        Center(child: Text(S.of(context).empty)),
+                                      ]
+                                  ),
+                                ),
+                              SliverGrid(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, childAspectRatio: 0.7,),
+                                delegate: SliverChildListDelegate(
+                                  [
+                                    for(User user in inUsers)
+                                      userItem(user),
+                                  ]
+                                ),
+                              ),
+                              SliverList(
+                                delegate: SliverChildListDelegate(
                                     [
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Text(S.of(context).employeeLogIn,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                                        child: Text(S.of(context).employeeLogOut,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
                                       )
                                     ]
-                                  ),
                                 ),
-                                if(inUsers.isEmpty)
-                                  SliverList(
-                                    delegate: SliverChildListDelegate(
-                                        [
-                                          Center(child: Text(S.of(context).empty)),
-                                        ]
-                                    ),
-                                  ),
-                                SliverGrid(
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5,childAspectRatio: 1,),
-                                  delegate: SliverChildListDelegate(
-                                    [
-                                      for(User user in inUsers)
-                                        userItem(user,width),
-                                    ]
-                                  ),
-                                ),
+                              ),
+                              if(outUsers.isEmpty)
                                 SliverList(
                                   delegate: SliverChildListDelegate(
                                       [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(S.of(context).employeeLogOut,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-                                        )
+                                        Center(child: Text(S.of(context).empty)),
                                       ]
                                   ),
                                 ),
-                                if(outUsers.isEmpty)
-                                  SliverList(
-                                    delegate: SliverChildListDelegate(
-                                        [
-                                          Center(child: Text(S.of(context).empty)),
-                                        ]
-                                    ),
-                                  ),
-                                SliverGrid(
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5,childAspectRatio: 1,),
-                                  delegate: SliverChildListDelegate(
-                                      [
-                                        for(User user in outUsers)
-                                          userItem(user,width),
-                                      ]
-                                  ),
+                              SliverGrid(
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5, childAspectRatio: 0.7,),
+                                delegate: SliverChildListDelegate(
+                                    [
+                                      for(User user in outUsers)
+                                        userItem(user),
+                                    ]
                                 ),
-                              ],
+                              ),
+                            ],
 
-                            ),
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationPage())),
+                              child: Stack(
+                                children: [
+                                  Icon(Icons.notifications,color: Color(primaryColor),size: 35,),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.red
+                                    ),
+                                    padding: EdgeInsets.all(4),
+                                    child: Text("${revisions.length}", style: TextStyle(color: Colors.white),),
+                                  )
+                                ],
+                              )
+                          ),
+                          if(settings!.hasNFCHarvest??false)
                             TextButton(
-                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationPage())),
-                                child: Stack(
-                                  children: [
-                                    Icon(Icons.notifications,color: Color(primaryColor),size: 35,),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.red
-                                      ),
-                                      padding: EdgeInsets.all(4),
-                                      child: Text("${revisions.length}", style: TextStyle(color: Colors.white),),
-                                    )
-                                  ],
-                                )
+                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NFCScanPage())),
+                              child: Image.asset('assets/images/nfc.png',color: Color(primaryColor),height: 40,),
                             ),
-                            if(settings!.hasNFCHarvest??false)
-                              TextButton(
-                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NFCScanPage())),
-                                child: Image.asset('assets/images/nfc.png',color: Color(primaryColor),height: 40,),
-                              ),
-                            if(settings!.hasNFCReport??false)
-                              TextButton(
-                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
-                                child: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
-                              ),
+                          if(settings!.hasNFCReport??false)
                             TextButton(
-                                onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting())),
-                                child: Icon(Icons.settings,color: Color(primaryColor),size: 35,),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
+                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>HarvestReportScreen())),
+                              child: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
+                            ),
+                          TextButton(
+                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting())),
+                              child: Icon(Icons.settings,color: Color(primaryColor),size: 35,),
+                          )
+                        ],
+                      )
+                    ],
                   ),
                 ),
               ),
