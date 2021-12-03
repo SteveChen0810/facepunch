@@ -2093,7 +2093,7 @@ class S {
   }
   String get canNotEditDeleteCall{
     return Intl.message(
-      'Can neither edit nor delete after the employee worked.',
+      'Can neither edit nor delete a worked call.',
       name: 'canNotEditDeleteCall',
       desc: '',
       args: [],

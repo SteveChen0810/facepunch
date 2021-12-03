@@ -334,17 +334,8 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                   if(c != null)
                     TextButton(
                         onPressed: ()async{
-                          setState(() { _call = c; });
-                          String? result = await c.delete();
-                          if(!mounted) return;
-                          setState(() { _call = null;});
-                          if(result == null){
-                            setState(() {
-                              calls.remove(c);
-                            });
-                          }else{
-                            Tools.showErrorMessage(context, result);
-                          }
+                          Navigator.of(_context).pop();
+                          _deleteCall(c);
                         },
                         child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)
                     ),
@@ -374,6 +365,20 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
     final result = await call.addEditCall();
     if(result != null) Tools.showErrorMessage(context, result);
     _refreshController.requestRefresh();
+  }
+
+  _deleteCall(EmployeeCall call)async{
+    setState(() { _call = call; });
+    String? result = await call.delete();
+    if(!mounted) return;
+    setState(() { _call = null;});
+    if(result == null){
+      setState(() {
+        calls.remove(call);
+      });
+    }else{
+      Tools.showErrorMessage(context, result);
+    }
   }
 
   @override
