@@ -20,7 +20,6 @@ class AppConst{
   static final String addEditEmployee = baseUrl+"add-edit-employee";
   static final String deleteEmployee = baseUrl+"delete-employee";
   static final String getCompanyEmployees = baseUrl+"get-company-employees";
-  // static final String punchWithFace = baseUrl+"punch-with-face";
   static final String punchWithFace = baseUrl+"face-punch";
   static final String getTimeSheetData = baseUrl+"get-time-sheet-data";
   static final String getYearTotalHours = baseUrl+"get-year-total-hours";

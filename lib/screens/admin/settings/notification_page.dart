@@ -27,7 +27,6 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Widget _notificationItem(Revision revision){
     try{
-      if(!revision.isValid()) return SizedBox();
       if(revision == _revision){
         return Container(
             decoration: BoxDecoration(
@@ -44,8 +43,8 @@ class _NotificationPageState extends State<NotificationPage> {
           motion: ScrollMotion(),
           extentRatio: 0.2,
           children: [
-            CustomSlidableAction(
-              onPressed: (BuildContext context)async{
+            SlidableAction(
+              onPressed: (_)async{
                 setState(() { _revision = revision;});
                 String? result = await revision.delete();
                 setState(() { _revision = null;});
@@ -56,7 +55,7 @@ class _NotificationPageState extends State<NotificationPage> {
                   Tools.showErrorMessage(context, result);
                 }
               },
-              child: Icon(Icons.delete),
+              icon: Icons.delete,
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
@@ -488,53 +487,54 @@ class _NotificationPageState extends State<NotificationPage> {
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                   child: Text('${revision.description}'),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if(revision.status == 'requested')
-                      TextButton(
-                          onPressed: ()async{
-                            Navigator.pop(context);
-                            setState(() { _revision = revision; });
-                            String? result = await revision.accept();
-                            setState(() { _revision = null; });
-                            if(result != null){
-                              Tools.showErrorMessage(context, result);
-                            }
-                          },
-                          child: Text(S.of(context).accept, style: TextStyle(color: Colors.green),)
-                      ),
-                    if(revision.status == 'requested')
-                      TextButton(
-                          onPressed: ()async{
-                            Navigator.pop(context);
-                            setState(() { _revision = revision; });
-                            String? result = await revision.decline();
-                            setState(() { _revision = null; });
-                            if(result != null){
-                              Tools.showErrorMessage(context, result);
-                            }
-                          },
-                          child: Text(S.of(context).decline, style: TextStyle(color: Colors.orange),)
-                      ),
-                    TextButton(
-                        onPressed: ()async{
-                          Navigator.pop(context);
-                          setState(() { _revision = revision; });
-                          String? result = await revision.delete();
-                          setState(() { _revision = null; });
-                          context.read<NotificationModel>().removeRevision(revision);
-                          if(result != null){
-                            Tools.showErrorMessage(context, result);
-                          }
-                        },
-                        child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)
-                    ),
-                  ],
-                )
               ],
             ),
           ),
+          actions: [
+            if(revision.status == 'requested')
+              TextButton(
+                  onPressed: ()async{
+                    Navigator.pop(context);
+                    setState(() { _revision = revision; });
+                    String? result = await revision.accept();
+                    if(!mounted)return;
+                    setState(() { _revision = null; });
+                    if(result != null){
+                      Tools.showErrorMessage(context, result);
+                    }
+                  },
+                  child: Text(S.of(context).accept, style: TextStyle(color: Colors.green),)
+              ),
+            if(revision.status == 'requested')
+              TextButton(
+                  onPressed: ()async{
+                    Navigator.pop(context);
+                    setState(() { _revision = revision; });
+                    String? result = await revision.decline();
+                    if(!mounted)return;
+                    setState(() { _revision = null; });
+                    if(result != null){
+                      Tools.showErrorMessage(context, result);
+                    }
+                  },
+                  child: Text(S.of(context).decline, style: TextStyle(color: Colors.orange),)
+              ),
+            TextButton(
+                onPressed: ()async{
+                  Navigator.pop(context);
+                  setState(() { _revision = revision; });
+                  String? result = await revision.delete();
+                  if(!mounted)return;
+                  setState(() { _revision = null; });
+                  if(result != null){
+                    Tools.showErrorMessage(context, result);
+                  }else{
+                    context.read<NotificationModel>().removeRevision(revision);
+                  }
+                },
+                child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)
+            ),
+          ],
         )
     );
   }

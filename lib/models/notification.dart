@@ -33,7 +33,7 @@ class NotificationModel extends BaseProvider {
   }
 
   removeRevision(Revision revision){
-    revisions.remove(revision);
+    revisions.removeWhere((r) => r.id == revision.id);
     notifyListeners();
   }
 }
