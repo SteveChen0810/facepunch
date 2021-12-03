@@ -74,7 +74,7 @@ class AppConst{
   static final String getAppVersions = baseUrl+"get-app-versions";
   static final String submitMobileLog = baseUrl+"submit-mobile-log";
 
-  static const String LOG_FILE_NAME = "app_log.txt";
+  static const String LOG_FILE_PREFIX = "app_log_";
   static const int currentVersion = 43;
 }
 

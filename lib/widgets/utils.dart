@@ -116,9 +116,9 @@ class Tools {
 
   static Future<void> consoleLog(String log)async{
     try{
-      print(log);
+      print('$log');
       final directory = await getApplicationDocumentsDirectory();
-      final logFile = File('${directory.path}/${AppConst.LOG_FILE_NAME}');
+      final logFile = File('${directory.path}/${AppConst.LOG_FILE_PREFIX}${DateTime.now().toString().split(' ')[0]}');
       logFile.writeAsString('\n[${DateTime.now()}]$log', mode: FileMode.writeOnlyAppend);
     }catch(e){
       print('[consoleLog]$e');

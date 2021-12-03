@@ -432,7 +432,7 @@ class UserModel extends BaseProvider{
   Future<String?> submitMobileLog({String? comment, required Map<String, dynamic> deviceInfo})async{
     try{
       final directory = await getApplicationDocumentsDirectory();
-      final logFile = File('${directory.path}/${AppConst.LOG_FILE_NAME}');
+      final logFile = File('${directory.path}/${AppConst.LOG_FILE_PREFIX}${DateTime.now().toString().split(' ')[0]}');
       String content = '';
       if(await logFile.exists()){
         content = await logFile.readAsString();
