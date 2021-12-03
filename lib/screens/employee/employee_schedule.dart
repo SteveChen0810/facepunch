@@ -73,6 +73,10 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
       return InkWell(
         onTap: (){
           if(_schedule!=null)return;
+          if(s.isWorked()){
+            Tools.showErrorMessage(context, S.of(context).youCanNotSendRevisionAfterStart);
+            return ;
+          }
           _showScheduleRevisionDialog(s);
         },
         child: Container(
@@ -129,7 +133,6 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
     );
   }
 
-
   Widget _callItem(EmployeeCall call){
     try{
       if(call == _call){
@@ -143,6 +146,10 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
       return InkWell(
         onTap: (){
           if(_call != null)return;
+          if(call.isWorked()){
+            Tools.showErrorMessage(context, S.of(context).youCanNotSendRevisionAfterStart);
+            return ;
+          }
           _showCallRevisionDialog(call);
         },
         child: Container(

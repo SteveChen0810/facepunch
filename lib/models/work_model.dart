@@ -312,19 +312,15 @@ class WorkSchedule with HttpRequest{
       'end':end,
       'shift':shift,
       'no_available':noAvailable,
-      'color':color,
-      'worked':worked,
+      'color': color,
+      'worked': (worked != null && worked!)?1:0,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
   }
 
-  bool isStarted(){
-    return (start !=null && start!.isNotEmpty) && (end==null || end!.isEmpty);
-  }
-
-  bool isEnded(){
-    return (start !=null && start!.isNotEmpty) && (end !=null && end!.isNotEmpty);
+  bool isWorked(){
+    return worked != null && worked!;
   }
 
   DateTime? getStartTime(){
@@ -558,19 +554,15 @@ class EmployeeCall with HttpRequest{
       'end':end,
       'todo':todo,
       'note':note,
-      'worked':(worked == null || !worked!)?1:0,
+      'worked':(worked != null && worked!) ? 1 : 0,
       'priority':priority,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
   }
 
-  bool isStarted(){
-    return (start !=null && start!.isNotEmpty) && (end == null || end!.isEmpty);
-  }
-
-  bool isEnded(){
-    return (start !=null && start!.isNotEmpty) && (end !=null && end!.isNotEmpty);
+  bool isWorked(){
+    return worked != null && worked!;
   }
 
   DateTime? getStartTime(){

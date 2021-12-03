@@ -2083,6 +2083,14 @@ class S {
       args: [],
     );
   }
+  String get youCanNotSendRevisionAfterStart{
+    return Intl.message(
+      'You can not send a revision after start.',
+      name: 'youCanNotSendRevisionAfterStart',
+      desc: '',
+      args: [],
+    );
+  }
 
 }
 
