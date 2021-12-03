@@ -2099,6 +2099,14 @@ class S {
       args: [],
     );
   }
+  String get workingNow{
+    return Intl.message(
+      'Working Now',
+      name: 'workingNow',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

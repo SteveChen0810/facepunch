@@ -251,6 +251,7 @@ class WorkSchedule with HttpRequest{
   String? color;
   String? noAvailable;
   bool? worked;
+  bool? workingOn;
   String? createdAt;
   String? updatedAt;
 
@@ -290,6 +291,7 @@ class WorkSchedule with HttpRequest{
       noAvailable = json['no_available'];
       color = json['color'];
       worked = json['worked'] == 1;
+      workingOn = json['working_on']??false;
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -314,6 +316,7 @@ class WorkSchedule with HttpRequest{
       'no_available':noAvailable,
       'color': color,
       'worked': (worked != null && worked!)?1:0,
+      'working_on' : workingOn,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
@@ -321,6 +324,10 @@ class WorkSchedule with HttpRequest{
 
   bool isWorked(){
     return worked != null && worked!;
+  }
+
+  bool isWorkingOn(){
+    return workingOn != null && workingOn!;
   }
 
   DateTime? getStartTime(){
@@ -489,6 +496,7 @@ class EmployeeCall with HttpRequest{
   String? note;
   int? priority;
   bool? worked;
+  bool? workingOn;
   String? createdAt;
   String? updatedAt;
 
@@ -531,6 +539,7 @@ class EmployeeCall with HttpRequest{
       note = json['note']??'';
       priority = json['priority'];
       worked = json['worked'] == 1;
+      workingOn = json['working_on']??false;
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -555,6 +564,7 @@ class EmployeeCall with HttpRequest{
       'todo':todo,
       'note':note,
       'worked':(worked != null && worked!) ? 1 : 0,
+      'working_on':workingOn,
       'priority':priority,
       'created_at':createdAt,
       'updated_at':updatedAt
@@ -563,6 +573,10 @@ class EmployeeCall with HttpRequest{
 
   bool isWorked(){
     return worked != null && worked!;
+  }
+
+  bool isWorkingOn(){
+    return workingOn != null && workingOn!;
   }
 
   DateTime? getStartTime(){

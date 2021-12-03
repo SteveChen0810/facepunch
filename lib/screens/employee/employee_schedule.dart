@@ -82,6 +82,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
         child: Container(
           decoration: BoxDecoration(
             color: Color(int.parse('0xFF${s.color}')),
+            border: s.isWorkingOn() ? Border.all(color: Colors.red) : null
           ),
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(4),
@@ -94,9 +95,23 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${s.shift?.toUpperCase()}',),
-                  Text("${s.startTime()} ~ ${s.endTime()}",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Expanded(
+                      child: Text('${s.shift?.toUpperCase()}',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )
+                  ),
+                  if(!s.isWorkingOn())
+                    Expanded(
+                        child: Text(S.of(context).workingNow,
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        )
+                    ),
+                  Expanded(
+                    child: Text("${s.startTime()} ~ ${s.endTime()}",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
               )
@@ -155,6 +170,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
         child: Container(
           decoration: BoxDecoration(
             color: call.color(),
+            border: call.isWorkingOn() ? Border.all(color: Colors.red) : null
           ),
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(4),
@@ -162,14 +178,28 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "${call.priority}",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "${call.priority}",
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
                   ),
-                  Text("${call.startTime()} ~ ${call.endTime()}",
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  if(call.isWorkingOn())
+                    Expanded(
+                      flex: 1,
+                        child: Text(S.of(context).workingNow,
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        )
+                    ),
+                  Expanded(
+                    flex: 1,
+                    child: Text("${call.startTime()} ~ ${call.endTime()}",
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
               ),
