@@ -63,7 +63,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     await context.read<NotificationModel>().getNotificationFromServer();
   }
 
-  Widget userItem(User user){
+  Widget _userItem(User user){
     return CupertinoPopoverButton(
       popoverBoxShadow: [
         BoxShadow(color: Colors.black54,blurRadius: 5.0)
@@ -118,7 +118,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                 ),
                 onTap: (){
-                  if(user.id != null)deleteEmployee(user.id!);
+                  if(user.id != null){
+                    _deleteEmployee(user.id!);
+                  }
                   return true;
                 },
               )
@@ -126,46 +128,44 @@ class _AdminHomePageState extends State<AdminHomePage> {
         );
       },
       onTap: (){
-        showEmployeeLog(user);
+        _showEmployeeLog(user);
         return true;
       },
       child: Container(
         margin: EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          border: Border.all(color: selectedUser?.id==user.id?Colors.red:Colors.transparent,width: 2)
-        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipOval(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: "${AppConst.domainURL}images/user_avatars/${user.avatar}",
-                    alignment: Alignment.center,
-                    placeholder: (_,__)=>Image.asset("assets/images/person.png"),
-                    errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),
-                    fit: BoxFit.cover,
-                  ),
-                  if(user.lastPunch != null)
-                    Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                            color: Colors.black.withOpacity(0.5),
-                            padding: EdgeInsets.only(bottom: 3),
-                            child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch!.createdAt!))}",
-                              style: TextStyle(color: Colors.white,),
-                              textAlign: TextAlign.center,
-                            )
-                        )
-                    ),
-                  if(user.id == loadingUser)
-                    Center(child: CircularProgressIndicator(color: Colors.green,)),
-                ],
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: selectedUser?.id==user.id?Colors.red:Colors.transparent,width: 2),
+                shape: BoxShape.circle
+              ),
+              child: ClipOval(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    user.userAvatarImage(),
+                    if(user.lastPunch != null)
+                      Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                              color: Colors.black.withOpacity(0.5),
+                              padding: EdgeInsets.only(bottom: 3),
+                              child: Text("${PunchDateUtils.getTimeString(DateTime.parse(user.lastPunch!.createdAt!))}",
+                                style: TextStyle(color: Colors.white,),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                              )
+                          )
+                      ),
+                    if(user.id == loadingUser)
+                      Center(child: CircularProgressIndicator(color: Colors.green,)),
+                  ],
+                ),
               ),
             ),
             if(user.hasCode())
@@ -185,7 +185,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
 
-  deleteEmployee(int userId)async{
+  _deleteEmployee(int userId)async{
     bool isDeletingField = false;
     showDialog(
       context: context,
@@ -238,7 +238,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     );
   }
 
-  showEmployeeLog(User user)async{
+  _showEmployeeLog(User user)async{
     Navigator.push(context, MaterialPageRoute(builder: (context)=>EmployeeLogs(employee: user, latitude: currentPosition?.latitude, longitude: currentPosition?.longitude,)));
   }
 
@@ -405,7 +405,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                 delegate: SliverChildListDelegate(
                                   [
                                     for(User user in inUsers)
-                                      userItem(user),
+                                      _userItem(user),
                                   ]
                                 ),
                               ),
@@ -432,7 +432,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                 delegate: SliverChildListDelegate(
                                     [
                                       for(User user in outUsers)
-                                        userItem(user),
+                                        _userItem(user),
                                     ]
                                 ),
                               ),
