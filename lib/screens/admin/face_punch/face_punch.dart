@@ -358,10 +358,6 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  double _cameraScale(){
-    return MediaQuery.of(context).size.height/720;
-  }
-
   Widget _body(){
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
@@ -427,18 +423,15 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     if(cameraController != null && cameraController!.value.isInitialized){
       return Stack(
         children: [
-          Transform.scale(
-            scale: _cameraScale(),
-            child: Center(
-              child: CameraPreview(
-                cameraController!,
-                child: Platform.isIOS
-                    ? faceRect()
-                    : Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.rotationY(math.pi),
-                        child: faceRect(),
-                      ),
+          Center(
+            child: CameraPreview(
+              cameraController!,
+              child: Platform.isIOS
+                  ? faceRect()
+                  : Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.rotationY(math.pi),
+                child: faceRect(),
               ),
             ),
           ),
