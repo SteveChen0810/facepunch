@@ -57,6 +57,7 @@ class AppConst{
 
   static final String startCall = baseUrl+"start-call";
   static final String endCall = baseUrl+"end-call";
+  static final String deleteCall = baseUrl+"delete-call";
   static final String startShopTracking = baseUrl+"start-shop-tracking";
 
   static final String getDailySchedule = baseUrl+"get-daily-schedule";

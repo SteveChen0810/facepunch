@@ -2083,15 +2083,22 @@ class S {
       args: [],
     );
   }
-  String get youCanNotSendRevisionAfterStart{
+  String get canNotSendRevisionAfterStart{
     return Intl.message(
-      'You can not send a revision after start.',
-      name: 'youCanNotSendRevisionAfterStart',
+      'Can not send a revision after start.',
+      name: 'canNotSendRevisionAfterStart',
       desc: '',
       args: [],
     );
   }
-
+  String get canNotEditDeleteCall{
+    return Intl.message(
+      'Can neither edit nor delete after the employee worked.',
+      name: 'canNotEditDeleteCall',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

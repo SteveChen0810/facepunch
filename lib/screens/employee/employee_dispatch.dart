@@ -67,6 +67,9 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
       return InkWell(
         onTap: (){
           if(_call!=null)return;
+          if(call.isWorked()){
+            Tools.showErrorMessage(context, S.of(context).canNotEditDeleteCall);
+          }
           _showCallDialog(call);
         },
         child: Container(
@@ -86,9 +89,10 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                   Text("${call.priority}",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("${call.startTime()} ~ ${call.endTime()}",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  if(call.hasTime())
+                    Text("${call.startTime()} ~ ${call.endTime()}",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                 ],
               ),
             ],
@@ -327,6 +331,23 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                       },
                       child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
                   ),
+                  if(c != null)
+                    TextButton(
+                        onPressed: ()async{
+                          setState(() { _call = c; });
+                          String? result = await c.delete();
+                          if(!mounted) return;
+                          setState(() { _call = null;});
+                          if(result == null){
+                            setState(() {
+                              calls.remove(c);
+                            });
+                          }else{
+                            Tools.showErrorMessage(context, result);
+                          }
+                        },
+                        child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)
+                    ),
                   TextButton(
                       onPressed: ()async{
                         Navigator.of(_context).pop();

@@ -627,6 +627,25 @@ class EmployeeCall with HttpRequest{
     }
   }
 
+  Future<String?> delete()async{
+    try{
+      var res = await sendPostRequest(
+          AppConst.deleteCall,
+          GlobalData.token,
+          {'id':id}
+      );
+      Tools.consoleLog('[EmployeeCall.delete.res]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog('[EmployeeCall.startSchedule.err]$e');
+      return e.toString();
+    }
+  }
+
   Color color(){
     List<Color> colors = [
       Colors.blue,

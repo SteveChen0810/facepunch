@@ -74,7 +74,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
         onTap: (){
           if(_schedule!=null)return;
           if(s.isWorked()){
-            Tools.showErrorMessage(context, S.of(context).youCanNotSendRevisionAfterStart);
+            Tools.showErrorMessage(context, S.of(context).canNotSendRevisionAfterStart);
             return ;
           }
           _showScheduleRevisionDialog(s);
@@ -147,7 +147,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
         onTap: (){
           if(_call != null)return;
           if(call.isWorked()){
-            Tools.showErrorMessage(context, S.of(context).youCanNotSendRevisionAfterStart);
+            Tools.showErrorMessage(context, S.of(context).canNotSendRevisionAfterStart);
             return ;
           }
           _showCallRevisionDialog(call);
@@ -525,6 +525,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   _sendCallRevision(EmployeeCall newValue, EmployeeCall oldValue, String description)async{
     setState(() { _call = oldValue;});
     final result = await context.read<RevisionModel>().sendCallRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
+    if(!mounted) return;
     setState(() { _call = null;});
     if(result != null){
       Tools.showErrorMessage(context, result);
