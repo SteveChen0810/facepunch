@@ -187,7 +187,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                 Container(
                   width: size,
                   height: size,
-                  alignment: Alignment.center,
                   padding: EdgeInsets.all(8),
                   child: _photoPath.isEmpty
                     ?(cameraController==null || !cameraController!.value.isInitialized)

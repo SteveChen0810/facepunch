@@ -44,14 +44,36 @@ class WorkModel extends BaseProvider{
             'project_id': projectId,
           }
       );
-      Tools.consoleLog('[ScheduleTask.startShopTracking.res]${res.body}');
+      Tools.consoleLog('[WorkModel.startShopTracking.res]${res.body}');
       if(res.statusCode==200){
         return null;
       }else{
         return jsonDecode(res.body)['message'];
       }
     }catch(e){
-      Tools.consoleLog('[ScheduleTask.startShopTracking.err]$e');
+      Tools.consoleLog('[WorkModel.startShopTracking.err]$e');
+      return e.toString();
+    }
+  }
+
+  Future<dynamic> getCall(int callId)async{
+    try{
+      var res = await sendPostRequest(
+          AppConst.getCall,
+          GlobalData.token,
+          {
+            'id': callId
+          }
+      );
+      Tools.consoleLog('[WorkModel.getCall.res]${res.body}');
+      final body = jsonDecode(res.body);
+      if(res.statusCode==200){
+        return EmployeeCall.fromJson(body);
+      }else{
+        return body['message']??'Something went wrong.';
+      }
+    }catch(e){
+      Tools.consoleLog('[WorkModel.getCall.err]$e');
       return e.toString();
     }
   }
@@ -509,8 +531,8 @@ class EmployeeCall with HttpRequest{
       date = json['date'];
       start = json['start'];
       end = json['end'];
-      todo = json['todo'];
-      note = json['note'];
+      todo = json['todo']??'';
+      note = json['note']??'';
       priority = json['priority'];
       worked = json['worked'] == 1;
       createdAt = json['created_at'];
@@ -562,13 +584,17 @@ class EmployeeCall with HttpRequest{
   }
 
   String startTime(){
-    if(start == null || start!.length < 16) return '--:--';
-    return start!.substring(11, 16);
+    if(start != null && start!.length > 16){
+      return start!.substring(11, 16);
+    }
+    return '--:--';
   }
 
   String endTime(){
-    if(end == null || end!.length < 16) return '--:--';
-    return end!.substring(11, 16);
+    if(end != null && end!.length > 16){
+      return end!.substring(11, 16);
+    }
+    return '--:--';
   }
 
   Future<String?> startCall(String? token)async{
@@ -633,6 +659,10 @@ class EmployeeCall with HttpRequest{
 
   String taskTitle(){
     return '$taskName - $taskCode';
+  }
+
+  bool hasTime(){
+    return start != null && end != null;
   }
 }
 

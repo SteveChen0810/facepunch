@@ -1,3 +1,4 @@
+import 'package:facepunch/screens/employee/call_detail.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:io';
@@ -84,32 +85,31 @@ showNotificationDialog(AppNotification notification, BuildContext context){
   try{
     showDialog(
       context: context,
-      builder:(_)=> StatefulBuilder(
-          builder: (BuildContext _context,StateSetter setState){
-            return AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-              contentPadding: EdgeInsets.all(0),
-              title: Text('${notification.type?.replaceAll('_', ' ').toUpperCase()}',style: TextStyle(fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
-              content: Container(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('${notification.body}',style: TextStyle(fontSize: 16),),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: ()async{
-                    Navigator.pop(_context);
-                  },
-                  child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
-                ),
-              ],
-            );
-          }
+      builder:(_context)=> AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+        contentPadding: EdgeInsets.all(16),
+        title: Text(
+          '${notification.type?.replaceAll('_', ' ').toUpperCase()}',
+          style: TextStyle(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        content: Text('${notification.body}', textAlign: TextAlign.center,),
+        actions: [
+          TextButton(
+            onPressed: (){
+              Navigator.pop(_context);
+            },
+            child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
+          ),
+          if(notification.hasCall())
+            TextButton(
+              onPressed: (){
+                Navigator.pop(_context);
+                Navigator.push(context, MaterialPageRoute(builder: (c)=>CallDetailScreen(notification.callId!)));
+              },
+              child: Text(S.of(context).open,style: TextStyle(color: Colors.green),),
+            ),
+        ],
       ),
     );
   }catch(e){

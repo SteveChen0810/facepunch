@@ -2051,7 +2051,30 @@ class S {
       args: [],
     );
   }
-
+  String get open{
+    return Intl.message(
+      'Open',
+      name: 'open',
+      desc: '',
+      args: [],
+    );
+  }
+  String get callDetail{
+    return Intl.message(
+      'Call Detail',
+      name: 'callDetail',
+      desc: '',
+      args: [],
+    );
+  }
+  String get date{
+    return Intl.message(
+      'Date',
+      name: 'date',
+      desc: '',
+      args: [],
+    );
+  }
 
 }
 

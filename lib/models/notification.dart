@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'base_model.dart';
@@ -43,14 +44,8 @@ class AppNotification {
   bool? seen;
   String? date;
   String? type;
-
-  AppNotification({
-    this.body,
-    this.title,
-    this.seen,
-    this.date,
-    this.type,
-  });
+  int? callId;
+  int? scheduleId;
 
   AppNotification.fromJsonFirebase(Map<String, dynamic> json) {
     try {
@@ -66,30 +61,15 @@ class AppNotification {
       type = notification['notify_type'];
       seen = false;
       date = DateTime.now().toString();
+      callId = int.tryParse(notification['call_id'].toString());
+      scheduleId = int.tryParse(notification['schedule_id'].toString());
     } catch (e) {
       Tools.consoleLog("[AppNotification.fromJsonFirebase.err]$e");
     }
   }
 
-
-  AppNotification.fromLocalStorage(Map<String, dynamic> json) {
-    try {
-      body = json['body'];
-      title = json['title'];
-      date = json['date'];
-      type = json['notify_type'];
-      seen = json['seen'];
-    } catch (e) {
-      Tools.consoleLog("[AppNotification.fromLocalStorage.err]$e");
-    }
+  bool hasCall(){
+    return callId != null;
   }
 
-
-  Map<String, dynamic> toJson() => {
-    'body': body,
-    'title': title,
-    'notify_type': type,
-    'seen': seen,
-    'date': date,
-  };
 }
