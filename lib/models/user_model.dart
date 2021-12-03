@@ -1011,6 +1011,7 @@ class Punch{
   String? punch;
   double? longitude;
   double? latitude;
+  String? status;
   String? createdAt;
   String? updatedAt;
   int? paid;
@@ -1035,6 +1036,7 @@ class Punch{
       longitude = json['longitude']==null?null:double.parse(json['longitude'].toString());
       latitude = json['latitude']==null?null:double.parse(json['latitude'].toString());
       paid = json['paid'];
+      status = json['status'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -1048,6 +1050,10 @@ class Punch{
 
   bool isOut(){
     return punch == "Out";
+  }
+
+  bool isSent(){
+    return status == 'Sent';
   }
 
   String title(BuildContext context){

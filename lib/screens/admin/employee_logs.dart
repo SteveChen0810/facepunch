@@ -151,12 +151,22 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           )
       );
     }
-    double extentRatio = 0.2;
-    if(punch.isIn() || (punch.hasLocation() && (settings?.hasGeolocationPunch??false))){
-      extentRatio = 0.4;
+    double extentRatio = 0.0;
+    if(punch.isIn() && !punch.isSent()){
+      extentRatio += 0.2; // can delete
     }
-    if(punch.isIn() && punch.hasLocation() && (settings?.hasGeolocationPunch??false)){
-      extentRatio = 0.6;
+    if(!punch.isSent()){
+      extentRatio += 0.2; // can edit
+    }
+    if(punch.hasLocation() && (settings?.hasGeolocationPunch??false)){
+      extentRatio += 0.2; // can location
+    }
+    if(extentRatio == 0.0){
+      return Container(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        width: MediaQuery.of(context).size.width,
+        child: Text("${punch.title(context)}"),
+      );
     }
     return Slidable(
       child: Container(
@@ -177,17 +187,18 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                 goToPosition(LatLng(punch.latitude!, punch.longitude!));
               },
             ),
-          SlidableAction(
-            backgroundColor: Colors.orange,
-            icon: Icons.edit,
-            foregroundColor: Colors.white,
-            onPressed: (v)async{
-              String? changedTime = await showEditPunchDialog(punch);
-              punch.createdAt = changedTime;
-              if(mounted)setState(() {});
-            },
-          ),
-          if(punch.isIn())
+          if(!punch.isSent())
+            SlidableAction(
+              backgroundColor: Colors.orange,
+              icon: Icons.edit,
+              foregroundColor: Colors.white,
+              onPressed: (v)async{
+                String? changedTime = await showEditPunchDialog(punch);
+                punch.createdAt = changedTime;
+                if(mounted)setState(() {});
+              },
+            ),
+          if(punch.isIn() && !punch.isSent())
             SlidableAction(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
