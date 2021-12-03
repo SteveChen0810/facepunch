@@ -390,8 +390,8 @@ class UserModel extends BaseProvider{
       );
       Tools.consoleLog("[UserModel.getYearTotalHours.res] ${res.body}");
       var body = jsonDecode(res.body);
-      if(res.statusCode==200){
-        yearTotalHours = body['total'];
+      if(res.statusCode == 200){
+        yearTotalHours = double.parse(body['total'].toString());
         notifyListeners();
         return null;
       }else{
