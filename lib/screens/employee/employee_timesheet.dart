@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/screens/bug_report_page.dart';
-import 'package:facepunch/widgets/TimeEditor.dart';
-import 'package:facepunch/widgets/project_picker.dart';
-import 'package:facepunch/widgets/task_picker.dart';
-import 'package:facepunch/widgets/utils.dart';
+import '/screens/bug_report_page.dart';
+import '/widgets/TimeEditor.dart';
+import '/widgets/project_picker.dart';
+import '/widgets/task_picker.dart';
+import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/revision_model.dart';
@@ -109,7 +109,11 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           punchDetail.add(
               InkWell(
                 onTap: (){
-                  _showPunchRevisionDialog(punchIn);
+                  if(punchIn.isSent()){
+                    Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
+                  }else{
+                    _showPunchRevisionDialog(punchIn);
+                  }
                 },
                 child: Container(
                     padding: EdgeInsets.symmetric(vertical: 6),
@@ -157,7 +161,11 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
             punchDetail.add(
                 InkWell(
                   onTap: (){
-                    _showPunchRevisionDialog(punchOut);
+                    if(punchIn.isSent() || punchOut.isSent()){
+                      Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
+                    }else{
+                      _showPunchRevisionDialog(punchOut);
+                    }
                   },
                   child: Container(
                       padding: EdgeInsets.symmetric(vertical: 6),

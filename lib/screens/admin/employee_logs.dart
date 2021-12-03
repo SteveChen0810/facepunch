@@ -151,22 +151,12 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           )
       );
     }
-    double extentRatio = 0.0;
-    if(punch.isIn() && !punch.isSent()){
-      extentRatio += 0.2; // can delete
-    }
-    if(!punch.isSent()){
-      extentRatio += 0.2; // can edit
+    double extentRatio = 0.2; // has edit
+    if(punch.isIn()){
+      extentRatio += 0.2; // has delete
     }
     if(punch.hasLocation() && (settings?.hasGeolocationPunch??false)){
-      extentRatio += 0.2; // can location
-    }
-    if(extentRatio == 0.0){
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        width: MediaQuery.of(context).size.width,
-        child: Text("${punch.title(context)}"),
-      );
+      extentRatio += 0.2; // has location
     }
     return Slidable(
       child: Container(
@@ -187,35 +177,42 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                 goToPosition(LatLng(punch.latitude!, punch.longitude!));
               },
             ),
-          if(!punch.isSent())
-            SlidableAction(
-              backgroundColor: Colors.orange,
-              icon: Icons.edit,
-              foregroundColor: Colors.white,
-              onPressed: (v)async{
+          SlidableAction(
+            backgroundColor: Colors.orange,
+            icon: Icons.edit,
+            foregroundColor: Colors.white,
+            onPressed: (v)async{
+              if(punch.isSent()){
+                Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
+              }else{
                 String? changedTime = await showEditPunchDialog(punch);
                 punch.createdAt = changedTime;
                 if(mounted)setState(() {});
-              },
-            ),
-          if(punch.isIn() && !punch.isSent())
+              }
+            },
+          ),
+          if(punch.isIn())
             SlidableAction(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: Icons.delete,
               onPressed: (v)async{
-                if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
-                  setState(() { selectedPunch = punch;});
-                  String? result = await user.deletePunch(punch.id);
-                  if(result==null){
-                    user.punches.removeWhere((p) => p.id == punch.id);
-                    selectedPunches.values.forEach((ps) {
-                      ps.removeWhere((p) => p.id == punch.id);
-                    });
-                  }else{
-                    Tools.showErrorMessage(context, result);
+                if(punch.isSent()){
+                  Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
+                }else{
+                  if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
+                    setState(() { selectedPunch = punch;});
+                    String? result = await user.deletePunch(punch.id);
+                    if(result==null){
+                      user.punches.removeWhere((p) => p.id == punch.id);
+                      selectedPunches.values.forEach((ps) {
+                        ps.removeWhere((p) => p.id == punch.id);
+                      });
+                    }else{
+                      Tools.showErrorMessage(context, result);
+                    }
+                    setState(() { selectedPunch = null;});
                   }
-                  setState(() { selectedPunch = null;});
                 }
               },
             ),

@@ -2075,6 +2075,14 @@ class S {
       args: [],
     );
   }
+  String get thisPunchHasBeenSentAlready{
+    return Intl.message(
+      'This punch has been sent already.',
+      name: 'thisPunchHasBeenSentAlready',
+      desc: '',
+      args: [],
+    );
+  }
 
 }
 
