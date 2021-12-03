@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -119,6 +118,44 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
         children: [
           for(var call in calls)
             _callItem(call),
+        ],
+      ),
+    );
+  }
+
+  Widget _userItem(User employee){
+    return Container(
+      margin: EdgeInsets.all(3),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+                border: Border.all(color: selectedUser?.id == employee.id ? Colors.red:Colors.transparent, width: 2),
+              shape: BoxShape.circle
+            ),
+            child: InkWell(
+              onTap: (){
+                setState(() {selectedUser = employee;});
+                _refreshController.requestRefresh();
+              },
+              splashColor: Colors.transparent,
+              child: ClipOval(
+                child: employee.userAvatarImage(),
+              ),
+            ),
+          ),
+          if(employee.hasCode())
+            Text('${employee.employeeCode}',
+              style: TextStyle(fontSize: 10),
+              maxLines: 1,
+              textAlign: TextAlign.center,
+            ),
+          Expanded(
+            child: Text('${employee.getFullName()}',
+              style: TextStyle(fontSize: 12), maxLines: 1, textAlign: TextAlign.center,),
+          ),
         ],
       ),
     );
@@ -320,7 +357,6 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     employees = context.watch<CompanyModel>().users.where((u) => u.hasCall()).toList();
     projects = context.watch<WorkModel>().projects;
     tasks = context.watch<WorkModel>().tasks;
@@ -399,37 +435,11 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                       ),
                   ])),
                   SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5,childAspectRatio: 1),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5,childAspectRatio: 0.7),
                     delegate: SliverChildListDelegate(
                         [
                           for(var employee in employees)
-                            Container(
-                              alignment: Alignment.center,
-                              margin: EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: selectedUser?.id == employee.id ? Colors.red : Colors.transparent, width: 2)
-                              ),
-                              clipBehavior: Clip.hardEdge,
-                              child: InkWell(
-                                onTap: (){
-                                  setState(() {selectedUser = employee;});
-                                  _refreshController.requestRefresh();
-                                },
-                                borderRadius: BorderRadius.circular(width/5),
-                                child: ClipOval(
-                                  child: CachedNetworkImage(
-                                    imageUrl: "${AppConst.domainURL}images/user_avatars/${employee.avatar}",
-                                    height: width/5,
-                                    width: width/5,
-                                    alignment: Alignment.center,
-                                    placeholder: (_,__)=>Image.asset("assets/images/person.png"),
-                                    errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            )
+                            _userItem(employee),
                         ]
                     ),
                   ),

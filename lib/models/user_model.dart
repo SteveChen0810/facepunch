@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:localstorage/localstorage.dart';
@@ -877,6 +878,16 @@ class User with HttpRequest{
 
   String avatarUrl(){
     return Uri.encodeFull('${AppConst.domainURL}images/user_avatars/$avatar');
+  }
+
+  Widget userAvatarImage(){
+    return CachedNetworkImage(
+      imageUrl: avatarUrl(),
+      alignment: Alignment.center,
+      placeholder: (_,__)=>Image.asset("assets/images/person.png"),
+      errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),
+      fit: BoxFit.cover,
+    );
   }
 
   Future<String?> getDailySchedule(String date)async{
