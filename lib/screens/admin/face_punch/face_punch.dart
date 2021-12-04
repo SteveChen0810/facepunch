@@ -16,7 +16,6 @@ import '/models/work_model.dart';
 import 'select_call_schedule.dart';
 import 'select_project_task.dart';
 import '/widgets/dialogs.dart';
-import '/widgets/face_painter.dart';
 import '/widgets/utils.dart';
 
 class FacePunchScreen extends StatefulWidget {
@@ -67,10 +66,10 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     try{
       if(_isCameraAllowed){
         if(description == null){
-          description = await getCamera(_direction);
+          description = await Tools.getCamera(_direction);
           if(!mounted)return;
         }
-        rotation = rotationIntToImageRotation(description.sensorOrientation);
+        rotation = Tools.rotationIntToImageRotation(description.sensorOrientation);
         cameraController = CameraController(
           description,
           Platform.isIOS? ResolutionPreset.low: ResolutionPreset.high,
@@ -95,7 +94,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       cameraController!.startImageStream((CameraImage image) {
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
-        detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!).then((dynamic result) {
+        Tools.detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!).then((dynamic result) {
           setState(() {faces = result;});
           _isDetecting = false;
         }).catchError((e) {
@@ -132,17 +131,6 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       Tools.consoleLog('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }
-  }
-
-  Widget faceRect() {
-    if (faces == null || cameraController == null || !cameraController!.value.isInitialized) {
-      return SizedBox();
-    }
-    CustomPainter painter;
-    final Size imageSize = Size(cameraController!.value.previewSize!.height, cameraController!.value.previewSize!.width,);
-    if (faces is! List<Face>) return SizedBox();
-    painter = FaceDetectorPainter(imageSize, faces!);
-    return CustomPaint(painter: painter,);
   }
 
   Future<void> takePhoto() async {
@@ -405,14 +393,16 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     if(_photoPath.isNotEmpty){
       return Stack(
         children: [
-          Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.rotationY(math.pi),
-            child: Image.file(
-              File(_photoPath),
-              fit: BoxFit.cover,
-              width: width,
-              height: height,
+          Center(
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationY(math.pi),
+              child: Image.file(
+                File(_photoPath),
+                fit: BoxFit.cover,
+                width: width,
+                height: height,
+              ),
             ),
           ),
           closeButton,
@@ -421,17 +411,28 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       );
     }
     if(cameraController != null && cameraController!.value.isInitialized){
+      var tmp = MediaQuery.of(context).size;
+      final screenH = math.max(tmp.height, tmp.width);
+      final screenW = math.min(tmp.height, tmp.width);
+      tmp = cameraController!.value.previewSize!;
+      final previewH = math.max(tmp.height, tmp.width);
+      final previewW = math.min(tmp.height, tmp.width);
+      final screenRatio = screenH / screenW;
+      final previewRatio = previewH / previewW;
+
       return Stack(
         children: [
-          Center(
-            child: CameraPreview(
-              cameraController!,
-              child: Platform.isIOS
-                  ? faceRect()
-                  : Transform(
-                alignment: Alignment.center,
-                transform: Matrix4.rotationY(math.pi),
-                child: faceRect(),
+          ClipRRect(
+            child: OverflowBox(
+              maxHeight: screenRatio > previewRatio
+                  ? screenH
+                  : screenW / previewW * previewH,
+              maxWidth: screenRatio > previewRatio
+                  ? screenH / previewH * previewW
+                  : screenW,
+              child: CameraPreview(
+                cameraController!,
+                child: Tools.faceRect(cameraController!, faces)
               ),
             ),
           ),

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 import 'package:convert/convert.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -15,68 +15,9 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '/models/app_const.dart';
 import '/lang/l10n.dart';
+import 'face_painter.dart';
 
 typedef HandleDetection = Future<List<Face>> Function(InputImage image);
-
-Future<CameraDescription> getCamera(CameraLensDirection dir) async {
-  return await availableCameras().then(
-        (List<CameraDescription> cameras) => cameras.firstWhere(
-          (CameraDescription camera) => camera.lensDirection == dir,
-    ),
-  );
-}
-
-Uint8List concatenatePlanes(List<Plane> planes) {
-  final WriteBuffer allBytes = WriteBuffer();
-  planes.forEach((Plane plane) => allBytes.putUint8List(plane.bytes));
-  return allBytes.done().buffer.asUint8List();
-}
-
-InputImageData buildMetaData(
-    CameraImage image,
-    InputImageRotation rotation,
-    ) {
-  return InputImageData(
-    inputImageFormat: InputImageFormatMethods.fromRawValue(image.format.raw) ?? InputImageFormat.NV21,
-    size: Size(image.width.toDouble(), image.height.toDouble()),
-    imageRotation: rotation,
-    planeData: image.planes.map((Plane plane) {
-        return InputImagePlaneMetadata(
-          bytesPerRow: plane.bytesPerRow,
-          height: plane.height,
-          width: plane.width,
-        );
-      },
-    ).toList()
-  );
-}
-
-Future<List<Face>> detect(
-    CameraImage image,
-    HandleDetection handleDetection,
-    InputImageRotation rotation,
-    ) async {
-  return handleDetection(
-    InputImage.fromBytes(
-      bytes: concatenatePlanes(image.planes),
-      inputImageData: buildMetaData(image, rotation),
-    ),
-  );
-}
-
-InputImageRotation rotationIntToImageRotation(int rotation) {
-  switch (rotation) {
-    case 0:
-      return InputImageRotation.Rotation_0deg;
-    case 90:
-      return InputImageRotation.Rotation_90deg;
-    case 180:
-      return InputImageRotation.Rotation_180deg;
-    default:
-      assert(rotation == 270);
-      return InputImageRotation.Rotation_270deg;
-  }
-}
 
 class Tools {
   static Future<void> playSound()async{
@@ -206,7 +147,7 @@ class Tools {
 
   static String generateRandomString(int length){
     const ch = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
-    Random r = Random();
+    math.Random r = math.Random();
     return String.fromCharCodes(Iterable.generate(length, (_) => ch.codeUnitAt(r.nextInt(ch.length))));
   }
 
@@ -235,4 +176,85 @@ class Tools {
       sound: true,
     );
   }
+
+  static Future<CameraDescription> getCamera(CameraLensDirection dir) async {
+    return await availableCameras().then(
+          (List<CameraDescription> cameras) => cameras.firstWhere(
+            (CameraDescription camera) => camera.lensDirection == dir,
+      ),
+    );
+  }
+
+  static Uint8List concatenatePlanes(List<Plane> planes) {
+    final WriteBuffer allBytes = WriteBuffer();
+    planes.forEach((Plane plane) => allBytes.putUint8List(plane.bytes));
+    return allBytes.done().buffer.asUint8List();
+  }
+
+  static InputImageData buildMetaData(
+      CameraImage image,
+      InputImageRotation rotation,
+      ) {
+    return InputImageData(
+        inputImageFormat: InputImageFormatMethods.fromRawValue(image.format.raw) ?? InputImageFormat.NV21,
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        imageRotation: rotation,
+        planeData: image.planes.map((Plane plane) {
+          return InputImagePlaneMetadata(
+            bytesPerRow: plane.bytesPerRow,
+            height: plane.height,
+            width: plane.width,
+          );
+        },
+        ).toList()
+    );
+  }
+
+  static Future<List<Face>> detect(
+      CameraImage image,
+      HandleDetection handleDetection,
+      InputImageRotation rotation,
+      ) async {
+    return handleDetection(
+      InputImage.fromBytes(
+        bytes: concatenatePlanes(image.planes),
+        inputImageData: buildMetaData(image, rotation),
+      ),
+    );
+  }
+
+  static InputImageRotation rotationIntToImageRotation(int rotation) {
+    switch (rotation) {
+      case 0:
+        return InputImageRotation.Rotation_0deg;
+      case 90:
+        return InputImageRotation.Rotation_90deg;
+      case 180:
+        return InputImageRotation.Rotation_180deg;
+      default:
+        assert(rotation == 270);
+        return InputImageRotation.Rotation_270deg;
+    }
+  }
+
+  static Widget faceRect(CameraController cameraController, List<Face>? faces) {
+    try{
+      if(faces == null || !(faces is List<Face>)) return SizedBox();
+      final Size imageSize = Size(cameraController.value.previewSize!.height, cameraController.value.previewSize!.width,);
+      CustomPainter painter = FaceDetectorPainter(imageSize, faces, 3.0);
+      if(Platform.isIOS){
+        return CustomPaint(painter: painter,);
+      }else{
+        return Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.rotationY(math.pi),
+          child: CustomPaint(painter: painter,),
+        );
+      }
+    }catch(e){
+      Tools.consoleLog("[Tools.faceRect.err] $e");
+      return SizedBox();
+    }
+  }
+
 }

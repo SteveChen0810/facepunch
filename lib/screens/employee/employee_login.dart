@@ -62,8 +62,8 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   _initializeCamera() async {
     try{
       if(_isCameraAllowed){
-        CameraDescription description = await getCamera(_direction);
-        rotation = rotationIntToImageRotation(
+        CameraDescription description = await Tools.getCamera(_direction);
+        rotation = Tools.rotationIntToImageRotation(
           description.sensorOrientation,
         );
         cameraController = CameraController(
@@ -88,7 +88,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       cameraController!.startImageStream((CameraImage image) {
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
-        detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!)
+        Tools.detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!)
             .then((dynamic result) {
               if(mounted)setState(() {faces = result;});
               _isDetecting = false;
@@ -158,22 +158,6 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
     return false;
   }
 
-  Widget faceRect() {
-    try{
-      if (faces == null || cameraController == null || !cameraController!.value.isInitialized) {
-        return SizedBox();
-      }
-      CustomPainter painter;
-      final Size imageSize = Size(cameraController!.value.previewSize!.height, cameraController!.value.previewSize!.width,);
-      if (faces is! List<Face>) return SizedBox();
-      painter = FaceDetectorPainter(imageSize, faces!);
-      return CustomPaint(painter: painter,);
-    }catch(e){
-      Tools.consoleLog("[EmployeeLogin.faceRect.err] $e");
-      return SizedBox();
-    }
-  }
-
   Widget loginWithFaceWidget(){
     final size = MediaQuery.of(context).size.width*0.7;
     try{
@@ -189,7 +173,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   height: size,
                   padding: EdgeInsets.all(8),
                   child: _photoPath.isEmpty
-                    ?(cameraController==null || !cameraController!.value.isInitialized)
+                    ?(cameraController == null || !cameraController!.value.isInitialized)
                     ?Center(child: CircularProgressIndicator(),)
                     :ClipRect(
                       child: Transform.scale(
@@ -197,13 +181,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                           child: Center(
                               child: CameraPreview(
                                 cameraController!,
-                                child: Platform.isIOS
-                                    ? faceRect()
-                                    : Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.rotationY(math.pi),
-                                        child: faceRect(),
-                                      ),
+                                child: Tools.faceRect(cameraController!, faces),
                               )
                           )
                       ),
