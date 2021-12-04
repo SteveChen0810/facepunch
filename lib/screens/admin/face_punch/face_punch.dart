@@ -72,7 +72,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         rotation = Tools.rotationIntToImageRotation(description.sensorOrientation);
         cameraController = CameraController(
           description,
-          Platform.isIOS? ResolutionPreset.low: ResolutionPreset.high,
+          ResolutionPreset.high,
           enableAudio: false,
         );
         await cameraController!.initialize();
