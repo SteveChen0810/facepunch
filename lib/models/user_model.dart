@@ -945,7 +945,7 @@ class User with HttpRequest{
     try{
       var res = await sendPostRequest(
           AppConst.getEmployeeCall,
-          token??GlobalData.token,
+          GlobalData.token,
           {
             'date' : date,
             'id' : id.toString()

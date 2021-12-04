@@ -432,7 +432,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
                   : screenW,
               child: CameraPreview(
                 cameraController!,
-                child: Tools.faceRect(cameraController!, faces)
+                child: Tools.faceRect(cameraController!, faces, 5.0)
               ),
             ),
           ),

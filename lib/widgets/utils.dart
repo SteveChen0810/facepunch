@@ -237,11 +237,11 @@ class Tools {
     }
   }
 
-  static Widget faceRect(CameraController cameraController, List<Face>? faces) {
+  static Widget faceRect(CameraController cameraController, List<Face>? faces, double strokeWidth) {
     try{
       if(faces == null || !(faces is List<Face>)) return SizedBox();
       final Size imageSize = Size(cameraController.value.previewSize!.height, cameraController.value.previewSize!.width,);
-      CustomPainter painter = FaceDetectorPainter(imageSize, faces, 3.0);
+      CustomPainter painter = FaceDetectorPainter(imageSize, faces, strokeWidth);
       if(Platform.isIOS){
         return CustomPaint(painter: painter,);
       }else{

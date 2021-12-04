@@ -69,6 +69,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
           if(_call!=null)return;
           if(call.isWorked()){
             Tools.showErrorMessage(context, S.of(context).canNotEditDeleteCall);
+            return;
           }
           _showCallDialog(call);
         },

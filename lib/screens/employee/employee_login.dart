@@ -181,7 +181,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                           child: Center(
                               child: CameraPreview(
                                 cameraController!,
-                                child: Tools.faceRect(cameraController!, faces),
+                                child: Tools.faceRect(cameraController!, faces, 2.0),
                               )
                           )
                       ),
