@@ -100,7 +100,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       )
                   ),
-                  if(!s.isWorkingOn())
+                  if(s.isWorkingOn())
                     Expanded(
                         child: Text(S.of(context).workingNow,
                           style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
