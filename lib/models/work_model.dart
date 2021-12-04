@@ -670,12 +670,11 @@ class EmployeeCall with HttpRequest{
       Colors.cyan,
       Colors.indigo,
       Colors.orange,
-      Colors.pink,
       Colors.purple,
       Colors.teal,
     ];
     if(id==null) return Colors.blue;
-    return colors[id!%11];
+    return colors[id!%10];
   }
 
   String projectTitle(){
