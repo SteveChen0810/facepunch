@@ -1,17 +1,19 @@
-import 'models/harvest_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import '/models/app_model.dart';
+import 'models/harvest_model.dart';
 import 'lang/l10n.dart';
 import 'models/app_const.dart';
 import 'models/company_model.dart';
-import 'package:provider/provider.dart';
 import 'models/notification.dart';
 import 'models/user_model.dart';
 import 'models/revision_model.dart';
 import 'models/work_model.dart';
 import 'screens/splash_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +28,7 @@ Future<void> main() async {
   runApp(
       MultiProvider(
           providers:[
+            ChangeNotifierProvider(create: (_) => AppModel()),
             ChangeNotifierProvider(create: (_) => UserModel()),
             ChangeNotifierProvider(create: (_) => CompanyModel()),
             ChangeNotifierProvider(create: (_) => RevisionModel()),
@@ -44,10 +47,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'FacePunch',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: context.watch<AppModel>().isDebug,
       theme: ThemeData(
         splashColor: Color(primaryColor),
-        accentColor: Color(primaryColor),
         primaryColor: Color(primaryColor),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),

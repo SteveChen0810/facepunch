@@ -9,14 +9,14 @@ import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock/wakelock.dart';
+
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
-import 'select_call_schedule.dart';
-import 'select_project_task.dart';
 import '/widgets/dialogs.dart';
 import '/widgets/utils.dart';
+import 'select_task.dart';
 
 class FacePunchScreen extends StatefulWidget {
 
@@ -223,11 +223,10 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       );
     }else{
       await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectCallScheduleScreen(
+          builder: (context)=>SelectTaskScreen(
             calls: calls,
             employee: employee,
-            punch: punch,
-            schedules: [],
+            punch: punch
           )
       ));
     }
@@ -246,11 +245,10 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       );
     }else{
       await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectCallScheduleScreen(
+          builder: (context)=>SelectTaskScreen(
             schedules: schedules,
             employee: employee,
             punch: punch,
-            calls: [],
           )
       ));
     }
@@ -267,7 +265,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
     if(projects.isNotEmpty && tasks.isNotEmpty){
       await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectProjectTask(
+          builder: (context)=>SelectTaskScreen(
             employee: employee,
             projects: projects,
             tasks: tasks,
@@ -300,7 +298,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       );
     }else{
       await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectCallScheduleScreen(
+          builder: (context)=>SelectTaskScreen(
             schedules: schedules,
             employee: employee,
             punch: punch,
@@ -323,21 +321,15 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     for(var c in cData){
       calls.add(EmployeeCall.fromJson(c));
     }
-    if(calls.isNotEmpty){
-      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectCallScheduleScreen(
-        schedules: [],
+    if(calls.isNotEmpty || (projects.isNotEmpty && tasks.isNotEmpty)){
+      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectTaskScreen(
         employee: employee,
         punch: punch,
+        projects: projects,
+        tasks: tasks,
         calls: calls,
       )));
-    }else if(projects.isNotEmpty && tasks.isNotEmpty){
-      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectProjectTask(
-          employee: employee,
-          projects: projects,
-          tasks: tasks,
-          punch: punch
-      )));
-    } else{
+    }else{
       await showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",

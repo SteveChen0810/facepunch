@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:facepunch/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   _init()async{
     try{
-      final appVersions = await context.read<UserModel>().getAppVersions();
+      final appVersions = await context.read<AppModel>().getAppVersions();
       if(appVersions != null){
         if(appVersions[Platform.isAndroid?'android':'ios'] > AppConst.currentVersion){
           await checkAppVersionDialog(context, appVersions['force']);

@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:localstorage/localstorage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:collection/collection.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'work_model.dart';
 import '/widgets/utils.dart';
@@ -43,6 +40,9 @@ class UserModel extends BaseProvider{
           }else{
             logOut();
           }
+        }else{
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          locale = prefs.getString('language')??'en';
         }
       }
     }catch(e){
@@ -246,7 +246,7 @@ class UserModel extends BaseProvider{
           null,
           {
             'photo':photo,
-            'face_punch_key' : await getPunchKey(),
+            'face_punch_key' : await Tools.getPunchKey(),
             'firebase_token': deviceToken??''
           }
       );
@@ -273,7 +273,7 @@ class UserModel extends BaseProvider{
           null,
           {
             'photo': photo,
-            'face_punch_key' : await getPunchKey(),
+            'face_punch_key' : await Tools.getPunchKey(),
             'longitude': longitude,
             'latitude': latitude
           }
@@ -377,10 +377,12 @@ class UserModel extends BaseProvider{
     }
   }
 
-  changeAppLanguage(String lang){
+  changeAppLanguage(String lang)async{
     locale = lang;
     GlobalData.lang = lang;
     notifyListeners();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('language', lang);
   }
 
   Future<String?> getYearTotalHours()async{
@@ -415,59 +417,6 @@ class UserModel extends BaseProvider{
       Tools.consoleLog('[UserModel.getUserInfoFromServer.err]$e');
     }
     return null;
-  }
-
-  Future<Map<String, dynamic>?> getAppVersions()async{
-    try{
-      var res = await sendGetRequest( AppConst.getAppVersions, null);
-      Tools.consoleLog('[UserModel.getAppVersions.res]${res.body}');
-      if(res.statusCode == 200){
-        return jsonDecode(res.body);
-      }
-    }catch(e){
-      Tools.consoleLog('[UserModel.getAppVersions.err]$e');
-    }
-    return null;
-  }
-
-  Future<String?> submitMobileLog({String? comment, required Map<String, dynamic> deviceInfo})async{
-    try{
-      final directory = await getApplicationDocumentsDirectory();
-      final logFile = File('${directory.path}/${AppConst.LOG_FILE_PREFIX}${DateTime.now().toString().split(' ')[0]}');
-      String content = '';
-      if(await logFile.exists()){
-        content = await logFile.readAsString();
-      }
-      Map<String, dynamic> data = Map<String, dynamic>();
-      data['log'] = content;
-      if(comment != null){
-        data['comment'] = comment;
-      }
-      deviceInfo['app_version'] = AppConst.currentVersion;
-      deviceInfo['lang'] = GlobalData.lang;
-      data['device'] = deviceInfo;
-      final res = await sendPostRequest(AppConst.submitMobileLog, user?.token, data);
-      Tools.consoleLog('[UserModel.submitMobileLog.res]${res.body}');
-      if(res.statusCode == 200){
-        logFile.deleteSync();
-        return null;
-      }else{
-        return jsonDecode(res.body)['message']??"Something went wrong.";
-      }
-    }catch(e){
-      Tools.consoleLog('[UserModel.submitMobileLog.err]$e');
-      return e.toString();
-    }
-  }
-
-  Future<String> getPunchKey()async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? punchKey = prefs.getString('face_punch_key');
-    if(punchKey == null){
-      punchKey = Tools.generateRandomString(20);
-      prefs.setString('face_punch_key', punchKey);
-    }
-    return punchKey;
   }
 }
 

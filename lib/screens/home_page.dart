@@ -1,3 +1,4 @@
+import '/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '/lang/l10n.dart';
@@ -111,12 +112,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      width: imageSize,
-                      height: imageSize,
+                  child: GestureDetector(
+                    onLongPress: (){
+                      context.read<AppModel>().switchDebug();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Image.asset(
+                        "assets/images/logo.png",
+                        width: imageSize,
+                        height: imageSize,
+                      ),
                     ),
                   ),
                 ),

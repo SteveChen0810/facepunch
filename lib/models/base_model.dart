@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:facepunch/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,6 +21,7 @@ class HttpRequest{
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }
+    Tools.consoleLog('[POST][$url][$data]');
     return await http.post(
       Uri.parse(url),
       headers: headers,
@@ -37,6 +39,7 @@ class HttpRequest{
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }
+    Tools.consoleLog('[GET][$url]');
     return await http.get(
         Uri.parse(url),
         headers: headers

@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '/models/app_const.dart';
 import '/lang/l10n.dart';
 import 'face_painter.dart';
@@ -257,4 +258,13 @@ class Tools {
     }
   }
 
+  static Future<String> getPunchKey()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? punchKey = prefs.getString('face_punch_key');
+    if(punchKey == null){
+      punchKey = Tools.generateRandomString(20);
+      prefs.setString('face_punch_key', punchKey);
+    }
+    return punchKey;
+  }
 }
