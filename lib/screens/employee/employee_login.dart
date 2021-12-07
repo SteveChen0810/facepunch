@@ -75,7 +75,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         await cameraController!.initialize();
         await initDetectFace();
       }else{
-        Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
+        Tools.showErrorMessage(context, S.of(context).allowCameraPermissionToTakePictures);
       }
     }on CameraException catch(e){
       Tools.consoleLog('[EmployeeLogin._initializeCamera.err]$e');
@@ -121,15 +121,19 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
 
   Future<void> takePhoto() async {
     try {
+      if(cameraController == null){
+        Tools.showErrorMessage(context, S.of(context).allowCameraPermissionToTakePictures);
+        return ;
+      }
       if (!cameraController!.value.isInitialized) {
-        return null;
+        return ;
       }
       if (cameraController!.value.isTakingPicture) {
         return ;
       }
       if(faces==null || faces!.isEmpty){
         Tools.showErrorMessage(context, S.of(context).thereIsNotAnyFaces);
-        return null;
+        return ;
       }
       if(cameraController!.value.isStreamingImages){
         await cameraController!.stopImageStream();
@@ -138,7 +142,11 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       XFile file = await cameraController!.takePicture();
       setState(() {_photoPath = file.path;});
     } on CameraException catch (e) {
+      Tools.showErrorMessage(context, e.toString());
+      Tools.consoleLog('[EmployeeLogin.takePhoto.CameraException]$e');
+    }catch(e){
       Tools.consoleLog('[EmployeeLogin.takePhoto.err]$e');
+      Tools.showErrorMessage(context, e.toString());
     }
   }
 

@@ -79,7 +79,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         await initDetectFace();
         if(!mounted)return;
       }else{
-        Tools.showErrorMessage(context, S.of(context).allowFacePunchToTakePictures);
+        Tools.showErrorMessage(context, S.of(context).allowCameraPermissionToTakePictures);
       }
     }on CameraException catch(e){
       Tools.consoleLog('[FacePunchScreen._initializeCamera]$e');
@@ -134,15 +134,19 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
 
   Future<void> takePhoto() async {
     try {
+      if(cameraController == null){
+        Tools.showErrorMessage(context, S.of(context).allowCameraPermissionToTakePictures);
+        return ;
+      }
       if (!cameraController!.value.isInitialized) {
-        return null;
+        return ;
       }
       if (cameraController!.value.isTakingPicture) {
         return ;
       }
       if(faces==null || faces!.isEmpty){
         Tools.showErrorMessage(context, S.of(context).thereIsNotAnyFaces);
-        return null;
+        return ;
       }
       if(cameraController!.value.isStreamingImages){
         await cameraController!.stopImageStream();
@@ -156,7 +160,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       });
     } on CameraException catch (e) {
       Tools.showErrorMessage(context, e.toString());
-      Tools.consoleLog('[FacePunch.takePhoto]$e');
+      Tools.consoleLog('[FacePunch.takePhoto.CameraException]$e');
     } catch(e){
       Tools.showErrorMessage(context, e.toString());
       Tools.consoleLog('[FacePunch.takePhoto]$e');

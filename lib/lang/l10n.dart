@@ -387,10 +387,10 @@ class S {
       args: [],
     );
   }
-  String get  allowFacePunchToTakePictures{
+  String get  allowCameraPermissionToTakePictures{
     return Intl.message(
-      'Allow Facepunch to take pictures.',
-      name: 'allowFacePunchToTakePictures',
+      'Allow Camera permission to take pictures.',
+      name: 'allowCameraPermissionToTakePictures',
       desc: '',
       args: [],
     );
