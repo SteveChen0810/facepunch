@@ -79,7 +79,7 @@ class AppConst{
   static String get submitMobileLog => baseUrl+"submit-mobile-log";
 
   static const String LOG_FILE_PREFIX = "app_log_";
-  static const int currentVersion = 45;
+  static const int currentVersion = 46;
 }
 
 class GlobalData{
