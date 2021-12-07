@@ -1,21 +1,20 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+
 import '/models/notification.dart';
 import '/models/work_model.dart';
-import '/screens/employee/employee_dispatch.dart';
-import '/widgets/dialogs.dart';
-import '/widgets/utils.dart';
-import '/lang/l10n.dart';
+import '/models/app_const.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
+import '/widgets/utils.dart';
+import '/lang/l10n.dart';
 import '../admin/nfc/nfc_scan.dart';
 import 'employee_document.dart';
 import 'employee_notification.dart';
 import 'employee_timesheet.dart';
-import '/models/app_const.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import 'employee_schedule.dart';
-
+import 'employee_dispatch.dart';
+import 'employee_daily_tasks.dart';
 class EmployeeHomePage extends StatefulWidget {
 
   @override
@@ -39,7 +38,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
       if(mounted){
         AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
         Tools.playSound();
-        showNotificationDialog(newNotification, context,);
+        Tools.showNotificationDialog(newNotification, context,);
       }
     }catch(e){
       Tools.consoleLog('[EmployeeHome._onMessage]$e');
@@ -71,8 +70,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             EmployeeDocument(),
             if(user.hasNTCTracking())
               NFCScanPage(),
-            if(user.hasSchedule() || user.hasCall())
-              EmployeeSchedule(),
+            EmployeeDailyTasks(),
             if(user.canManageDispatch())
               EmployeeDispatch(),
             EmployeeNotification()
@@ -102,12 +100,11 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 activeIcon: Image.asset("assets/images/nfc.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
             ),
-          if(user.hasSchedule() || user.hasCall())
-            BottomNavigationBarItem(
-                icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
-                activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),
-                label: S.of(context).schedule
-            ),
+          BottomNavigationBarItem(
+              icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),
+              activeIcon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Color(primaryColor),),
+              label: S.of(context).schedule
+          ),
           if(user.canManageDispatch())
             BottomNavigationBarItem(
                 icon: Image.asset("assets/images/ic_dispatch.png",width: 30,color: Colors.black,),

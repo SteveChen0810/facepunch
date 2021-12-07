@@ -12,7 +12,6 @@ import '/models/work_model.dart';
 import '/screens/admin/pdf_full_screen.dart';
 import '/widgets/calendar_strip/calendar_strip.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import '/widgets/dialogs.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
 import '/widgets/project_picker.dart';
@@ -200,7 +199,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                 if(punch.isSent()){
                   Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
                 }else{
-                  if(await confirmDeleting(context, S.of(context).deletePunchConfirm)){
+                  if(await Tools.confirmDeleting(context, S.of(context).deletePunchConfirm)){
                     setState(() { selectedPunch = punch;});
                     String? result = await user.deletePunch(punch.id);
                     if(result==null){
@@ -272,7 +271,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                       foregroundColor: Colors.white,
                       icon: Icons.delete,
                       onPressed: (v)async{
-                        if(await confirmDeleting(context, S.of(context).deleteWorkConfirm)){
+                        if(await Tools.confirmDeleting(context, S.of(context).deleteWorkConfirm)){
                           setState(() {selectedWork = work;});
                           String? result = await user.deleteWork(work.id);
                           if(mounted)setState(() {
@@ -321,7 +320,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                       foregroundColor: Colors.white,
                       icon: Icons.delete,
                       onPressed: (v)async{
-                        if(await confirmDeleting(context, S.of(context).deleteBreakConfirm)){
+                        if(await Tools.confirmDeleting(context, S.of(context).deleteBreakConfirm)){
                           setState(() {selectedBreak = b;});
                           String? result = await user.deleteBreak(b.id);
                           if(mounted)setState(() {

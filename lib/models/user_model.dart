@@ -839,30 +839,34 @@ class User with HttpRequest{
     );
   }
 
-  Future<String?> getDailySchedule(String date)async{
+  Future<String?> getDailyTasks(String date)async{
     try{
       var res = await sendPostRequest(
-          AppConst.getDailySchedule,
+          AppConst.getDailyTasks,
           token,
           {'date':date}
       );
-      Tools.consoleLog('[WorkModel.getDailySchedule.res]${res.body}');
+      Tools.consoleLog('[WorkModel.getDailyTasks.res]${res.body}');
       var body = jsonDecode(res.body);
       if(res.statusCode==200){
         schedules.clear();
         calls.clear();
+        works.clear();
         for(var s in body['schedules']){
           schedules.add(WorkSchedule.fromJson(s));
         }
         for(var c in body['calls']){
           calls.add(EmployeeCall.fromJson(c));
         }
+        for(var w in body['works']){
+          works.add(WorkHistory.fromJson(w));
+        }
         return null;
       }else{
         return body['message']??'Something went wrong.';
       }
     }catch(e){
-      Tools.consoleLog('[WorkModel.getDailySchedule.err]$e');
+      Tools.consoleLog('[WorkModel.getDailyTasks.err]$e');
       return e.toString();
     }
   }

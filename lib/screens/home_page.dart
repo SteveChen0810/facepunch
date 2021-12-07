@@ -1,8 +1,7 @@
-import 'package:facepunch/widgets/dialogs.dart';
-
-import '/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '/models/app_model.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/company_model.dart';
@@ -116,7 +115,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   alignment: Alignment.bottomCenter,
                   child: GestureDetector(
                     onLongPress: ()async{
-                      if(await confirmDeleting(context, 'Are you going to switch app mode?')){
+                      if(await Tools.confirmDialog(context, 'Are you going to switch app mode?')){
                         context.read<AppModel>().switchDebug();
                       }
                     },

@@ -1,6 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:facepunch/screens/bug_report_page.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +20,6 @@ import '../home_page.dart';
 
 import '/widgets/autocomplete_textfield.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import '/widgets/dialogs.dart';
 import '/widgets/utils.dart';
 import '/widgets/popover/cool_ui.dart';
 import 'nfc/harvest_report.dart';
@@ -261,7 +258,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
       if(mounted){
         AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
         Tools.playSound();
-        showNotificationDialog(newNotification, context);
+        Tools.showNotificationDialog(newNotification, context);
       }
     }catch(e){
       Tools.consoleLog('[AdminHome._onMessage]$e');

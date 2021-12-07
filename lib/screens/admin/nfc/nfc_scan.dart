@@ -9,7 +9,6 @@ import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/harvest_model.dart';
 import '/screens/admin/nfc/nfc_settings.dart';
-import '/widgets/dialogs.dart';
 import '/widgets/utils.dart';
 import '/widgets/popover/cool_ui.dart';
 
@@ -250,7 +249,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
   }
 
   _deleteHarvestTask(HTask task)async{
-    if(await confirmDeleting(context, S.of(context).deleteTaskConfirm)){
+    if(await Tools.confirmDeleting(context, S.of(context).deleteTaskConfirm)){
       setState(() {
         _deletingTask = task;
       });
@@ -499,7 +498,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                                   foregroundColor: Colors.white,
                                   icon: Icons.delete,
                                   onPressed: (c)async{
-                                    if(await confirmDeleting(context, S.of(context).deleteHarvestConfirm)){
+                                    if(await Tools.confirmDeleting(context, S.of(context).deleteHarvestConfirm)){
                                       setState(() {harvests.remove(harvest);});
                                       context.read<HarvestModel>().deleteHarvest(harvest.id).then((message){
                                         if(mounted && message!=null && (message is String)){

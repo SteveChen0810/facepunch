@@ -7,7 +7,6 @@ import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/company_model.dart';
 import '/models/harvest_model.dart';
-import '/widgets/dialogs.dart';
 import '/widgets/popover/cool_ui.dart';
 
 class NFCSettingPage extends StatefulWidget{
@@ -440,7 +439,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   }
 
   _deleteField(Field field)async{
-    if(await confirmDeleting(context, S.of(context).deleteFieldConfirm)){
+    if(await Tools.confirmDeleting(context, S.of(context).deleteFieldConfirm)){
       setState(() { selectedField = field; });
       String? result = await context.read<HarvestModel>().deleteField(field);
       if(result != null) Tools.showErrorMessage(context, result);
@@ -542,7 +541,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   }
 
   _deleteContainer(HContainer container)async{
-    if(await confirmDeleting(context, S.of(context).deleteContainerConfirm)){
+    if(await Tools.confirmDeleting(context, S.of(context).deleteContainerConfirm)){
       setState(() { selectedContainer = container; });
       String? result = await context.read<HarvestModel>().deleteContainer(container);
       if(result != null) Tools.showErrorMessage(context, result);

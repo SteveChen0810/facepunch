@@ -134,15 +134,18 @@ class WorkHistory{
   int? punchId;
   int? taskId;
   int? projectId;
+  String? projectAddress;
+  int? callId;
+  int? scheduleId;
   String? start;
   String? end;
-  String? createdAt;
-  String? updatedAt;
   String? taskName;
   String? taskCode;
   String? projectName;
   String? projectCode;
-
+  String? type;
+  String? createdAt;
+  String? updatedAt;
   WorkHistory({
     this.id,
     this.userId,
@@ -163,12 +166,16 @@ class WorkHistory{
       punchId = json['punch_id'];
       projectId = json['project_id'];
       taskId = json['task_id'];
+      callId = json['call_id'];
+      scheduleId = json['schedule_id'];
       taskName = json['task_name'];
       taskCode = json['task_code'];
       projectName = json['project_name'];
       projectCode = json['project_code'];
+      projectAddress = json['project_address'];
       start = json['start'];
       end = json['end'];
+      type = json['type'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -205,7 +212,7 @@ class WorkHistory{
   }
 
   String projectTitle(){
-    return '$projectName - $projectCode';
+    return '$projectName - $projectCode \n $projectAddress'.trim();
   }
 
   String taskTitle(){
@@ -221,10 +228,14 @@ class WorkHistory{
       'end':end,
       'task_id' : taskId,
       'project_id' : projectId,
+      'call_id' : callId,
+      'schedule_id' : scheduleId,
       'task_name':taskName,
       'task_code':taskCode,
       'project_name':projectName,
       'project_code':projectCode,
+      'project_address':projectAddress,
+      'type':type,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
@@ -233,6 +244,25 @@ class WorkHistory{
   bool isEnd(){
     return end != null && end!.isNotEmpty;
   }
+
+  bool isWorkingOn(){
+    return start != null && end == null;
+  }
+
+  String startTime(){
+    if(start != null && start!.length > 16){
+      return start!.substring(11, 16);
+    }
+    return '--:--';
+  }
+
+  String endTime(){
+    if(end != null && end!.length > 16){
+      return end!.substring(11, 16);
+    }
+    return '--:--';
+  }
+
 }
 
 class WorkSchedule with HttpRequest{
@@ -339,13 +369,17 @@ class WorkSchedule with HttpRequest{
   }
 
   String startTime(){
-    if(start == null) return '--:--';
-    return start!.substring(11, 16);
+    if(start != null && start!.length > 16){
+      return start!.substring(11, 16);
+    }
+    return '--:--';
   }
 
   String endTime(){
-    if(start == null) return '--:--';
-    return end!.substring(11, 16);
+    if(end != null && end!.length > 16){
+      return end!.substring(11, 16);
+    }
+    return '--:--';
   }
 
   String projectTitle(){

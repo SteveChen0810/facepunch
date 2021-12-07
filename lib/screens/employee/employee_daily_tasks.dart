@@ -1,30 +1,31 @@
-import 'package:facepunch/widgets/TimeEditor.dart';
-import 'package:facepunch/widgets/project_picker.dart';
-import 'package:facepunch/widgets/task_picker.dart';
-import 'package:facepunch/widgets/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import '/widgets/TimeEditor.dart';
+import '/widgets/project_picker.dart';
+import '/widgets/task_picker.dart';
+import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/revision_model.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class EmployeeSchedule extends StatefulWidget {
+class EmployeeDailyTasks extends StatefulWidget {
 
   @override
-  _EmployeeScheduleState createState() => _EmployeeScheduleState();
+  _EmployeeDailyTasksState createState() => _EmployeeDailyTasksState();
 }
 
-class _EmployeeScheduleState extends State<EmployeeSchedule> {
+class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
+
   DateTime selectedDate = DateTime.now();
   List<WorkSchedule> schedules = [];
   List<EmployeeCall> calls = [];
+  List<WorkHistory> works = [];
   RefreshController _refreshController = RefreshController(initialRefresh: true);
-  WorkSchedule? _schedule;
-  EmployeeCall? _call;
+  var _selected;
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
   User? user;
@@ -49,20 +50,21 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
 
   _onRefresh()async{
     final user = context.read<UserModel>().user;
-    String? result = await user!.getDailySchedule(selectedDate.toString());
+    String? result = await user!.getDailyTasks(selectedDate.toString());
     if(result == null){
       schedules = user.schedules;
       calls = user.calls;
+      works = user.works;
     }else{
       Tools.showErrorMessage(context, result);
     }
     _refreshController.refreshCompleted();
-    if(mounted)setState(() { _schedule = null; _call = null; });
+    if(mounted)setState(() { _selected = null; });
   }
 
   Widget _scheduleItem(WorkSchedule s){
     try{
-      if(s ==_schedule){
+      if(s ==_selected){
         return Container(
           height: 70,
           alignment: Alignment.center,
@@ -72,7 +74,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
       }
       return InkWell(
         onTap: (){
-          if(_schedule!=null)return;
+          if(_selected != null)return;
           if(s.isWorked()){
             Tools.showErrorMessage(context, S.of(context).canNotSendRevisionAfterStart);
             return ;
@@ -150,7 +152,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
 
   Widget _callItem(EmployeeCall call){
     try{
-      if(call == _call){
+      if(call == _selected){
         return Container(
           height: 70,
           alignment: Alignment.center,
@@ -160,7 +162,7 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
       }
       return InkWell(
         onTap: (){
-          if(_call != null)return;
+          if(_selected != null)return;
           if(call.isWorked()){
             Tools.showErrorMessage(context, S.of(context).canNotSendRevisionAfterStart);
             return ;
@@ -245,12 +247,106 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: 10,),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
             child: Text(S.of(context).calls,style: TextStyle(fontWeight: FontWeight.w500),),
           ),
           for(var c in calls)
             _callItem(c),
+        ],
+      ),
+    );
+  }
+
+  Widget _workItem(WorkHistory work){
+    try{
+      if(work == _selected){
+        return Container(
+          height: 70,
+          alignment: Alignment.center,
+          color: Colors.red,
+          child: CircularProgressIndicator(strokeWidth: 2,),
+        );
+      }
+      return InkWell(
+        onTap: (){
+          if(_selected != null)return;
+          _showWorkRevisionDialog(work);
+        },
+        child: Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black54)
+          ),
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.all(4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: Text(
+                      "${work.type}",
+                      style: TextStyle(fontWeight: FontWeight.bold,),
+                    ),
+                  ),
+                  if(work.isWorkingOn())
+                    Expanded(
+                        flex: 1,
+                        child: Text(S.of(context).workingNow,
+                          style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        )
+                    ),
+                  Expanded(
+                    flex: 1,
+                    child: Text("${work.startTime()} ~ ${work.endTime()}",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
+              ),
+              Center(
+                child: Text(work.projectTitle(),
+                  style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Center(
+                child: Text(work.taskTitle(),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }catch(e){
+      Tools.consoleLog('[EmployeeDailyTask.workItem]$e');
+      return Container(
+        color: Colors.red,
+        height: 30,
+        child: Text(e.toString()),
+      );
+    }
+  }
+
+  Widget _workLine(){
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 10,),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 4),
+            child: Text(S.of(context).works,style: TextStyle(fontWeight: FontWeight.w500),),
+          ),
+          for(var w in works)
+            _workItem(w),
         ],
       ),
     );
@@ -389,9 +485,9 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   _sendScheduleRevision(WorkSchedule newValue, WorkSchedule oldValue, String description)async{
-    setState(() { _schedule = oldValue;});
+    setState(() { _selected = oldValue;});
     final result = await context.read<RevisionModel>().sendScheduleRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
-    setState(() { _schedule = null;});
+    setState(() { _selected = null;});
     if(result != null){
       Tools.showErrorMessage(context, result);
     }else{
@@ -553,10 +649,139 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
   }
 
   _sendCallRevision(EmployeeCall newValue, EmployeeCall oldValue, String description)async{
-    setState(() { _call = oldValue;});
+    setState(() { _selected = oldValue;});
     final result = await context.read<RevisionModel>().sendCallRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     if(!mounted) return;
-    setState(() { _call = null;});
+    setState(() { _selected = null;});
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
+    }
+  }
+
+  _showWorkRevisionDialog(WorkHistory work){
+    WorkHistory newWork = WorkHistory.fromJson(work.toJson());
+    String description = '';
+    String? errorMessage;
+
+    showDialog(
+        context: context,
+        builder:(_)=> StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
+                  width: MediaQuery.of(context).size.width-50,
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(child: Text(S.of(context).workRevision,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),)),
+                      if(work.projectId != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 8,),
+                            Text(S.of(context).project,style: TextStyle(fontSize: 12),),
+                            ProjectPicker(
+                              projects: projects,
+                              projectId: newWork.projectId,
+                              onSelected: (v) {
+                                _setState((){
+                                  newWork.projectId = v?.id;
+                                  newWork.projectName = v?.name;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      if(work.taskId != null)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 6,),
+                            Text(S.of(context).task, style: TextStyle(fontSize: 12),),
+                            TaskPicker(
+                              tasks: tasks,
+                              taskId: newWork.taskId,
+                              onSelected: (v) {
+                                _setState((){
+                                  newWork.taskId = v?.id;
+                                  newWork.taskName = v?.name;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      SizedBox(height: 12,),
+                      TimeEditor(
+                        label: S.of(context).startTime,
+                        initTime: work.start,
+                        onChanged: (v){
+                          _setState(() { newWork.start = v; });
+                        },
+                      ),
+                      SizedBox(height: 12,),
+                      TimeEditor(
+                        label: S.of(context).endTime,
+                        initTime: work.end,
+                        onChanged: (v){
+                          _setState(() { newWork.end = v; });
+                        },
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: S.of(context).description,
+                            alignLabelWithHint: true,
+                            errorText: errorMessage
+                        ),
+                        minLines: 3,
+                        maxLines: null,
+                        onChanged: (v){
+                          _setState(() {description = v;});
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: (){
+                      if(newWork.start != null && newWork.end != null){
+                        if(description.isNotEmpty){
+                          Navigator.pop(_context);
+                          _setState(() { _selected = work; });
+                          _sendWorkRevisionRequest(work, newWork, description);
+                        }else{
+                          _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                        }
+                      }
+                    },
+                    child: Text(S.of(context).submit,style: TextStyle(color: Colors.red),),
+                  )
+                ],
+              );
+            }
+        )
+    );
+  }
+
+  _sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
+    setState(() { _selected = oldWork;});
+    String? result = await context.read<RevisionModel>().sendWorkRevisionRequest(
+        newWork: newWork,
+        oldWork: oldWork,
+        description: description
+    );
+    if(!mounted) return;
+    setState(() { _selected = null;});
     if(result != null){
       Tools.showErrorMessage(context, result);
     }else{
@@ -628,7 +853,8 @@ class _EmployeeScheduleState extends State<EmployeeSchedule> {
                   children: [
                     _scheduleLine(),
                     _callLine(),
-                    if(schedules.isEmpty && calls.isEmpty)
+                    _workLine(),
+                    if(schedules.isEmpty && calls.isEmpty && works.isEmpty)
                       Container(
                           height: MediaQuery.of(context).size.height*0.5,
                           alignment: Alignment.center,

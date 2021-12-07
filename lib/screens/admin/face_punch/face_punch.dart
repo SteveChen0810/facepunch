@@ -14,7 +14,6 @@ import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
-import '/widgets/dialogs.dart';
 import '/widgets/utils.dart';
 import 'select_task.dart';
 
@@ -216,7 +215,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       calls.add(EmployeeCall.fromJson(c));
     }
     if(calls.isEmpty){
-      await showWelcomeDialog(
+      await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",
           context: context
@@ -238,7 +237,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       schedules.add(WorkSchedule.fromJson(s));
     }
     if(schedules.isEmpty){
-      await showWelcomeDialog(
+      await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",
           context: context
@@ -273,7 +272,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           )
       ));
     }else{
-      await showWelcomeDialog(
+      await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",
           context: context
@@ -291,7 +290,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       calls.add(EmployeeCall.fromJson(c));
     }
     if(schedules.isEmpty && calls.isEmpty){
-      await showWelcomeDialog(
+      await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",
           context: context
@@ -330,7 +329,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         calls: calls,
       )));
     }else{
-      await showWelcomeDialog(
+      await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
           isPunchIn: punch.punch == "In",
           context: context

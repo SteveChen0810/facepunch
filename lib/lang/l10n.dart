@@ -2107,6 +2107,22 @@ class S {
       args: [],
     );
   }
+  String get works{
+    return Intl.message(
+      'Works',
+      name: 'works',
+      desc: '',
+      args: [],
+    );
+  }
+  String get workRevision{
+    return Intl.message(
+      'Work Revision',
+      name: 'workRevision',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

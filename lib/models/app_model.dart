@@ -9,14 +9,19 @@ import 'app_const.dart';
 import 'base_model.dart';
 
 class AppModel extends BaseProvider{
-  bool isDebug = true;
+  bool isDebug = false;
   final LocalStorage storage = LocalStorage('app_config');
 
   getConfig()async{
     try{
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      isDebug = prefs.getBool('is_debug')??true;
+      isDebug = prefs.getBool('is_debug')??false;
       notifyListeners();
+      if(isDebug){
+        AppConst.domainURL = AppConst.devDomain;
+      }else{
+        AppConst.domainURL = AppConst.liveDomain;
+      }
     }catch(e){
       Tools.consoleLog('[AppModel.getConfig]$e');
     }
@@ -27,6 +32,11 @@ class AppModel extends BaseProvider{
     notifyListeners();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('is_debug', isDebug);
+    if(isDebug){
+      AppConst.domainURL = AppConst.devDomain;
+    }else{
+      AppConst.domainURL = AppConst.liveDomain;
+    }
   }
 
   Future<Map<String, dynamic>?> getAppVersions()async{

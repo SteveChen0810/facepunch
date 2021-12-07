@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '/lang/l10n.dart';
 import '/screens/home_page.dart';
-import '/widgets/dialogs.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
 import '/screens/admin/admin_home.dart';
@@ -33,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       final appVersions = await context.read<AppModel>().getAppVersions();
       if(appVersions != null){
         if(appVersions[Platform.isAndroid?'android':'ios'] > AppConst.currentVersion){
-          await checkAppVersionDialog(context, appVersions['force']);
+          await Tools.checkAppVersionDialog(context, appVersions['force']);
         }
       }
       User? user  = await context.read<UserModel>().getUserFromLocal();
