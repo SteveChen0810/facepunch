@@ -21,7 +21,11 @@ class HttpRequest{
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }
-    Tools.consoleLog('[POST][$url][$data]');
+    var logData = { ...data };
+    if(logData['photo'] != null){
+      logData['photo'] = '----Base 64 photo----';
+    }
+    Tools.consoleLog('[POST][$url][$logData]');
     return await http.post(
       Uri.parse(url),
       headers: headers,
