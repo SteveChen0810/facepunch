@@ -307,30 +307,6 @@ class S {
       args: [],
     );
   }
-  String get  next{
-    return Intl.message(
-      'Next',
-      name: 'next',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  pleaseEnterYourEmployeeRange{
-    return Intl.message(
-      'Please enter your Employee Range',
-      name: 'pleaseEnterYourEmployeeRange',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  free{
-    return Intl.message(
-      'Free',
-      name: 'free',
-      desc: '',
-      args: [],
-    );
-  }
   String get  employees{
     return Intl.message(
       'Employees',
@@ -339,50 +315,10 @@ class S {
       args: [],
     );
   }
-  String get  theNumberMustBe6Digits{
-    return Intl.message(
-      'The number must be 6 digits.',
-      name: 'theNumberMustBe6Digits',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  thankYouForRegisteringWithUs{
-    return Intl.message(
-      'Thank you for registering with us',
-      name: 'thankYouForRegisteringWithUs',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  pleaseEnterThe6DigitsConfirmationNumberSentToYouByEmail{
-    return Intl.message(
-      'Please enter the 6 digits confirmation number send to you by email',
-      name: 'pleaseEnterThe6DigitsConfirmationNumberSentToYouByEmail',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  didNotGetAVerificationCode{
-    return Intl.message(
-      'Did not get a verification code?',
-      name: 'didNotGetAVerificationCode',
-      desc: '',
-      args: [],
-    );
-  }
   String get  close{
     return Intl.message(
       'Close',
       name: 'close',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  registration{
-    return Intl.message(
-      'Registration',
-      name: 'registration',
       desc: '',
       args: [],
     );
@@ -447,14 +383,6 @@ class S {
     return Intl.message(
       'Try Again',
       name: 'tryAgain',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  selectCompany{
-    return Intl.message(
-      'Please select your company.',
-      name: 'selectCompany',
       desc: '',
       args: [],
     );
@@ -863,14 +791,6 @@ class S {
     return Intl.message(
       'Company',
       name: 'company',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  companyPlan{
-    return Intl.message(
-      'Company Plan',
-      name: 'companyPlan',
       desc: '',
       args: [],
     );
@@ -1765,7 +1685,7 @@ class S {
   }
   String get  length{
     return Intl.message(
-      'length',
+      'Length',
       name: 'length',
       desc: '',
       args: [],
