@@ -2043,6 +2043,14 @@ class S {
       args: [],
     );
   }
+  String get revisions{
+    return Intl.message(
+      'Revisions',
+      name: 'revisions',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -190,19 +190,22 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       );
       if(result is String){
         Tools.showErrorMessage(context, result);
-      }else{
-        User employee = User.fromJson(result['employee']);
-        Punch punch = Punch.fromJson(result['punch']);
+      }else if(result is FacePunchData){
+        if(result.message != null){
+          Tools.showSuccessMessage(context, result.message!);
+        }
+        User employee = result.employee!;
+        Punch punch = result.punch!;
         if(employee.type == 'call'){
-          await _punchCallEmployee(employee, punch, result['calls']);
+          await _punchCallEmployee(employee, punch, result.calls);
         }else if(employee.type == 'shop_daily'){
-          await _punchShopDailyEmployee(employee, punch, result['schedules']);
+          await _punchShopDailyEmployee(employee, punch, result.schedules);
         }else if(employee.type == 'shop_tracking'){
-          await _punchShopTrackingEmployee(employee, punch, result['projects'], result['tasks']);
+          await _punchShopTrackingEmployee(employee, punch, result.projects, result.tasks);
         }else if(employee.type == 'call_shop_daily'){
-          await _punchCallShopDailyEmployee(employee, punch, result['schedules'], result['calls']);
+          await _punchCallShopDailyEmployee(employee, punch, result.schedules, result.calls);
         }else if(employee.type == 'call_shop_tracking'){
-          await _punchCallShopTrackingEmployee(employee, punch, result['calls'], result['projects'], result['tasks']);
+          await _punchCallShopTrackingEmployee(employee, punch, result.calls, result.projects, result.tasks);
         }
         await initDetectFace();
         setState(() {_photoPath="";});
@@ -213,11 +216,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  Future<void> _punchCallEmployee(User employee, Punch punch, data)async{
-    List<EmployeeCall> calls = [];
-    for(var c in data){
-      calls.add(EmployeeCall.fromJson(c));
-    }
+  Future<void> _punchCallEmployee(User employee, Punch punch, List<EmployeeCall> calls)async{
     if(calls.isEmpty){
       await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
@@ -235,11 +234,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  Future<void> _punchShopDailyEmployee(User employee, Punch punch, data)async{
-    List<WorkSchedule> schedules = [];
-    for(var s in data){
-      schedules.add(WorkSchedule.fromJson(s));
-    }
+  Future<void> _punchShopDailyEmployee(User employee, Punch punch, List<WorkSchedule> schedules)async{
     if(schedules.isEmpty){
       await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
@@ -257,15 +252,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  Future<void> _punchShopTrackingEmployee(User employee, Punch punch, pData, tData)async{
-    List<Project> projects = [];
-    for(var p in pData){
-      projects.add(Project.fromJson(p));
-    }
-    List<ScheduleTask> tasks = [];
-    for(var t in tData){
-      tasks.add(ScheduleTask.fromJson(t));
-    }
+  Future<void> _punchShopTrackingEmployee(User employee, Punch punch, List<Project> projects, List<ScheduleTask> tasks)async{
     if(projects.isNotEmpty && tasks.isNotEmpty){
       await Navigator.push(context, MaterialPageRoute(
           builder: (context)=>SelectTaskScreen(
@@ -284,15 +271,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  Future<void> _punchCallShopDailyEmployee(User employee, Punch punch, sData, cData)async{
-    List<WorkSchedule> schedules = [];
-    for(var s in sData){
-      schedules.add(WorkSchedule.fromJson(s));
-    }
-    List<EmployeeCall> calls = [];
-    for(var c in cData){
-      calls.add(EmployeeCall.fromJson(c));
-    }
+  Future<void> _punchCallShopDailyEmployee(User employee, Punch punch, List<WorkSchedule> schedules, List<EmployeeCall> calls)async{
     if(schedules.isEmpty && calls.isEmpty){
       await Tools.showWelcomeDialog(
           userName: employee.getFullName(),
@@ -311,19 +290,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  Future<void> _punchCallShopTrackingEmployee(User employee, Punch punch, cData, pData, tData)async{
-    List<Project> projects = [];
-    for(var p in pData){
-      projects.add(Project.fromJson(p));
-    }
-    List<ScheduleTask> tasks = [];
-    for(var t in tData){
-      tasks.add(ScheduleTask.fromJson(t));
-    }
-    List<EmployeeCall> calls = [];
-    for(var c in cData){
-      calls.add(EmployeeCall.fromJson(c));
-    }
+  Future<void> _punchCallShopTrackingEmployee(User employee, Punch punch, List<EmployeeCall> calls, List<Project> projects, List<ScheduleTask> tasks )async{
     if(calls.isNotEmpty || (projects.isNotEmpty && tasks.isNotEmpty)){
       await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectTaskScreen(
         employee: employee,

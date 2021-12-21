@@ -280,7 +280,7 @@ class UserModel extends BaseProvider{
       );
       Tools.consoleLog("[UserModel.punchWithFace.res] ${res.body}");
       if(res.statusCode==200){
-        return jsonDecode(res.body);
+        return FacePunchData.fromJson(jsonDecode(res.body));
       }else{
         result = jsonDecode(res.body)['message'];
       }
@@ -1039,5 +1039,45 @@ class Punch{
     return latitude != null && longitude != null;
   }
 
+}
+
+class FacePunchData{
+  User? employee;
+  Punch? punch;
+  List<EmployeeCall> calls = [];
+  List<WorkSchedule> schedules = [];
+  List<Project> projects = [];
+  List<ScheduleTask> tasks = [];
+  String? message;
+
+  FacePunchData.fromJson(Map<String, dynamic> json){
+    try{
+      employee = User.fromJson(json['employee']);
+      punch = Punch.fromJson(json['punch']);
+      message = json['message'];
+      if(json['calls'] != null){
+        for(var call in json['calls']){
+          calls.add(EmployeeCall.fromJson(call));
+        }
+      }
+      if(json['schedules'] != null){
+        for(var schedule in json['schedules']){
+          schedules.add(WorkSchedule.fromJson(schedule));
+        }
+      }
+      if(json['projects'] != null){
+        for(var project in json['projects']){
+          projects.add(Project.fromJson(project));
+        }
+      }
+      if(json['tasks'] != null){
+        for(var task in json['tasks']){
+          tasks.add(ScheduleTask.fromJson(task));
+        }
+      }
+    }catch(e){
+      Tools.consoleLog("[FacePunchData.fromJson.err] $e");
+    }
+  }
 }
 

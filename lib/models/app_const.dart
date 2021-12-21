@@ -1,6 +1,6 @@
 class AppConst{
-  static String devDomain = "https://dev.facepunch.app/";
-  static String liveDomain = "https://dev.facepunch.app/";
+  static String devDomain = "https://dev2.facepunch.app/";
+  static String liveDomain = "https://dev2.facepunch.app/";
   static String localDomain = "http://192.168.3.2/";
 
   static String domainURL = "https://dev.facepunch.app/";

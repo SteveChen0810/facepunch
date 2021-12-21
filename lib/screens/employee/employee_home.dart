@@ -1,3 +1,4 @@
+import 'package:facepunch/screens/employee/employee_revisions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,7 @@ import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '../admin/nfc/nfc_scan.dart';
 import 'employee_document.dart';
-import 'employee_notification.dart';
+import 'employee_revisions.dart';
 import 'employee_timesheet.dart';
 import 'employee_dispatch.dart';
 import 'employee_daily_tasks.dart';
@@ -73,7 +74,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             EmployeeDailyTasks(),
             if(user.canManageDispatch())
               EmployeeDispatch(),
-            EmployeeNotification()
+            EmployeeRevisions()
           ],
           controller: _pageController,
           physics: NeverScrollableScrollPhysics(),

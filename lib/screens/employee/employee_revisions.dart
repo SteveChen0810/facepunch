@@ -9,13 +9,13 @@ import '/models/user_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/widgets/utils.dart';
 
-class EmployeeNotification extends StatefulWidget {
+class EmployeeRevisions extends StatefulWidget {
 
   @override
-  _EmployeeNotificationState createState() => _EmployeeNotificationState();
+  _EmployeeRevisionState createState() => _EmployeeRevisionState();
 }
 
-class _EmployeeNotificationState extends State<EmployeeNotification> {
+class _EmployeeRevisionState extends State<EmployeeRevisions> {
 
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   List<Revision> revisions = [];
@@ -586,7 +586,7 @@ class _EmployeeNotificationState extends State<EmployeeNotification> {
             height: kToolbarHeight+MediaQuery.of(context).padding.top,
             alignment: Alignment.center,
             color: Color(primaryColor),
-            child: Text(S.of(context).notifications, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),),
+            child: Text(S.of(context).revisions, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),),
           ),
           Expanded(
             child: SmartRefresher(
