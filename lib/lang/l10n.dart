@@ -2051,6 +2051,30 @@ class S {
       args: [],
     );
   }
+  String get deviceIdForPunch{
+    return Intl.message(
+      'Device ID for Punch',
+      name: 'deviceIdForPunch',
+      desc: '',
+      args: [],
+    );
+  }
+  String get clickToCopy{
+    return Intl.message(
+      'Click to copy',
+      name: 'clickToCopy',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deviceIdCopied{
+    return Intl.message(
+      'Device Id copied',
+      name: 'deviceIdCopied',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/company_model.dart';
@@ -38,6 +40,8 @@ class _AdminSettingState extends State<AdminSetting> {
   bool isRevisionNotificationUpdating = false;
   bool isPunchNotificationUpdating = false;
 
+  String punchKey = '';
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +59,9 @@ class _AdminSettingState extends State<AdminSetting> {
     country = user.country;
     state = user.state;
     city = user.city;
+    Tools.getPunchKey().then((value){
+      if(mounted)setState((){punchKey = value;});
+    });
   }
 
   bool profileValidator(){
@@ -510,6 +517,30 @@ class _AdminSettingState extends State<AdminSetting> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+                Card(
+                  child: InkWell(
+                    onTap: (){
+                      Clipboard.setData(new ClipboardData(text: punchKey)).then((_){
+                        Tools.showSuccessMessage(context, S.of(context).deviceIdCopied);
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(S.of(context).deviceIdForPunch, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),),
+                              Text(S.of(context).clickToCopy, style: TextStyle(fontSize: 10, color: Colors.red),)
+                            ],
+                          ),
+                          Text('$punchKey'),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: 20,)
