@@ -280,8 +280,7 @@ class WorkSchedule with HttpRequest{
   String? shift;
   String? color;
   String? noAvailable;
-  bool? worked;
-  bool? workingOn;
+  String? status;
   String? createdAt;
   String? updatedAt;
 
@@ -320,8 +319,7 @@ class WorkSchedule with HttpRequest{
       shift = json['shift'];
       noAvailable = json['no_available'];
       color = json['color'];
-      worked = json['worked'] == 1;
-      workingOn = json['working_on']??false;
+      status = json['status'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -345,19 +343,18 @@ class WorkSchedule with HttpRequest{
       'shift':shift,
       'no_available':noAvailable,
       'color': color,
-      'worked': (worked != null && worked!)?1:0,
-      'working_on' : workingOn,
+      'status' : status,
       'created_at':createdAt,
       'updated_at':updatedAt
     };
   }
 
   bool isWorked(){
-    return worked != null && worked!;
+    return status == 'done';
   }
 
   bool isWorkingOn(){
-    return workingOn != null && workingOn!;
+    return status == "working";
   }
 
   DateTime? getStartTime(){
@@ -529,8 +526,7 @@ class EmployeeCall with HttpRequest{
   String? todo;
   String? note;
   int? priority;
-  bool? worked;
-  bool? workingOn;
+  String? status;
   String? createdAt;
   String? updatedAt;
 
@@ -550,7 +546,6 @@ class EmployeeCall with HttpRequest{
     this.todo,
     this.note,
     this.priority,
-    this.worked,
     this.createdAt,
     this.updatedAt
   });
@@ -572,8 +567,7 @@ class EmployeeCall with HttpRequest{
       todo = json['todo']??'';
       note = json['note']??'';
       priority = json['priority'];
-      worked = json['worked'] == 1;
-      workingOn = json['working_on']??false;
+      status = json['status'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
     }catch(e){
@@ -597,8 +591,7 @@ class EmployeeCall with HttpRequest{
       'end':end,
       'todo':todo,
       'note':note,
-      'worked':(worked != null && worked!) ? 1 : 0,
-      'working_on':workingOn,
+      'status':status,
       'priority':priority,
       'created_at':createdAt,
       'updated_at':updatedAt
@@ -606,11 +599,11 @@ class EmployeeCall with HttpRequest{
   }
 
   bool isWorked(){
-    return worked != null && worked!;
+    return status == 'done';
   }
 
   bool isWorkingOn(){
-    return workingOn != null && workingOn!;
+    return status == 'working';
   }
 
   DateTime? getStartTime(){

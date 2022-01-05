@@ -75,7 +75,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
       return InkWell(
         onTap: (){
           if(_selected != null)return;
-          if(s.isWorked()){
+          if(s.isWorked() || s.isWorkingOn()){
             Tools.showErrorMessage(context, S.of(context).canNotSendRevisionAfterStart);
             return ;
           }
@@ -163,7 +163,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
       return InkWell(
         onTap: (){
           if(_selected != null)return;
-          if(call.isWorked()){
+          if(call.isWorked() || call.isWorkingOn()){
             Tools.showErrorMessage(context, S.of(context).canNotSendRevisionAfterStart);
             return ;
           }

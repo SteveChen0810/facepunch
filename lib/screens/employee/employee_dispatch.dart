@@ -67,7 +67,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
       return InkWell(
         onTap: (){
           if(_call!=null)return;
-          if(call.isWorked()){
+          if(call.isWorked() || call.isWorkingOn()){
             Tools.showErrorMessage(context, S.of(context).canNotEditDeleteCall);
             return;
           }
