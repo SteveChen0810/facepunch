@@ -300,6 +300,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     List<Revision> revisions  = context.watch<NotificationModel>().revisions.where((r) => r.status == 'requested').toList();
     settings = context.watch<CompanyModel>().myCompanySettings;
     List<User> users = context.watch<CompanyModel>().users;
+    User? user = context.watch<UserModel>().user;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -477,7 +478,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                   ),
                 ),
               ),
-              if(settings!.useOwnData??false)
+              if((settings!.useOwnData??false) && (user!= null && user.isAdmin()))
                 Container(
                   width: width,
                   margin: EdgeInsets.only(top: 8),

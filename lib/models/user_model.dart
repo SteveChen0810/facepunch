@@ -1013,7 +1013,6 @@ class Punch{
   String? status;
   String? createdAt;
   String? updatedAt;
-  int? paid;
 
   Punch({
     this.id,
@@ -1021,7 +1020,6 @@ class Punch{
     this.punch,
     this.longitude,
     this.latitude,
-    this.paid,
     this.createdAt,
     this.updatedAt
   });
@@ -1034,7 +1032,6 @@ class Punch{
       punch = json['punch'];
       longitude = json['longitude']==null?null:double.parse(json['longitude'].toString());
       latitude = json['latitude']==null?null:double.parse(json['latitude'].toString());
-      paid = json['paid'];
       status = json['status'];
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
@@ -1070,7 +1067,6 @@ class Punch{
     data['punch'] = this.punch;
     data['longitude'] = this.longitude;
     data['latitude'] = this.latitude;
-    data['paid'] = this.paid;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
