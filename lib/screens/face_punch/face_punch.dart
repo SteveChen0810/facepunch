@@ -194,18 +194,17 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         if(result.message != null){
           Tools.showSuccessMessage(context, result.message!);
         }
-        User employee = result.employee!;
-        Punch punch = result.punch!;
+        User employee = result.employee;
         if(employee.type == 'call'){
-          await _punchCallEmployee(employee, punch, result.calls);
+          await _punchCallEmployee(result);
         }else if(employee.type == 'shop_daily'){
-          await _punchShopDailyEmployee(employee, punch, result.schedules);
+          await _punchShopDailyEmployee(result);
         }else if(employee.type == 'shop_tracking'){
-          await _punchShopTrackingEmployee(employee, punch, result.projects, result.tasks);
+          await _punchShopTrackingEmployee(result);
         }else if(employee.type == 'call_shop_daily'){
-          await _punchCallShopDailyEmployee(employee, punch, result.schedules, result.calls);
+          await _punchCallShopDailyEmployee(result);
         }else if(employee.type == 'call_shop_tracking'){
-          await _punchCallShopTrackingEmployee(employee, punch, result.calls, result.projects, result.tasks);
+          await _punchCallShopTrackingEmployee(result);
         }
         await initDetectFace();
         setState(() {_photoPath="";});
@@ -216,93 +215,69 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  Future<void> _punchCallEmployee(User employee, Punch punch, List<EmployeeCall> calls)async{
-    if(calls.isEmpty){
-      await Tools.showWelcomeDialog(
-          userName: employee.getFullName(),
-          isPunchIn: punch.punch == "In",
-          context: context
-      );
-    }else{
+  Future<void> _punchCallEmployee(FacePunchData data)async{
+    if(data.calls.isNotEmpty || (data.punch.isOut() && data.employee.isManualBreak())){
       await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(
-            calls: calls,
-            employee: employee,
-            punch: punch
-          )
-      ));
-    }
-  }
-
-  Future<void> _punchShopDailyEmployee(User employee, Punch punch, List<WorkSchedule> schedules)async{
-    if(schedules.isEmpty){
-      await Tools.showWelcomeDialog(
-          userName: employee.getFullName(),
-          isPunchIn: punch.punch == "In",
-          context: context
-      );
-    }else{
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(
-            schedules: schedules,
-            employee: employee,
-            punch: punch,
-          )
-      ));
-    }
-  }
-
-  Future<void> _punchShopTrackingEmployee(User employee, Punch punch, List<Project> projects, List<ScheduleTask> tasks)async{
-    if(projects.isNotEmpty && tasks.isNotEmpty){
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(
-            employee: employee,
-            projects: projects,
-            tasks: tasks,
-            punch: punch
-          )
+          builder: (context)=>SelectTaskScreen(data)
       ));
     }else{
       await Tools.showWelcomeDialog(
-          userName: employee.getFullName(),
-          isPunchIn: punch.punch == "In",
+          userName: data.employee.getFullName(),
+          isPunchIn: data.punch.punch == "In",
           context: context
       );
     }
   }
 
-  Future<void> _punchCallShopDailyEmployee(User employee, Punch punch, List<WorkSchedule> schedules, List<EmployeeCall> calls)async{
-    if(schedules.isEmpty && calls.isEmpty){
+  Future<void> _punchShopDailyEmployee(FacePunchData data)async{
+    if(data.schedules.isNotEmpty || (data.punch.isOut() && data.employee.isManualBreak())){
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectTaskScreen(data)
+      ));
+    }else{
       await Tools.showWelcomeDialog(
-          userName: employee.getFullName(),
-          isPunchIn: punch.punch == "In",
+          userName: data.employee.getFullName(),
+          isPunchIn: data.punch.punch == "In",
           context: context
       );
-    }else{
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(
-            schedules: schedules,
-            employee: employee,
-            punch: punch,
-            calls: calls,
-          )
-      ));
     }
   }
 
-  Future<void> _punchCallShopTrackingEmployee(User employee, Punch punch, List<EmployeeCall> calls, List<Project> projects, List<ScheduleTask> tasks )async{
-    if(calls.isNotEmpty || (projects.isNotEmpty && tasks.isNotEmpty)){
-      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectTaskScreen(
-        employee: employee,
-        punch: punch,
-        projects: projects,
-        tasks: tasks,
-        calls: calls,
-      )));
+  Future<void> _punchShopTrackingEmployee(FacePunchData data)async{
+    if((data.projects.isNotEmpty && data.tasks.isNotEmpty) || (data.punch.isOut() && data.employee.isManualBreak())){
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectTaskScreen(data)
+      ));
     }else{
       await Tools.showWelcomeDialog(
-          userName: employee.getFullName(),
-          isPunchIn: punch.punch == "In",
+          userName: data.employee.getFullName(),
+          isPunchIn: data.punch.punch == "In",
+          context: context
+      );
+    }
+  }
+
+  Future<void> _punchCallShopDailyEmployee(FacePunchData data)async{
+    if(data.schedules.isNotEmpty || data.calls.isNotEmpty || (data.punch.isOut() && data.employee.isManualBreak())){
+      await Navigator.push(context, MaterialPageRoute(
+          builder: (context)=>SelectTaskScreen(data)
+      ));
+    }else{
+      await Tools.showWelcomeDialog(
+          userName: data.employee.getFullName(),
+          isPunchIn: data.punch.punch == "In",
+          context: context
+      );
+    }
+  }
+
+  Future<void> _punchCallShopTrackingEmployee(FacePunchData data)async{
+    if(data.calls.isNotEmpty || (data.projects.isNotEmpty && data.tasks.isNotEmpty) || (data.punch.isOut() && data.employee.isManualBreak())){
+      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectTaskScreen(data)));
+    }else{
+      await Tools.showWelcomeDialog(
+          userName: data.employee.getFullName(),
+          isPunchIn: data.punch.punch == "In",
           context: context
       );
     }
@@ -318,7 +293,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       child: MaterialButton(
         onPressed: ()async{
           await cameraClose();
-          Navigator.pop(context);
+          if(mounted)Navigator.pop(context);
         },
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: CircleBorder(),

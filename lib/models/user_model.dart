@@ -447,13 +447,13 @@ class User with HttpRequest{
   String? firebaseToken;
   String? emailVerifyNumber;
   int? companyId;
-  bool? hasAutoBreak = true;
   String? nfc;
   bool? canNTCTracking = true;
   bool? sendScheduleNotification = true;
   String? createdAt;
   String? updatedAt;
   bool? active = true;
+  BreakSetting? breakSetting;
 
   List<Punch> punches = [];
   List<WorkHistory> works = [];
@@ -498,7 +498,6 @@ class User with HttpRequest{
     this.token,
     this.sendScheduleNotification,
     this.active,
-    this.hasAutoBreak,
     this.projects
   });
 
@@ -547,8 +546,10 @@ class User with HttpRequest{
       if(json['projects'] != null){
         projects = json['projects'].cast<String>();
       }
-      hasAutoBreak = json['has_auto_break'] != null && json['has_auto_break'] == 1;
       active = json['active'] != null && json['active'] == 1;
+      if(json['break'] != null){
+        breakSetting = BreakSetting.fromJson(json['break']);
+      }
     }catch(e){
       Tools.consoleLog("[User.fromJson.err] $e");
     }
@@ -592,11 +593,11 @@ class User with HttpRequest{
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['projects'] = this.projects;
-    if(this.hasAutoBreak != null){
-      data['has_auto_break'] = this.hasAutoBreak!?1:0;
-    }
     if(this.active != null){
       data['active'] = this.active!?1:0;
+    }
+    if(this.breakSetting != null){
+      data['break'] = this.breakSetting!.toJson();
     }
     return data;
   }
@@ -955,6 +956,51 @@ class User with HttpRequest{
   bool canManageDispatch(){
     return role != 'employee';
   }
+
+  bool isManualBreak(){
+    return breakSetting != null && breakSetting!.type == "manual";
+  }
+
+  Future<String?> startShopTracking(int? projectId, int? taskId)async{
+    try{
+      var res = await sendPostRequest(
+          AppConst.startShopTracking,
+          token,
+          {
+            'task_id': taskId,
+            'project_id': projectId,
+          }
+      );
+      Tools.consoleLog('[User.startShopTracking.res]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog('[User.startShopTracking.err]$e');
+      return e.toString();
+    }
+  }
+
+  Future<String?> startManualBreak()async{
+    try{
+      var res = await sendPostRequest(
+          AppConst.startManualBreak,
+          token,
+          {}
+      );
+      Tools.consoleLog('[User.startManualBreak.res]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog('[User.startManualBreak.err]$e');
+      return e.toString();
+    }
+  }
 }
 
 class Punch{
@@ -1042,8 +1088,8 @@ class Punch{
 }
 
 class FacePunchData{
-  User? employee;
-  Punch? punch;
+  late User employee;
+  late Punch punch;
   List<EmployeeCall> calls = [];
   List<WorkSchedule> schedules = [];
   List<Project> projects = [];
@@ -1078,6 +1124,33 @@ class FacePunchData{
     }catch(e){
       Tools.consoleLog("[FacePunchData.fromJson.err] $e");
     }
+  }
+}
+
+class BreakSetting{
+  String? type;
+  String? start;
+  int? length;
+  bool? calculate;
+
+  BreakSetting.fromJson(Map<String, dynamic> json){
+    try{
+      type = json['type'];
+      start = json['start'];
+      length = json['length'];
+      calculate = json['calculate'];
+    }catch(e){
+      Tools.consoleLog("[BreakSetting.fromJson.err] $e");
+    }
+  }
+
+  Map<String, dynamic> toJson(){
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['type'] = type;
+    data['start'] = start;
+    data['length'] = length;
+    data['calculate'] = calculate;
+    return data;
   }
 }
 

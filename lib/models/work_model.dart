@@ -34,28 +34,6 @@ class WorkModel extends BaseProvider{
     }
   }
 
-  Future<String?> startShopTracking(String? token, int? projectId, int? taskId)async{
-    try{
-      var res = await sendPostRequest(
-          AppConst.startShopTracking,
-          token,
-          {
-            'task_id': taskId,
-            'project_id': projectId,
-          }
-      );
-      Tools.consoleLog('[WorkModel.startShopTracking.res]${res.body}');
-      if(res.statusCode==200){
-        return null;
-      }else{
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      Tools.consoleLog('[WorkModel.startShopTracking.err]$e');
-      return e.toString();
-    }
-  }
-
   Future<dynamic> getCall(int callId)async{
     try{
       var res = await sendPostRequest(
@@ -745,10 +723,10 @@ class EmployeeBreak{
   }
 
   String getTitle(BuildContext context){
-    if(createdAt == null){
+    if(start == null){
       return '$title ${S.of(context).at} --:--, $length Minutes';
     }
-    return '$title ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.tryParse(createdAt!))}, $length Minutes';
+    return '$title ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.tryParse(start!))}, $length Minutes';
   }
 
   Map<String, dynamic> toJson(){

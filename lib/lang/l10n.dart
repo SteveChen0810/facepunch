@@ -2075,6 +2075,14 @@ class S {
       args: [],
     );
   }
+  String get manualBreak{
+    return Intl.message(
+      'Manual Break',
+      name: 'manualBreak',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

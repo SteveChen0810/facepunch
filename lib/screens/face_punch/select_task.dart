@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
@@ -11,13 +9,8 @@ import '/widgets/task_picker.dart';
 
 class SelectTaskScreen extends StatefulWidget{
 
-  final List<WorkSchedule>? schedules;
-  final List<EmployeeCall>? calls;
-  final List<Project>? projects;
-  final List<ScheduleTask>? tasks;
-  final User employee;
-  final Punch punch;
-  SelectTaskScreen({this.schedules, required this.employee, required this.punch, this.calls, this.projects, this.tasks});
+  final FacePunchData facePunchData;
+  SelectTaskScreen(this.facePunchData);
 
   @override
   _SelectTaskScreenState createState() => _SelectTaskScreenState();
@@ -40,12 +33,12 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
   @override
   void initState() {
     super.initState();
-    schedules = widget.schedules??[];
-    calls = widget.calls??[];
-    projects = widget.projects??[];
-    tasks = widget.tasks??[];
-    employee = widget.employee;
-    punch = widget.punch;
+    schedules = widget.facePunchData.schedules;
+    calls = widget.facePunchData.calls;
+    projects = widget.facePunchData.projects;
+    tasks = widget.facePunchData.tasks;
+    employee = widget.facePunchData.employee;
+    punch = widget.facePunchData.punch;
   }
 
   bool canStartWork(){
@@ -61,8 +54,21 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
       }else if(selectedSchedule != null){
         message = await selectedSchedule!.startSchedule(employee.token);
       }else if(selectedProject != null && selectedTask != null){
-        message = await context.read<WorkModel>().startShopTracking(employee.token, selectedProject!.id, selectedTask!.id);
+        message = await employee.startShopTracking(selectedProject!.id, selectedTask!.id);
       }
+      setState(() { isLoading = false; });
+      if(message != null){
+        Tools.showErrorMessage(context, message);
+      }else{
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<void> startManualBreak()async{
+    if(!isLoading){
+      setState(() { isLoading = true; });
+      String? message = await employee.startManualBreak();
       setState(() { isLoading = false; });
       if(message != null){
         Tools.showErrorMessage(context, message);
@@ -284,11 +290,32 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: isLoading?
+      Container(
+            margin: EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: Colors.green,),
+              ],
+            ),
+          ):
+      Container(
         margin: EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if(punch.isOut() && employee.isManualBreak())
+              MaterialButton(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                color: Colors.orange,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                minWidth: MediaQuery.of(context).size.width-40,
+                height: 40,
+                onPressed: startManualBreak,
+                child: Text(S.of(context).manualBreak.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
+              ),
+            SizedBox(height: 8,),
             MaterialButton(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               color: Color(primaryColor),
@@ -297,11 +324,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
               minWidth: MediaQuery.of(context).size.width-40,
               height: 40,
               onPressed: canStartWork()?startWork:null,
-              child: isLoading?SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: CircularProgressIndicator(backgroundColor: Colors.white,strokeWidth: 2,)
-              ):Text(S.of(context).start.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
+              child: Text(S.of(context).start.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
             ),
             SizedBox(height: 8,),
             if(punch.isOut())
@@ -312,7 +335,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 minWidth: MediaQuery.of(context).size.width-40,
                 height: 40,
-                onPressed: isLoading ? null : ()async{
+                onPressed: (){
                   Navigator.pop(context);
                 },
                 child: Text(S.of(context).punchOut.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),

@@ -62,6 +62,7 @@ class AppConst{
   static String get endCall => baseUrl+"end-call";
   static String get deleteCall => baseUrl+"delete-call";
   static String get startShopTracking => baseUrl+"start-shop-tracking";
+  static String get startManualBreak => baseUrl+"start-manual-break";
 
   static String get getDailyTasks => baseUrl+"get-daily-tasks";
   static String get getEmployeeSchedule => baseUrl+"get-employee-schedule";

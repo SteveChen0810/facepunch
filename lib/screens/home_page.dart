@@ -9,7 +9,7 @@ import '/models/user_model.dart';
 import '/screens/employee/employee_login.dart';
 import 'admin/admin_home.dart';
 import 'admin/auth/login.dart';
-import 'admin/face_punch/start_face_punch.dart';
+import 'face_punch/start_face_punch.dart';
 import 'employee/employee_home.dart';
 import '/widgets/utils.dart';
 

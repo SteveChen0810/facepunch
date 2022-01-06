@@ -221,7 +221,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         type: widget.employee?.type??'shop_daily',
         updatedAt: widget.employee?.updatedAt,
         active: widget.employee?.active??true,
-        hasAutoBreak: widget.employee?.hasAutoBreak??true,
         projects: widget.employee?.projects??[]
       );
       String? base64Image;
@@ -257,7 +256,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.employee==null?S.of(context).createNewEmployee:S.of(context).editEmployee,style: TextStyle(color: Colors.black87,fontSize: 25,fontWeight: FontWeight.bold),),
+        title: Text(widget.employee==null?S.of(context).createNewEmployee:S.of(context).editEmployee,),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,color: Colors.black87,size: 35,),
           onPressed: ()=>Navigator.pop(context),
@@ -345,7 +344,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     suffixIcon: Icon(Icons.person,color: Colors.black87,),
                     isDense: true,
                     labelText: S.of(context).firstName,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
                     errorText: _fNameError
@@ -369,7 +367,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     suffixIcon: Icon(Icons.person,color: Colors.black87,),
                     isDense: true,
                     labelText: S.of(context).lastName,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
                     errorText: _lNameError
@@ -393,7 +390,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     suffixIcon: Icon(Icons.mail,color: Colors.black87,),
                     isDense: true,
                     labelText: S.of(context).email,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
                     errorText: _emailError
@@ -413,7 +409,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     suffixIcon: Icon(Icons.lock,color: Colors.black87,),
                     isDense: true,
                     labelText: S.of(context).passwordPin,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
                     contentPadding: EdgeInsets.zero,
                     errorText: _passwordError
@@ -427,7 +422,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 20,bottom: 5),
-                child: Text(S.of(context).address,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.grey),),
+                child: Text(S.of(context).address,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.grey),),
               ),
               TextField(
                 decoration: InputDecoration(
@@ -436,7 +431,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
                     labelText: S.of(context).streetAddress,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _addressError
                 ),
@@ -454,7 +448,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
                     labelText: S.of(context).aptSuiteBuilding,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                 ),
                 enabled: !isLoading && (settings?.useOwnData??false),
@@ -490,7 +483,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                   isDense: true,
                   labelText: S.of(context).postalCode,
-                  labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                   errorText: _postalError
                 ),
@@ -511,7 +503,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                   isDense: true,
                   labelText: S.of(context).phoneNumber,
-                  labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                 ),
                 enabled: !isLoading && (settings?.useOwnData??false),
@@ -528,7 +519,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                   isDense: true,
                   labelText: "${S.of(context).employee}#",
-                  labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                   contentPadding: EdgeInsets.zero,
                   errorText: _codeError
                 ),
@@ -546,7 +536,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
                     labelText: S.of(context).startDate,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _startDateError
                 ),
@@ -566,9 +555,8 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
                     labelText: S.of(context).salary,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     suffixIconConstraints: BoxConstraints(maxHeight: 20),
-                    suffixIcon: Text("\$/h",style: TextStyle(fontSize: 18),),
+                    suffixIcon: Text("\$/h",style: TextStyle(),),
                     contentPadding: EdgeInsets.zero,
                     errorText: _salaryError
                 ),
@@ -586,7 +574,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
                     labelText: S.of(context).birthday,
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                     errorText: _birthDayError
                 ),
@@ -606,7 +593,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
                     isDense: true,
                     labelText: "NFC",
-                    labelStyle: TextStyle(color: Colors.grey,fontSize: 18),
                     contentPadding: EdgeInsets.zero,
                 ),
                 enabled: !isLoading,
@@ -645,20 +631,20 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     value: value,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2,horizontal: 8),
-                      child: Text(value),
+                      child: Text(value, style: TextStyle(fontSize: 14),),
                     ),
                   );
                 }).toList(),
                 underline: Container(color: Colors.black87,width: double.infinity,height: 1,),
                 style: TextStyle(fontSize: 20, color: Colors.black87),
-                hint: Text(S.of(context).chooseLanguage),
+                hint: Text(S.of(context).chooseLanguage, style: TextStyle(fontSize: 14),),
                 isExpanded: true,
                 onChanged: !(settings?.useOwnData??false)? null :(v) {
                   setState(() { language = v; });
                   FocusScope.of(context).requestFocus(FocusNode());
                 },
                 value: language,
-                disabledHint: Text('$language'),
+                disabledHint: Text('$language', style: TextStyle(fontSize: 14),),
               ),
               MaterialButton(
                 minWidth: MediaQuery.of(context).size.width,
@@ -669,7 +655,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     ?SizedBox( height: 28, width: 28, child: CircularProgressIndicator(strokeWidth: 2,),)
                     :Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                      child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                     ),
                 onPressed: ()async{
                   FocusScope.of(context).requestFocus(FocusNode());
