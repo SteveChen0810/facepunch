@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
@@ -43,6 +44,13 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
 
   bool canStartWork(){
     return selectedSchedule != null || selectedCall != null || (selectedTask != null && selectedProject != null);
+  }
+
+  String startButtonTitle(){
+    if(selectedSchedule != null && selectedSchedule!.status == "pending"){
+      return S.of(context).resume.toUpperCase();
+    }
+    return S.of(context).start.toUpperCase();
   }
 
   Future<void> startWork()async{
@@ -324,7 +332,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
               minWidth: MediaQuery.of(context).size.width-40,
               height: 40,
               onPressed: canStartWork()?startWork:null,
-              child: Text(S.of(context).start.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
+              child: Text(startButtonTitle(), style: TextStyle(color: Colors.white, fontSize: 16),),
             ),
             SizedBox(height: 8,),
             if(punch.isOut())

@@ -1459,6 +1459,14 @@ class S {
       args: [],
     );
   }
+  String get  resume{
+    return Intl.message(
+      'Resume',
+      name: 'resume',
+      desc: '',
+      args: [],
+    );
+  }
   String get  end{
     return Intl.message(
       'End',
