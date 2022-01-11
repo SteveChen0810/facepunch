@@ -183,369 +183,358 @@ class _AdminSettingState extends State<AdminSetting> {
       appBar: AppBar(
         title: Text("Settings"),
         centerTitle: true,
-        leading: GestureDetector(
-          child: Icon(Icons.arrow_back),
-          onTap: (){
-            if(!(isCompanyUpdating || isProfileUpdating || isRevisionNotificationUpdating || isPunchNotificationUpdating)) Navigator.pop(context);
-          },
-        ),
         backgroundColor: Color(primaryColor),
       ),
-      body: WillPopScope(
-        onWillPop: ()async{
-          return !(isCompanyUpdating || isProfileUpdating || isRevisionNotificationUpdating || isPunchNotificationUpdating);
-        },
-        child: Container(
-          padding: EdgeInsets.all(8),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Card(
-                  child: InkWell(
-                    onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AboutPage())),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.info,color: Colors.black87,size: 30,),
-                          SizedBox(width: 20,),
-                          Text(S.of(context).aboutApp,style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.bold),)
-                        ],
-                      ),
+      body: Container(
+        padding: EdgeInsets.all(8),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Card(
+                child: InkWell(
+                  onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AboutPage())),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info,color: Colors.black87,size: 30,),
+                        SizedBox(width: 20,),
+                        Text(S.of(context).aboutApp,style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.bold),)
+                      ],
                     ),
                   ),
                 ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(S.of(context).profile,style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
-                        SizedBox(height: 8,),
-                        TextField(
-                          decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              enabledBorder: UnderlineInputBorder(),
-                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: S.of(context).firstName,
-                              labelStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.person_outline,color: Colors.black87,size: 30,),
-                              suffixIconConstraints: BoxConstraints(minHeight: 25,maxHeight: 25),
-                              isDense: true,
-                              errorText: _fNameError
-                          ),
-                          keyboardType: TextInputType.name,
-                          textCapitalization: TextCapitalization.words,
-                          textInputAction: TextInputAction.next,
-                          maxLines: 1,
-                          enabled: !isProfileUpdating,
-                          controller: _fName,
-                          onChanged: (v){
-                            _fName.value = _fName.value.copyWith(text: firstToUpper(v));
-                          },
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              enabledBorder: UnderlineInputBorder(),
-                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: S.of(context).lastName,
-                              labelStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.person_outline,color: Colors.black87,size: 30,),
-                              suffixIconConstraints: BoxConstraints(minHeight: 25,maxHeight: 25),
-                              isDense: true,
-                              errorText: _lNameError
-                          ),
-                          keyboardType: TextInputType.name,
-                          textCapitalization: TextCapitalization.words,
-                          textInputAction: TextInputAction.next,
-                          maxLines: 1,
-                          enabled: !isProfileUpdating,
-                          controller: _lName,
-                          onChanged: (v){
-                            _lName.value = _lName.value.copyWith(text: firstToUpper(v));
-                          },
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              enabledBorder: UnderlineInputBorder(),
-                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: S.of(context).email,
-                              labelStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.email_outlined, color: Colors.black87, size: 30,),
-                              suffixIconConstraints: BoxConstraints(minHeight: 30, maxHeight: 30),
-                              isDense: true,
-                              errorText: _emailError
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          enabled: !isProfileUpdating,
-                          controller: _email,
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                              border: UnderlineInputBorder(),
-                              enabledBorder: UnderlineInputBorder(),
-                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                              labelText: S.of(context).oldPassword,
-                              labelStyle: TextStyle(color: Colors.grey),
-                              suffixIcon: Icon(Icons.lock_outline,color: Colors.black87,size: 30,),
-                              suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
-                              isDense: true,
-                              errorText: _passwordError
-                          ),
-                          keyboardType: TextInputType.visiblePassword,
-                          enabled: !isProfileUpdating,
-                          controller: _oldPassword,
-                          enableSuggestions: false,
-                          obscureText: true,
-                          autocorrect: false,
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
+              ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(S.of(context).profile,style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
                             border: UnderlineInputBorder(),
                             enabledBorder: UnderlineInputBorder(),
                             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                            labelText: S.of(context).newPassword,
+                            labelText: S.of(context).firstName,
+                            labelStyle: TextStyle(color: Colors.grey),
+                            suffixIcon: Icon(Icons.person_outline,color: Colors.black87,size: 30,),
+                            suffixIconConstraints: BoxConstraints(minHeight: 25,maxHeight: 25),
+                            isDense: true,
+                            errorText: _fNameError
+                        ),
+                        keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        maxLines: 1,
+                        enabled: !isProfileUpdating,
+                        controller: _fName,
+                        onChanged: (v){
+                          _fName.value = _fName.value.copyWith(text: firstToUpper(v));
+                        },
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            enabledBorder: UnderlineInputBorder(),
+                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                            labelText: S.of(context).lastName,
+                            labelStyle: TextStyle(color: Colors.grey),
+                            suffixIcon: Icon(Icons.person_outline,color: Colors.black87,size: 30,),
+                            suffixIconConstraints: BoxConstraints(minHeight: 25,maxHeight: 25),
+                            isDense: true,
+                            errorText: _lNameError
+                        ),
+                        keyboardType: TextInputType.name,
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
+                        maxLines: 1,
+                        enabled: !isProfileUpdating,
+                        controller: _lName,
+                        onChanged: (v){
+                          _lName.value = _lName.value.copyWith(text: firstToUpper(v));
+                        },
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            enabledBorder: UnderlineInputBorder(),
+                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                            labelText: S.of(context).email,
+                            labelStyle: TextStyle(color: Colors.grey),
+                            suffixIcon: Icon(Icons.email_outlined, color: Colors.black87, size: 30,),
+                            suffixIconConstraints: BoxConstraints(minHeight: 30, maxHeight: 30),
+                            isDense: true,
+                            errorText: _emailError
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        enabled: !isProfileUpdating,
+                        controller: _email,
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: UnderlineInputBorder(),
+                            enabledBorder: UnderlineInputBorder(),
+                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                            labelText: S.of(context).oldPassword,
                             labelStyle: TextStyle(color: Colors.grey),
                             suffixIcon: Icon(Icons.lock_outline,color: Colors.black87,size: 30,),
                             suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
                             isDense: true,
-                          ),
-                          keyboardType: TextInputType.visiblePassword,
-                          enabled: !isProfileUpdating,
-                          controller: _newPassword,
-                          enableSuggestions: false,
-                          obscureText: true,
-                          autocorrect: false,
+                            errorText: _passwordError
                         ),
-                        SizedBox(height: 8,),
-                        Center(
-                          child: MaterialButton(
-                            minWidth: MediaQuery.of(context).size.width/2,
-                            padding: EdgeInsets.all(8),
-                            child: isProfileUpdating?SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
-                            ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                            onPressed: updateUser,
-                            color: Colors.red,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(S.of(context).company,style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
-                        SizedBox(height: 8,),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
-                            labelText: S.of(context).companyName,
-                            labelStyle: TextStyle(color: Colors.grey),
-                            isDense: true,
-                            errorText: _nameError,
-                          ),
-                          controller: _name,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (v){
-                            _name.value = _name.value.copyWith(text: firstToUpper(v));
-                          },
-                        ),
-                        SizedBox(height: 10,),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: S.of(context).streetAddress,
-                            labelStyle: TextStyle(color: Colors.grey),
-                            isDense: true,
-                            errorText: _addressError,
-                          ),
-                          controller: _address1,
-                          keyboardType: TextInputType.streetAddress,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (v){
-                            _address1.value = _address1.value.copyWith(text: firstToUpper(v));
-                          },
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: S.of(context).aptSuiteBuilding,
-                            labelStyle: TextStyle(color: Colors.grey),
-                            errorText: null,
-                            isDense: true,
-                          ),
-                          controller: _address2,
-                          keyboardType: TextInputType.streetAddress,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (v){
-                            _address2.value = _address2.value.copyWith(text: firstToUpper(v));
-                          },
-                        ),
-                        SelectState(
-                          initCountry: country,
-                          initCity: city,
-                          initState: state,
-                          onCountryChanged: (value) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            country = value;
-                          },
-                          onStateChanged:(value) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            state = value;
-                          },
-                          onCityChanged:(value) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            city = value;
-                          },
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: S.of(context).postalCode,
-                            labelStyle: TextStyle(color: Colors.grey),
-                            errorText: _postalCodeError,
-                            isDense: true,
-                          ),
-                          controller: _postalCode,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.words,
-                          onChanged: (v){
-                            _postalCode.value = _postalCode.value.copyWith(text: v.toUpperCase());
-                          },
-                        ),
-                        TextField(
-                          decoration: InputDecoration(
-                            border: UnderlineInputBorder(),
-                            enabledBorder: UnderlineInputBorder(),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                            labelText: S.of(context).phoneNumber,
-                            labelStyle: TextStyle(color: Colors.grey),
-                            isDense: true,
-                          ),
-                          controller: _phone,
-                          keyboardType: TextInputType.phone,
-                          textCapitalization: TextCapitalization.words,
-                        ),
-                        SizedBox(height: 8,),
-                        Center(
-                          child: MaterialButton(
-                            minWidth: MediaQuery.of(context).size.width/2,
-                            padding: EdgeInsets.all(8),
-                            child: isCompanyUpdating?SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
-                            ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                            onPressed: updateCompany,
-                            color: Colors.red,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Card(
-                  child: Column(
-                    children: [
-                      SwitchListTile(
-                        value: companySettings.receiveRevisionNotification??true,
-                        onChanged: isRevisionNotificationUpdating?null:(v)async{
-                          setState(() {isRevisionNotificationUpdating = true;});
-                          companySettings.receiveRevisionNotification = v;
-                          String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
-                          if(result!=null)Tools.showErrorMessage(context, result);
-                          setState(() {isRevisionNotificationUpdating = false;});
-                        },
-                        dense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                        title: Row(
-                          children: [
-                            Text(S.of(context).receiveRevisionNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
-                            SizedBox(width: 10,),
-                            if(isRevisionNotificationUpdating)
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2,),
-                              )
-                          ],
-                        ),
+                        keyboardType: TextInputType.visiblePassword,
+                        enabled: !isProfileUpdating,
+                        controller: _oldPassword,
+                        enableSuggestions: false,
+                        obscureText: true,
+                        autocorrect: false,
                       ),
-                      SwitchListTile(
-                        value: companySettings.receivePunchNotification??false,
-                        onChanged: isPunchNotificationUpdating?null:(v)async{
-                          setState(() {isPunchNotificationUpdating = true;});
-                          companySettings.receivePunchNotification = v;
-                          String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
-                          if(result!=null)Tools.showErrorMessage(context, result);
-                          setState(() {isPunchNotificationUpdating = false;});
-                        },
-                        dense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                        title: Row(
-                          children: [
-                            Text(S.of(context).receivePunchNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
-                            SizedBox(width: 10,),
-                            if(isPunchNotificationUpdating)
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2,),
-                              )
-                          ],
+                      TextField(
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                          labelText: S.of(context).newPassword,
+                          labelStyle: TextStyle(color: Colors.grey),
+                          suffixIcon: Icon(Icons.lock_outline,color: Colors.black87,size: 30,),
+                          suffixIconConstraints: BoxConstraints(minHeight: 30,maxHeight: 30),
+                          isDense: true,
+                        ),
+                        keyboardType: TextInputType.visiblePassword,
+                        enabled: !isProfileUpdating,
+                        controller: _newPassword,
+                        enableSuggestions: false,
+                        obscureText: true,
+                        autocorrect: false,
+                      ),
+                      SizedBox(height: 8,),
+                      Center(
+                        child: MaterialButton(
+                          minWidth: MediaQuery.of(context).size.width/2,
+                          padding: EdgeInsets.all(8),
+                          child: isProfileUpdating?SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
+                          ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          onPressed: updateUser,
+                          color: Colors.red,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
                       ),
                     ],
                   ),
                 ),
-                Card(
-                  child: InkWell(
-                    onTap: (){
-                      Clipboard.setData(new ClipboardData(text: punchKey)).then((_){
-                        Tools.showSuccessMessage(context, S.of(context).deviceIdCopied);
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
+              ),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(S.of(context).company,style: TextStyle(color: Colors.red,fontSize: 18,fontWeight: FontWeight.bold),),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black87)),
+                          labelText: S.of(context).companyName,
+                          labelStyle: TextStyle(color: Colors.grey),
+                          isDense: true,
+                          errorText: _nameError,
+                        ),
+                        controller: _name,
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.words,
+                        onChanged: (v){
+                          _name.value = _name.value.copyWith(text: firstToUpper(v));
+                        },
+                      ),
+                      SizedBox(height: 10,),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                          labelText: S.of(context).streetAddress,
+                          labelStyle: TextStyle(color: Colors.grey),
+                          isDense: true,
+                          errorText: _addressError,
+                        ),
+                        controller: _address1,
+                        keyboardType: TextInputType.streetAddress,
+                        textCapitalization: TextCapitalization.words,
+                        onChanged: (v){
+                          _address1.value = _address1.value.copyWith(text: firstToUpper(v));
+                        },
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                          labelText: S.of(context).aptSuiteBuilding,
+                          labelStyle: TextStyle(color: Colors.grey),
+                          errorText: null,
+                          isDense: true,
+                        ),
+                        controller: _address2,
+                        keyboardType: TextInputType.streetAddress,
+                        textCapitalization: TextCapitalization.words,
+                        onChanged: (v){
+                          _address2.value = _address2.value.copyWith(text: firstToUpper(v));
+                        },
+                      ),
+                      SelectState(
+                        initCountry: country,
+                        initCity: city,
+                        initState: state,
+                        onCountryChanged: (value) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          country = value;
+                        },
+                        onStateChanged:(value) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          state = value;
+                        },
+                        onCityChanged:(value) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          city = value;
+                        },
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                          labelText: S.of(context).postalCode,
+                          labelStyle: TextStyle(color: Colors.grey),
+                          errorText: _postalCodeError,
+                          isDense: true,
+                        ),
+                        controller: _postalCode,
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.words,
+                        onChanged: (v){
+                          _postalCode.value = _postalCode.value.copyWith(text: v.toUpperCase());
+                        },
+                      ),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: UnderlineInputBorder(),
+                          enabledBorder: UnderlineInputBorder(),
+                          focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                          labelText: S.of(context).phoneNumber,
+                          labelStyle: TextStyle(color: Colors.grey),
+                          isDense: true,
+                        ),
+                        controller: _phone,
+                        keyboardType: TextInputType.phone,
+                        textCapitalization: TextCapitalization.words,
+                      ),
+                      SizedBox(height: 8,),
+                      Center(
+                        child: MaterialButton(
+                          minWidth: MediaQuery.of(context).size.width/2,
+                          padding: EdgeInsets.all(8),
+                          child: isCompanyUpdating?SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
+                          ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          onPressed: updateCompany,
+                          color: Colors.red,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      value: companySettings.receiveRevisionNotification??true,
+                      onChanged: isRevisionNotificationUpdating?null:(v)async{
+                        setState(() {isRevisionNotificationUpdating = true;});
+                        companySettings.receiveRevisionNotification = v;
+                        String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                        if(result!=null)Tools.showErrorMessage(context, result);
+                        setState(() {isRevisionNotificationUpdating = false;});
+                      },
+                      dense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                      title: Row(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(S.of(context).deviceIdForPunch, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),),
-                              Text(S.of(context).clickToCopy, style: TextStyle(fontSize: 10, color: Colors.red),)
-                            ],
-                          ),
-                          Text('$punchKey'),
+                          Text(S.of(context).receiveRevisionNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
+                          SizedBox(width: 10,),
+                          if(isRevisionNotificationUpdating)
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2,),
+                            )
                         ],
                       ),
                     ),
+                    SwitchListTile(
+                      value: companySettings.receivePunchNotification??false,
+                      onChanged: isPunchNotificationUpdating?null:(v)async{
+                        setState(() {isPunchNotificationUpdating = true;});
+                        companySettings.receivePunchNotification = v;
+                        String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                        if(result!=null)Tools.showErrorMessage(context, result);
+                        setState(() {isPunchNotificationUpdating = false;});
+                      },
+                      dense: true,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                      title: Row(
+                        children: [
+                          Text(S.of(context).receivePunchNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
+                          SizedBox(width: 10,),
+                          if(isPunchNotificationUpdating)
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2,),
+                            )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Card(
+                child: InkWell(
+                  onTap: (){
+                    Clipboard.setData(new ClipboardData(text: punchKey)).then((_){
+                      Tools.showSuccessMessage(context, S.of(context).deviceIdCopied);
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(S.of(context).deviceIdForPunch, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),),
+                            Text(S.of(context).clickToCopy, style: TextStyle(fontSize: 10, color: Colors.red),)
+                          ],
+                        ),
+                        Text('$punchKey'),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(height: 20,)
-              ],
-            ),
+              ),
+              SizedBox(height: 20,)
+            ],
           ),
         ),
       ),

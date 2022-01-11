@@ -2,7 +2,6 @@ import 'package:facepunch/screens/employee/employee_revisions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
 import '/models/notification.dart';
 import '/models/work_model.dart';
 import '/models/app_const.dart';

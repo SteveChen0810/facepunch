@@ -257,10 +257,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(widget.employee==null?S.of(context).createNewEmployee:S.of(context).editEmployee,),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back,color: Colors.black87,size: 35,),
-          onPressed: ()=>Navigator.pop(context),
-        ),
         backgroundColor: Color(primaryColor),
         elevation: 0,
       ),
