@@ -1,13 +1,14 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:provider/provider.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/notification.dart';
 import '/models/revision_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/widgets/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:provider/provider.dart';
 
 class NotificationPage extends StatefulWidget {
 
@@ -18,7 +19,7 @@ class NotificationPage extends StatefulWidget {
 class _NotificationPageState extends State<NotificationPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   RefreshController _refreshController = RefreshController(initialRefresh: true);
-  Revision? _revision;
+
 
   void _onRefresh() async{
     await context.read<NotificationModel>().getNotificationFromServer();
@@ -27,17 +28,6 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Widget _notificationItem(Revision revision){
     try{
-      if(revision == _revision){
-        return Container(
-            decoration: BoxDecoration(
-                border: Border.symmetric(horizontal: BorderSide(color: Colors.grey, width: 0.5),),
-            ),
-            padding: EdgeInsets.all(16),
-            width: double.infinity,
-            alignment: Alignment.center,
-            child: CircularProgressIndicator()
-        );
-      }
       return Slidable(
         endActionPane: ActionPane(
           motion: ScrollMotion(),
@@ -45,10 +35,9 @@ class _NotificationPageState extends State<NotificationPage> {
           children: [
             SlidableAction(
               onPressed: (_)async{
-                setState(() { _revision = revision;});
+                context.loaderOverlay.show();
                 String? result = await revision.delete();
-                setState(() { _revision = null;});
-                if(!mounted)return;
+                context.loaderOverlay.hide();
                 if(result == null){
                   context.read<NotificationModel>().removeRevision(revision);
                 }else{
@@ -495,12 +484,13 @@ class _NotificationPageState extends State<NotificationPage> {
               TextButton(
                   onPressed: ()async{
                     Navigator.pop(context);
-                    setState(() { _revision = revision; });
+                    context.loaderOverlay.show();
                     String? result = await revision.accept();
-                    if(!mounted)return;
-                    setState(() { _revision = null; });
+                    context.loaderOverlay.hide();
                     if(result != null){
                       Tools.showErrorMessage(context, result);
+                    }else{
+                      setState(() {});
                     }
                   },
                   child: Text(S.of(context).accept, style: TextStyle(color: Colors.green),)
@@ -509,31 +499,17 @@ class _NotificationPageState extends State<NotificationPage> {
               TextButton(
                   onPressed: ()async{
                     Navigator.pop(context);
-                    setState(() { _revision = revision; });
+                    context.loaderOverlay.show();
                     String? result = await revision.decline();
-                    if(!mounted)return;
-                    setState(() { _revision = null; });
+                    context.loaderOverlay.hide();
                     if(result != null){
                       Tools.showErrorMessage(context, result);
+                    }else{
+                      setState(() {});
                     }
                   },
-                  child: Text(S.of(context).decline, style: TextStyle(color: Colors.orange),)
+                  child: Text(S.of(context).decline, style: TextStyle(color: Colors.red),)
               ),
-            TextButton(
-                onPressed: ()async{
-                  Navigator.pop(context);
-                  setState(() { _revision = revision; });
-                  String? result = await revision.delete();
-                  if(!mounted)return;
-                  setState(() { _revision = null; });
-                  if(result != null){
-                    Tools.showErrorMessage(context, result);
-                  }else{
-                    context.read<NotificationModel>().removeRevision(revision);
-                  }
-                },
-                child: Text(S.of(context).delete, style: TextStyle(color: Colors.red),)
-            ),
           ],
         )
     );

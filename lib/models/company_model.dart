@@ -114,21 +114,8 @@ class CompanyModel extends BaseProvider{
   }
 
   Future<String?> deleteEmployee(int userId)async{
-    String result = 'Oops, Unknown Errors!';
-    try{
-      var res = await sendPostRequest( AppConst.deleteEmployee, GlobalData.token, {'user_id' : userId});
-      Tools.consoleLog("[CompanyModel.deleteEmployee.res] ${res.body}");
-      if(res.statusCode==200){
-        users.removeWhere((u) => u.id==userId);
-        notifyListeners();
-        return "A employee has been deleted.";
-      }else{
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      Tools.consoleLog("[CompanyModel.deleteEmployee.err] $e");
-    }
-    return result;
+    users.removeWhere((u) => u.id==userId);
+    notifyListeners();
   }
 
   Future<String?> updateCompany({required String name, String? address1, String? address2,

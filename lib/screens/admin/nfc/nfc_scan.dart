@@ -4,6 +4,7 @@ import 'package:nfc_manager/nfc_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:collection/collection.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
@@ -24,7 +25,6 @@ class _NFCScanPageState extends State<NFCScanPage>{
   bool isBigNFCImage = true;
   DateTime selectedDate = DateTime.now();
   HTask? selectedTask;
-  HTask? _deletingTask;
   List<Harvest> harvests = [];
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   bool isLoading = false;
@@ -63,7 +63,6 @@ class _NFCScanPageState extends State<NFCScanPage>{
     }
     HContainer selectedContainer;
     Field selectedField;
-    bool isUpdating = false;
     if(task == null){
       selectedContainer = containers[0];
       selectedField = fields[0];
@@ -148,32 +147,26 @@ class _NFCScanPageState extends State<NFCScanPage>{
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          child: isUpdating
-                              ?SizedBox( height: 20,width: 20, child: CircularProgressIndicator(strokeWidth: 2,))
-                              :Text(S.of(context).save, style: TextStyle(color: Colors.green),),
+                          child: Text(S.of(context).save, style: TextStyle(color: Colors.green),),
                           onPressed: ()async{
-                            if(!isUpdating){
-                              if(task != null){
-                                task!.field = selectedField;
-                                task!.container = selectedContainer;
-                              }else{
-                                task = HTask(field: selectedField,container: selectedContainer, containerId: selectedContainer.id,fieldId: selectedField.id);
-                              }
-                              setState((){isUpdating = true;});
-                              String? result = await context.read<HarvestModel>().createOrUpdateTask(task!);
-                              setState((){isUpdating = false;});
-                              if(result != null){
-                                Tools.showErrorMessage(context, result);
-                              }
-                              Navigator.pop(_context);
+                            if(task != null){
+                              task!.field = selectedField;
+                              task!.container = selectedContainer;
+                            }else{
+                              task = HTask(field: selectedField, container: selectedContainer, containerId: selectedContainer.id, fieldId: selectedField.id);
+                            }
+                            Navigator.pop(_context);
+                            context.loaderOverlay.show();
+                            String? result = await context.read<HarvestModel>().createOrUpdateTask(task!);
+                            context.loaderOverlay.hide();
+                            if(result != null){
+                              Tools.showErrorMessage(context, result);
                             }
                           },
                         ),
                         TextButton(
                           child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
-                          onPressed: ()async{
-                            if(!isUpdating)Navigator.pop(_context);
-                          },
+                          onPressed: ()=>Navigator.pop(_context),
                         ),
                       ],
                     )
@@ -204,11 +197,13 @@ class _NFCScanPageState extends State<NFCScanPage>{
       if(!mounted)return;
       setState(() {isLoading=true;});
       var result = await context.read<HarvestModel>().addHarvest(task: selectedTask!, date: selectedDate.toString(),nfc: nfc);
+      if(!mounted)return;
       setState(() {isLoading=false;});
       if(result != null){
         if(result is Harvest){
-          harvests.insert(0, result);
-          if(mounted)setState(() {});
+          setState(() {
+            harvests.insert(0, result);
+          });
         }else{
           Tools.showErrorMessage(context, result.toString());
         }
@@ -217,7 +212,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     }catch(e){
       Tools.consoleLog('[_addHarvest]$e');
       Tools.showErrorMessage(context, e.toString());
-      setState(() {isLoading=false;});
+      if(mounted)setState(() {isLoading=false;});
     }
   }
 
@@ -250,16 +245,13 @@ class _NFCScanPageState extends State<NFCScanPage>{
 
   _deleteHarvestTask(HTask task)async{
     if(await Tools.confirmDeleting(context, S.of(context).deleteTaskConfirm)){
-      setState(() {
-        _deletingTask = task;
-      });
+      context.loaderOverlay.show();
       String? result = await context.read<HarvestModel>().deleteTask(task);
+      context.loaderOverlay.hide();
       if(result != null){
         Tools.showErrorMessage(context, result);
-      }
-      if(mounted)setState(() {
+      }else if(mounted)setState(() {
         if(selectedTask == task) selectedTask = null;
-        _deletingTask = null;
       });
     }
   }
@@ -294,15 +286,6 @@ class _NFCScanPageState extends State<NFCScanPage>{
         ),
       ),
     );
-    if(_deletingTask != null && _deletingTask?.id == task.id){
-      return Stack(
-        alignment: Alignment.center,
-        children: [
-          child,
-          CircularProgressIndicator(backgroundColor: Colors.red,),
-        ],
-      );
-    }
     return CupertinoPopoverButton(
       popoverBoxShadow: [
         BoxShadow(color: Colors.black54,blurRadius: 5.0)
@@ -317,7 +300,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(S.of(context).editContainer, style: TextStyle(color: Colors.black87),),
+                    Text(S.of(context).updateTask, style: TextStyle(color: Colors.black87),),
                     Icon(Icons.edit, color: Colors.black87,),
                   ],
                 ),

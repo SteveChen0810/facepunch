@@ -46,6 +46,7 @@ dependencies:
   image_cropper: ^1.4.1
   device_info: ^2.0.3
   assets_audio_player: ^3.0.3+6
+  loader_overlay: ^2.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

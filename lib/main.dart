@@ -1,4 +1,5 @@
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'models/user_model.dart';
 import 'models/revision_model.dart';
 import 'models/work_model.dart';
 import 'screens/splash_screen.dart';
+import 'widgets/spin_circle.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,22 +47,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FacePunch',
-      debugShowCheckedModeBanner: context.watch<AppModel>().isDebug,
-      theme: ThemeData(
-        splashColor: Color(primaryColor),
-        primaryColor: Color(primaryColor),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return GlobalLoaderOverlay(
+      useDefaultLoading: false,
+      overlayWidget: SpinKitCircle(color: Colors.white, size: 60,),
+      overlayColor: Colors.black.withOpacity(0.6),
+      overlayOpacity: 1,
+      child: MaterialApp(
+        title: 'FacePunch',
+        debugShowCheckedModeBanner: context.watch<AppModel>().isDebug,
+        theme: ThemeData(
+          splashColor: Color(primaryColor),
+          primaryColor: Color(primaryColor),
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        locale: Locale(context.watch<UserModel>().locale),
+        localizationsDelegates: [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: S.delegate.supportedLocales,
+        home: SplashScreen(),
       ),
-      locale: Locale(context.watch<UserModel>().locale),
-      localizationsDelegates: [
-        S.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: S.delegate.supportedLocales,
-      home: SplashScreen(),
     );
   }
 

@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '/widgets/calendar_strip/date-utils.dart';
@@ -9,14 +14,11 @@ import '/models/company_model.dart';
 import '/widgets/address_picker/country_state_city_picker.dart';
 import '/models/user_model.dart';
 import '/models/app_const.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
-import 'package:image_cropper/image_cropper.dart';
 
 class CreateEditEmployee extends StatefulWidget {
   final User? employee;
-  CreateEditEmployee({this.employee});
+  final PageController? pageController;
+  CreateEditEmployee({this.employee, this.pageController});
   @override
   _CreateEditEmployeeState createState() => _CreateEditEmployeeState();
 }
@@ -42,9 +44,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
   String? country,state,city, language;
   DateTime? _startDate;
   DateTime? _birthDay;
-  bool isLoading = false;
-
-
 
   @override
   void initState() {
@@ -99,11 +98,11 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
           )
       );
       if(_cropFile!=null){
-        setState(() {_photoFile = _cropFile;});
+        if(mounted)setState(() {_photoFile = _cropFile;});
         return null;
       }
     }
-    setState(() {_photoFile = null;});
+    if(mounted)setState(() {_photoFile = null;});
   }
 
   Widget getAvatarWidget(){
@@ -148,7 +147,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         initialDatePickerMode: DatePickerMode.day,
         firstDate: DateTime(1970),
         lastDate: DateTime(2101));
-    if (picked != null)
+    if (picked != null && mounted)
       setState(() {_startDate = picked;});
   }
 
@@ -159,7 +158,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         initialDatePickerMode: DatePickerMode.day,
         firstDate: DateTime(1970),
         lastDate: DateTime(2101));
-    if (picked != null)
+    if (picked != null && mounted)
       setState(() {_birthDay = picked;});
   }
 
@@ -187,6 +186,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
 
   createEditEmployee()async{
     try{
+      context.loaderOverlay.show();
       User user = User(
         id: widget.employee?.id,
         name: '${_fName.text} ${_lName.text}'.toLowerCase(),
@@ -228,15 +228,19 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         base64Image = base64Encode(_photoFile!.readAsBytesSync());
       }
       String? result = await context.read<CompanyModel>().createEditEmployee(user, base64Image);
+      context.loaderOverlay.hide();
       if(result == null){
         Tools.showSuccessMessage(context, S.of(context).success);
-        Future.delayed(Duration(seconds: 1)).whenComplete((){
+        if(widget.pageController != null){
+          widget.pageController!.jumpToPage(0);
+        }else if(widget.employee != null){
           Navigator.pop(context);
-        });
+        }
       }else{
         Tools.showErrorMessage(context, result);
       }
     }catch(e){
+      context.loaderOverlay.hide();
       Tools.consoleLog("[createEditEmployee] $e");
       Tools.showErrorMessage(context, e.toString());
     }
@@ -259,13 +263,13 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         title: Text(widget.employee==null?S.of(context).createNewEmployee:S.of(context).editEmployee,),
         backgroundColor: Color(primaryColor),
         elevation: 0,
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
           ),
           width: MediaQuery.of(context).size.width,
           margin: EdgeInsets.all(8),
@@ -344,7 +348,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _fNameError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
@@ -367,7 +371,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _lNameError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
                 keyboardType: TextInputType.name,
@@ -390,7 +394,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _emailError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -409,9 +413,8 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _passwordError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.number,
-                maxLength: 4,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
                 controller: _password,
@@ -430,7 +433,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _addressError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -446,7 +449,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     labelText: S.of(context).aptSuiteBuilding,
                     contentPadding: EdgeInsets.zero,
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.streetAddress,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -482,7 +485,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   contentPadding: EdgeInsets.zero,
                   errorText: _postalError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -501,7 +504,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   labelText: S.of(context).phoneNumber,
                   contentPadding: EdgeInsets.zero,
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -518,7 +521,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                   contentPadding: EdgeInsets.zero,
                   errorText: _codeError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -535,7 +538,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _startDateError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 readOnly: true,
                 onTap: (){
                   _selectStartDate(context);
@@ -556,7 +559,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _salaryError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
@@ -573,7 +576,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     contentPadding: EdgeInsets.zero,
                     errorText: _birthDayError
                 ),
-                enabled: !isLoading && (settings?.useOwnData??false),
+                enabled: settings?.useOwnData??false,
                 readOnly: true,
                 onTap: (){
                   _selectBirthDate(context);
@@ -591,7 +594,6 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     labelText: "NFC",
                     contentPadding: EdgeInsets.zero,
                 ),
-                enabled: !isLoading,
                 onTap: ()async{
                   if(await NfcManager.instance.isAvailable()){
                     NfcManager.instance.startSession(
@@ -622,7 +624,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
               ),
               SizedBox(height: 4,),
               DropdownButton<String>(
-                items: ['English','Spanish','French'].map((String value) {
+                items: ['English', 'Spanish', 'French'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Padding(
@@ -647,20 +649,17 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 height: 40,
                 color: Colors.black87,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                child: isLoading
-                    ?SizedBox( height: 28, width: 28, child: CircularProgressIndicator(strokeWidth: 2,),)
-                    :Padding(
+                child: Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                     ),
                 onPressed: ()async{
                   FocusScope.of(context).requestFocus(FocusNode());
                   bool valid = validator();
-                  setState(() {});
                   if(valid){
-                    setState(() {isLoading = true;});
                     await createEditEmployee();
-                    setState(() {isLoading = false;});
+                  }else{
+                    setState(() {});
                   }
                 },
               ),

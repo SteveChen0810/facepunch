@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/company_model.dart';
@@ -9,6 +8,7 @@ import '/widgets/address_picker/country_state_city_picker.dart';
 import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class AdminSetting extends StatefulWidget {
 
@@ -34,12 +34,6 @@ class _AdminSettingState extends State<AdminSetting> {
   late TextEditingController _phone;
   String? country, state, city;
   String? _nameError, _addressError, _postalCodeError;
-
-  bool isProfileUpdating = false;
-  bool isCompanyUpdating = false;
-  bool isRevisionNotificationUpdating = false;
-  bool isPunchNotificationUpdating = false;
-
   String punchKey = '';
 
   @override
@@ -126,9 +120,8 @@ class _AdminSettingState extends State<AdminSetting> {
 
   updateUser()async{
     try{
-      if(isProfileUpdating)return;
       if(profileValidator()){
-        setState(() {isProfileUpdating = true;});
+        context.loaderOverlay.show();
         String? result = await context.read<UserModel>().updateAdmin(
             email: _email.text,
             fName: _fName.text,
@@ -136,7 +129,7 @@ class _AdminSettingState extends State<AdminSetting> {
             newPassword: _newPassword.text,
             oldPassword: _oldPassword.text
         );
-        setState(() {isProfileUpdating = false;});
+        context.loaderOverlay.hide();
         if(result!=null){
           Tools.showErrorMessage(context, result);
         }
@@ -144,14 +137,14 @@ class _AdminSettingState extends State<AdminSetting> {
         setState(() {});
       }
     }catch(e){
+      context.loaderOverlay.hide();
       Tools.consoleLog("[SettingScreen.updateUser.err] $e");
     }
   }
 
   updateCompany()async{
     try{
-      if(isCompanyUpdating)return;
-      setState(() {isCompanyUpdating = true;});
+      context.loaderOverlay.show();
       String? result = await context.read<CompanyModel>().updateCompany(
           name: _name.text,
           phone: _phone.text,
@@ -162,13 +155,12 @@ class _AdminSettingState extends State<AdminSetting> {
           address2: _address2.text,
           address1: _address1.text
       );
-      setState(() {
-        isCompanyUpdating = false;
-      });
+      context.loaderOverlay.hide();
       if(result!=null){
         Tools.showErrorMessage(context, result);
       }
     }catch(e){
+      context.loaderOverlay.hide();
       Tools.consoleLog("[SettingScreen.updateCompany.err] $e");
     }
   }
@@ -229,7 +221,6 @@ class _AdminSettingState extends State<AdminSetting> {
                         textCapitalization: TextCapitalization.words,
                         textInputAction: TextInputAction.next,
                         maxLines: 1,
-                        enabled: !isProfileUpdating,
                         controller: _fName,
                         onChanged: (v){
                           _fName.value = _fName.value.copyWith(text: firstToUpper(v));
@@ -251,7 +242,6 @@ class _AdminSettingState extends State<AdminSetting> {
                         textCapitalization: TextCapitalization.words,
                         textInputAction: TextInputAction.next,
                         maxLines: 1,
-                        enabled: !isProfileUpdating,
                         controller: _lName,
                         onChanged: (v){
                           _lName.value = _lName.value.copyWith(text: firstToUpper(v));
@@ -270,7 +260,6 @@ class _AdminSettingState extends State<AdminSetting> {
                             errorText: _emailError
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        enabled: !isProfileUpdating,
                         controller: _email,
                       ),
                       TextField(
@@ -286,7 +275,6 @@ class _AdminSettingState extends State<AdminSetting> {
                             errorText: _passwordError
                         ),
                         keyboardType: TextInputType.visiblePassword,
-                        enabled: !isProfileUpdating,
                         controller: _oldPassword,
                         enableSuggestions: false,
                         obscureText: true,
@@ -304,7 +292,6 @@ class _AdminSettingState extends State<AdminSetting> {
                           isDense: true,
                         ),
                         keyboardType: TextInputType.visiblePassword,
-                        enabled: !isProfileUpdating,
                         controller: _newPassword,
                         enableSuggestions: false,
                         obscureText: true,
@@ -315,11 +302,7 @@ class _AdminSettingState extends State<AdminSetting> {
                         child: MaterialButton(
                           minWidth: MediaQuery.of(context).size.width/2,
                           padding: EdgeInsets.all(8),
-                          child: isProfileUpdating?SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
-                          ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          child: Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           onPressed: updateUser,
                           color: Colors.red,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -441,11 +424,7 @@ class _AdminSettingState extends State<AdminSetting> {
                         child: MaterialButton(
                           minWidth: MediaQuery.of(context).size.width/2,
                           padding: EdgeInsets.all(8),
-                          child: isCompanyUpdating?SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(backgroundColor: Colors.white, strokeWidth: 2,)
-                          ):Text(S.of(context).save.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
+                          child: Text(S.of(context).save.toUpperCase(), style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                           onPressed: updateCompany,
                           color: Colors.red,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -460,51 +439,29 @@ class _AdminSettingState extends State<AdminSetting> {
                   children: [
                     SwitchListTile(
                       value: companySettings.receiveRevisionNotification??true,
-                      onChanged: isRevisionNotificationUpdating?null:(v)async{
-                        setState(() {isRevisionNotificationUpdating = true;});
+                      onChanged: (v)async{
+                        context.loaderOverlay.show();
                         companySettings.receiveRevisionNotification = v;
                         String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                        context.loaderOverlay.hide();
                         if(result!=null)Tools.showErrorMessage(context, result);
-                        setState(() {isRevisionNotificationUpdating = false;});
                       },
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                      title: Row(
-                        children: [
-                          Text(S.of(context).receiveRevisionNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
-                          SizedBox(width: 10,),
-                          if(isRevisionNotificationUpdating)
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2,),
-                            )
-                        ],
-                      ),
+                      title: Text(S.of(context).receiveRevisionNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
                     ),
                     SwitchListTile(
                       value: companySettings.receivePunchNotification??false,
-                      onChanged: isPunchNotificationUpdating?null:(v)async{
-                        setState(() {isPunchNotificationUpdating = true;});
+                      onChanged: (v)async{
+                        context.loaderOverlay.show();
                         companySettings.receivePunchNotification = v;
                         String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                        context.loaderOverlay.hide();
                         if(result!=null)Tools.showErrorMessage(context, result);
-                        setState(() {isPunchNotificationUpdating = false;});
                       },
                       dense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8.0),
-                      title: Row(
-                        children: [
-                          Text(S.of(context).receivePunchNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
-                          SizedBox(width: 10,),
-                          if(isPunchNotificationUpdating)
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2,),
-                            )
-                        ],
-                      ),
+                      title: Text(S.of(context).receivePunchNotification,style: TextStyle(color: Colors.black87,fontSize: 16,),),
                     ),
                   ],
                 ),
@@ -513,7 +470,7 @@ class _AdminSettingState extends State<AdminSetting> {
                 child: InkWell(
                   onTap: (){
                     Clipboard.setData(new ClipboardData(text: punchKey)).then((_){
-                      Tools.showSuccessMessage(context, S.of(context).deviceIdCopied);
+                      Tools.showErrorMessage(context, S.of(context).deviceIdCopied);
                     });
                   },
                   child: Padding(

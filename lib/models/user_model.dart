@@ -1001,6 +1001,22 @@ class User with HttpRequest{
       return e.toString();
     }
   }
+
+  Future<String?> delete()async{
+    String result = 'Oops, Unknown Errors!';
+    try{
+      var res = await sendPostRequest(AppConst.deleteEmployee, GlobalData.token, {'id' : id});
+      Tools.consoleLog("[User.delete.res] ${res.body}");
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog("[User.delete.err] $e");
+    }
+    return result;
+  }
 }
 
 class Punch{

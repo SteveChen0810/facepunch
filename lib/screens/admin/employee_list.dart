@@ -3,24 +3,18 @@ import 'package:geolocator/geolocator.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
-
+import 'package:loader_overlay/loader_overlay.dart';
 import '/lang/l10n.dart';
-import '/models/notification.dart';
-import '/models/revision_model.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
 import '/models/company_model.dart';
 import '/screens/admin/employee_logs.dart';
-import '/screens/admin/settings/admin_settings.dart';
-import '/screens/admin/settings/notification_page.dart';
 import '/screens/bug_report_page.dart';
 import '../home_page.dart';
 import '/widgets/autocomplete_textfield.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/widgets/utils.dart';
 import '/widgets/popover/cool_ui.dart';
-import 'nfc/harvest_report.dart';
-import 'nfc/nfc_scan.dart';
 import 'create_edit_employee.dart';
 
 class EmployeeList extends StatefulWidget {
@@ -102,7 +96,8 @@ class _EmployeeListState extends State<EmployeeList> {
                 ),
               ),
               onTap: (){
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CreateEditEmployee(employee: user,)));
+                Navigator.of(_context).pop();
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateEditEmployee(employee: user,)));
                 return true;
               },
             ),
@@ -119,9 +114,8 @@ class _EmployeeListState extends State<EmployeeList> {
                   ),
                 ),
                 onTap: (){
-                  if(user.id != null){
-                    _deleteEmployee(user.id!);
-                  }
+                  Navigator.pop(_context);
+                  _deleteEmployee(user);
                   return true;
                 },
               )
@@ -185,57 +179,17 @@ class _EmployeeListState extends State<EmployeeList> {
     );
   }
 
-  _deleteEmployee(int userId)async{
-    bool isDeletingField = false;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_context){
-        return AlertDialog(
-            title: Text(S.of(context).deleteEmployeeConfirm,textAlign: TextAlign.center,),
-            content:StatefulBuilder(
-              builder: (_,setState)=>Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton(
-                          child: isDeletingField?SizedBox(
-                            height: 28,
-                            width: 28,
-                            child: CircularProgressIndicator(backgroundColor: Colors.white,),
-                          ):Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).delete,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                          ),
-                          onPressed: ()async{
-                            setState((){isDeletingField = true;});
-                            String? result = await context.read<CompanyModel>().deleteEmployee(userId);
-                            setState((){isDeletingField = false;});
-                            Navigator.pop(_context);
-                            if(result != null)Tools.showErrorMessage(context, result);
-                          },
-                        ),
-                        TextButton(
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Text(S.of(context).close.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, color: Colors.white),),
-                          ),
-                          onPressed: ()async{
-                            Navigator.pop(_context);
-                          },
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            )
-        );
-      },
-    );
+  _deleteEmployee(User employee)async{
+    if(await Tools.confirmDeleting(context, S.of(context).deleteEmployeeConfirm)){
+      context.loaderOverlay.show();
+      String? result = await employee.delete();
+      context.loaderOverlay.hide();
+      if(result == null){
+        context.read<CompanyModel>().deleteEmployee(employee.id!);
+      }else{
+        Tools.showErrorMessage(context, result);
+      }
+    }
   }
 
   _showEmployeeLog(User user)async{
@@ -270,13 +224,10 @@ class _EmployeeListState extends State<EmployeeList> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
     List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
-    List<Revision> revisions  = context.watch<NotificationModel>().revisions.where((r) => r.status == 'requested').toList();
     settings = context.watch<CompanyModel>().myCompanySettings;
     List<User> users = context.watch<CompanyModel>().users;
-    User? user = context.watch<UserModel>().user;
 
     return Scaffold(
       key: _scaffoldKey,

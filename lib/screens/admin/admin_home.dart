@@ -1,7 +1,9 @@
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/app_const.dart';
+import 'package:facepunch/models/company_model.dart';
 import 'package:facepunch/models/harvest_model.dart';
 import 'package:facepunch/models/notification.dart';
+import 'package:facepunch/models/user_model.dart';
 import 'package:facepunch/models/work_model.dart';
 import 'package:facepunch/screens/admin/employee_list.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +36,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
   _fetchCompanyData()async{
     await context.read<WorkModel>().getProjectsAndTasks();
     await context.read<HarvestModel>().getHarvestData();
-    await context.read<NotificationModel>().getNotificationFromServer();
   }
 
   _onMessage(message){
@@ -51,6 +52,10 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    User? user = context.watch<UserModel>().user;
+    final settings = context.watch<CompanyModel>().myCompanySettings;
+    if(user == null) return Container();
+
     return Scaffold(
       body: WillPopScope(
         onWillPop: ()async{
@@ -59,10 +64,13 @@ class _AdminHomePageState extends State<AdminHomePage> {
         child: PageView(
           children: [
             EmployeeList(),
-            CreateEditEmployee(),
+            if(settings?.useOwnData??false)
+              CreateEditEmployee(pageController: _pageController,),
             NotificationPage(),
-            NFCScanPage(),
-            HarvestReportScreen(),
+            if(settings?.hasNFCHarvest??false)
+              NFCScanPage(),
+            if(settings?.hasHarvestReport??false)
+              HarvestReportScreen(),
             AdminSetting(),
           ],
           controller: _pageController,
@@ -79,26 +87,29 @@ class _AdminHomePageState extends State<AdminHomePage> {
               activeIcon: Image.asset('assets/images/ic_dashboard.png', color: Color(primaryColor), width: 30, height: 30,),
               label: S.of(context).calender
           ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.person_add),
-              activeIcon: Icon(Icons.person_add, color: Color(primaryColor),),
-              label: S.of(context).employee
-          ),
+          if(settings?.useOwnData??false)
+            BottomNavigationBarItem(
+                icon: Icon(Icons.person_add),
+                activeIcon: Icon(Icons.person_add, color: Color(primaryColor),),
+                label: S.of(context).employee
+            ),
           BottomNavigationBarItem(
               icon: Icon(Icons.notifications),
               activeIcon: Icon(Icons.notifications, color: Color(primaryColor),),
               label: S.of(context).notifications
           ),
-          BottomNavigationBarItem(
-              icon: Image.asset('assets/images/nfc.png', color: Colors.grey, width: 30, height: 30,),
-              activeIcon: Image.asset('assets/images/nfc.png', color: Color(primaryColor), width: 30, height: 30,),
-              label: S.of(context).nfc
-          ),
-          BottomNavigationBarItem(
-              icon: Image.asset('assets/images/ic_harvest.png', color: Colors.grey, width: 30, height: 30,),
-              activeIcon: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
-              label: S.of(context).harvestReport
-          ),
+          if(settings?.hasNFCHarvest??false)
+            BottomNavigationBarItem(
+                icon: Image.asset('assets/images/nfc.png', color: Colors.grey, width: 30, height: 30,),
+                activeIcon: Image.asset('assets/images/nfc.png', color: Color(primaryColor), width: 30, height: 30,),
+                label: S.of(context).nfc
+            ),
+          if(settings?.hasHarvestReport??false)
+            BottomNavigationBarItem(
+                icon: Image.asset('assets/images/ic_harvest.png', color: Colors.grey, width: 30, height: 30,),
+                activeIcon: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
+                label: S.of(context).harvestReport
+            ),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               activeIcon: Icon(Icons.settings, color: Color(primaryColor),),
