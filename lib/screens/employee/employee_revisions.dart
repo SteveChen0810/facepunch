@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
@@ -19,7 +20,6 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
 
   RefreshController _refreshController = RefreshController(initialRefresh: true);
   List<Revision> revisions = [];
-  Revision? _revision;
 
   _onRefresh()async{
     final user = context.read<UserModel>().user;
@@ -30,7 +30,7 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
       Tools.showErrorMessage(context, result);
     }
     _refreshController.refreshCompleted();
-    if(mounted)setState(() {_revision = null;});
+    if(mounted)setState(() {});
   }
 
 
@@ -41,7 +41,6 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
       if(revision.type == "schedule"){
         content = InkWell(
           onTap: revision.hasDescription()?null:(){
-            if(_revision != null) return;
             _showRevisionDialog(revision);
           },
           child: Column(
@@ -456,16 +455,6 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
         );
       }
 
-
-
-      if(revision == _revision){
-        content = Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircularProgressIndicator(strokeWidth: 2,),
-          )
-        );
-      }
       return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -547,7 +536,6 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
                   TextButton(
                       onPressed: (){
                         if(description.isNotEmpty){
-                          setState(() {_revision = revision;});
                           Navigator.of(_context).pop();
                           _addDescription(revision, description);
                         }else{
@@ -564,12 +552,13 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
   }
 
   _addDescription(Revision revision, description)async{
+    context.loaderOverlay.show();
     String? result = await revision.addDescription(description);
+    context.loaderOverlay.hide();
     if(result != null){
       Tools.showErrorMessage(context, result);
     }
     if(mounted) setState(() {
-      _revision = null;
       _refreshController.requestRefresh();
     });
   }

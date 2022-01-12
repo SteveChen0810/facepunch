@@ -1,3 +1,4 @@
+import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -107,6 +108,12 @@ class _NotificationPageState extends State<NotificationPage> {
     Widget content = SizedBox();
     try{
       if(revision.type == 'schedule'){
+        if(revision.isChanged('start')){
+          revision.correctStartTime = PunchDateUtils.toDateHourMinute(revision.newValue['start']);
+        }
+        if(revision.isChanged('end')){
+          revision.correctEndTime = PunchDateUtils.toDateHourMinute(revision.newValue['end']);
+        }
         content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -167,12 +174,21 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['start']))),
-                    ],
-                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TimeEditor(
+                      initTime: revision.newValue['start'],
+                      isOptional: false,
+                      label: S.of(context).correct,
+                      onChanged: (v){
+                        if(v != null){
+                          revision.correctStartTime = PunchDateUtils.toDateHourMinute(v);
+                        }else{
+                          revision.correctStartTime = null;
+                        }
+                      },
+                    ),
+                  )
                 ],
               ),
             if(!revision.isChanged('start'))
@@ -193,12 +209,21 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
-                    ],
-                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TimeEditor(
+                      initTime: revision.newValue['end'],
+                      isOptional: false,
+                      label: S.of(context).correct,
+                      onChanged: (v){
+                        if(v != null){
+                          revision.correctEndTime = PunchDateUtils.toDateHourMinute(v);
+                        }else{
+                          revision.correctEndTime = null;
+                        }
+                      },
+                    ),
+                  )
                 ],
               ),
             if(!revision.isChanged('end'))
@@ -212,6 +237,7 @@ class _NotificationPageState extends State<NotificationPage> {
         );
       }
       if(revision.type == 'punch'){
+        revision.correctPunchTime = PunchDateUtils.toDateHourMinute(revision.newValue);
         content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -222,16 +248,27 @@ class _NotificationPageState extends State<NotificationPage> {
                 Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue))),
               ],
             ),
-            Row(
-              children: [
-                Text("  ${S.of(context).correct}:    "),
-                Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue))),
-              ],
-            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TimeEditor(
+                initTime: revision.newValue,
+                isOptional: false,
+                label: S.of(context).correct,
+                onChanged: (v){
+                  if(v != null){
+                    revision.correctPunchTime = PunchDateUtils.toDateHourMinute(v);
+                  }else{
+                    revision.correctPunchTime = null;
+                  }
+                },
+              ),
+            )
           ],
         );
       }
       if(revision.type == 'break'){
+        revision.correctStartTime = PunchDateUtils.toDateHourMinute(revision.newValue['start']);
+        revision.correctLength = revision.newValue['length'].toString();
         content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -242,11 +279,20 @@ class _NotificationPageState extends State<NotificationPage> {
                 Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
               ],
             ),
-            Row(
-              children: [
-                Text("  ${S.of(context).correct}:    "),
-                Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['start']))),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TimeEditor(
+                initTime: revision.newValue['start'],
+                isOptional: false,
+                label: S.of(context).correct,
+                onChanged: (v){
+                  if(v != null){
+                    revision.correctStartTime = PunchDateUtils.toDateHourMinute(v);
+                  }else{
+                    revision.correctStartTime = null;
+                  }
+                },
+              ),
             ),
             Text(S.of(context).length, style: TextStyle(fontWeight: FontWeight.w500),),
             Row(
@@ -255,11 +301,20 @@ class _NotificationPageState extends State<NotificationPage> {
                 Expanded(child: Text('${revision.oldValue['length']} M')),
               ],
             ),
-            Row(
-              children: [
-                Text("  ${S.of(context).correct}:    "),
-                Expanded(child: Text('${revision.newValue['length']} M')),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "${S.of(context).correct} (M)",
+                    isDense: true
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (v){
+                  revision.correctLength = v;
+                },
+                controller: TextEditingController(text: '${revision.newValue['length']}'),
+              ),
             ),
           ],
         );
@@ -344,6 +399,12 @@ class _NotificationPageState extends State<NotificationPage> {
         );
       }
       if(revision.type == 'work'){
+        if(revision.isChanged('start')){
+          revision.correctStartTime = PunchDateUtils.toDateHourMinute(revision.newValue['start']);
+        }
+        if(revision.isChanged('end')){
+          revision.correctEndTime = PunchDateUtils.toDateHourMinute(revision.newValue['end']);
+        }
         content = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -404,11 +465,20 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['start']))),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TimeEditor(
+                      initTime: revision.newValue['start'],
+                      isOptional: false,
+                      label: S.of(context).correct,
+                      onChanged: (v){
+                        if(v != null){
+                          revision.correctStartTime = PunchDateUtils.toDateHourMinute(v);
+                        }else{
+                          revision.correctStartTime = null;
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -430,11 +500,20 @@ class _NotificationPageState extends State<NotificationPage> {
                       Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Text("  ${S.of(context).correct}:    "),
-                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.newValue['end']))),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TimeEditor(
+                      initTime: revision.newValue['end'],
+                      isOptional: false,
+                      label: S.of(context).correct,
+                      onChanged: (v){
+                        if(v != null){
+                          revision.correctEndTime = PunchDateUtils.toDateHourMinute(v);
+                        }else{
+                          revision.correctEndTime = null;
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),

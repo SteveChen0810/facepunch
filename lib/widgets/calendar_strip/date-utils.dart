@@ -182,16 +182,16 @@ class PunchDateUtils {
 
   static String getTimeString(date){
     if(date is String){
-      return DateFormat("kk:mm").format(DateTime.parse(date));
+      return DateFormat("hh:mm").format(DateTime.parse(date));
     }
-    return DateFormat("kk:mm").format(date);
+    return DateFormat("hh:mm").format(date);
   }
 
   static String getTimeSecondString(date){
     if(date is String){
-      return DateFormat("kk:mm:ss").format(DateTime.parse(date));
+      return DateFormat("hh:mm:ss").format(DateTime.parse(date));
     }
-    return DateFormat("kk:mm:ss").format(date);
+    return DateFormat("hh:mm:ss").format(date);
   }
 
   static String toDateTime(time){
@@ -204,8 +204,22 @@ class PunchDateUtils {
 
   static String toStandardDateTime(date){
     if(date is String){
-      return DateFormat("y-MM-dd kk:mm:ss").format(DateTime.parse(date));
+      return DateFormat("y-MM-dd hh:mm:ss").format(DateTime.parse(date));
     }
-    return DateFormat("y-MM-dd kk:mm:ss").format(date);
+    return DateFormat("y-MM-dd hh:mm:ss").format(date);
+  }
+
+  static String toDateString(date){
+    if(date is String){
+      return DateFormat("y-MM-dd").format(DateTime.parse(date));
+    }
+    return DateFormat("y-MM-dd").format(date);
+  }
+
+  static String toDateHourMinute(date){
+    if(date is String){
+      return DateFormat("y-MM-dd hh:mm").format(DateTime.parse(date));
+    }
+    return DateFormat("y-MM-dd hh:mm").format(date);
   }
 }

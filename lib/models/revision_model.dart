@@ -155,6 +155,11 @@ class Revision with HttpRequest{
   String? createdAt;
   String? updatedAt;
 
+  String? correctPunchTime;
+  String? correctStartTime;
+  String? correctEndTime;
+  String? correctLength;
+
   Revision({
     this.id,
     this.userId,
@@ -261,7 +266,13 @@ class Revision with HttpRequest{
       var res = await sendPostRequest(
           AppConst.acceptRevision,
           GlobalData.token,
-          {'id':id.toString()}
+          {
+            'id':id,
+            'correct_punch_time': correctPunchTime,
+            'correct_start_time': correctStartTime,
+            'correct_end_time': correctEndTime,
+            'correct_length': correctLength,
+          }
       );
       Tools.consoleLog("[Revision.accept.res] ${res.body}");
       if(res.statusCode==200){
