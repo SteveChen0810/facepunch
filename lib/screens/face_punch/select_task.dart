@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
@@ -7,6 +6,7 @@ import '/models/work_model.dart';
 import '/widgets/utils.dart';
 import '/widgets/project_picker.dart';
 import '/widgets/task_picker.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
 class SelectTaskScreen extends StatefulWidget{
 
@@ -19,7 +19,6 @@ class SelectTaskScreen extends StatefulWidget{
 
 class _SelectTaskScreenState extends State<SelectTaskScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool isLoading = false;
   List<WorkSchedule> schedules = [];
   List<EmployeeCall> calls = [];
   List<Project> projects = [];
@@ -54,8 +53,8 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
   }
 
   Future<void> startWork()async{
-    if(!isLoading){
-      setState(() { isLoading = true; });
+    try{
+      context.loaderOverlay.show();
       String? message;
       if(selectedCall != null){
         message = await selectedCall!.startCall(employee.token);
@@ -64,25 +63,33 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
       }else if(selectedProject != null && selectedTask != null){
         message = await employee.startShopTracking(selectedProject!.id, selectedTask!.id);
       }
-      setState(() { isLoading = false; });
+      context.loaderOverlay.hide();
       if(message != null){
         Tools.showErrorMessage(context, message);
       }else{
         Navigator.pop(context);
       }
+    }catch(e){
+      context.loaderOverlay.hide();
+      Tools.consoleLog('[SelectTaskScreen.startWork]$e');
+      Tools.showErrorMessage(context, S.of(context).somethingWentWrong);
     }
   }
 
   Future<void> startManualBreak()async{
-    if(!isLoading){
-      setState(() { isLoading = true; });
+    try{
+      context.loaderOverlay.show();
       String? message = await employee.startManualBreak();
-      setState(() { isLoading = false; });
+      context.loaderOverlay.hide();
       if(message != null){
         Tools.showErrorMessage(context, message);
       }else{
         Navigator.pop(context);
       }
+    }catch(e){
+      context.loaderOverlay.hide();
+      Tools.consoleLog('[SelectTaskScreen.startManualBreak]$e');
+      Tools.showErrorMessage(context, S.of(context).somethingWentWrong);
     }
   }
 
@@ -95,220 +102,210 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
         elevation: 0,
         backgroundColor: Color(primaryColor),
         centerTitle: true,
-        leading: IconButton(
-          onPressed: (){
-            if(!isLoading) Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back),
-        ),
+        automaticallyImplyLeading: !employee.checkType('call_shop_tracking'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            for(var call in calls)
-              Container(
-                margin: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: selectedCall==call?Color(primaryColor):Colors.green,
-                  borderRadius: BorderRadius.circular(8),
+      body: WillPopScope(
+        onWillPop: ()async{
+          return !employee.checkType('call_shop_tracking');
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              for(var call in calls)
+                Container(
+                  margin: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: selectedCall==call?Color(primaryColor):Colors.green,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: InkWell(
+                    onTap: (){
+                      setState(() {
+                        selectedProject = null;
+                        selectedTask = null;
+                        selectedSchedule = null;
+                        selectedCall = call;
+                      });
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Text('${S.of(context).start} : '),
+                                Text(call.startTime(), style: TextStyle(fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text('${S.of(context).end} : '),
+                                Text(call.endTime(), style: TextStyle(fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text('${S.of(context).priority} : '),
+                                Text('${call.priority}', style: TextStyle(fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    child: Text(call.projectTitle()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    child: Text(call.taskTitle()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text('${S.of(context).todo} : ', style: TextStyle(fontWeight: FontWeight.bold),),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: Text('${call.todo}'),
+                        ),
+                        Text('${S.of(context).note} : ', style: TextStyle(fontWeight: FontWeight.bold),),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          child: Text('${call.note}'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                padding: EdgeInsets.all(8),
-                child: InkWell(
-                  onTap: (){
-                    setState(() {
-                      selectedProject = null;
-                      selectedTask = null;
-                      selectedSchedule = null;
-                      selectedCall = call;
-                    });
-                  },
+              for(var schedule in schedules)
+                Container(
+                  margin: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: selectedSchedule==schedule ? Color(primaryColor) : Color(int.parse('0xFF${schedule.color}')),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: InkWell(
+                    onTap: ()=>setState(() {
+                      selectedCall = null;
+                      selectedSchedule = schedule;
+                    }),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Text('${S.of(context).start} : '),
+                                Text(schedule.startTime(), style: TextStyle(fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text('${S.of(context).end} : '),
+                                Text(schedule.endTime(), style: TextStyle(fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text('${S.of(context).shift} : '),
+                                Text('${schedule.shift?.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    child: Text(schedule.projectTitle()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    child: Text(schedule.taskTitle()),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if(employee.hasTracking())
+                Container(
+                  margin: EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text('${S.of(context).start} : '),
-                              Text(call.startTime(), style: TextStyle(fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('${S.of(context).end} : '),
-                              Text(call.endTime(), style: TextStyle(fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('${S.of(context).priority} : '),
-                              Text('${call.priority}', style: TextStyle(fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                        ],
+                      Text(S.of(context).project),
+                      ProjectPicker(
+                        projects: projects,
+                        projectId: selectedProject?.id,
+                        onSelected: (v){
+                          setState(() {
+                            selectedCall = null;
+                            selectedProject = v;
+                          });
+                        },
                       ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  child: Text(call.projectTitle()),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  child: Text(call.taskTitle()),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text('${S.of(context).todo} : ', style: TextStyle(fontWeight: FontWeight.bold),),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text('${call.todo}'),
-                      ),
-                      Text('${S.of(context).note} : ', style: TextStyle(fontWeight: FontWeight.bold),),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Text('${call.note}'),
+                      SizedBox(height: 20,),
+                      Text(S.of(context).task),
+                      TaskPicker(
+                        tasks: tasks,
+                        taskId: selectedTask?.id,
+                        onSelected: (v){
+                          setState(() {
+                            selectedCall = null;
+                            selectedTask = v;
+                          });
+                        },
                       ),
                     ],
                   ),
                 ),
-              ),
-            for(var schedule in schedules)
-              Container(
-                margin: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: selectedSchedule==schedule ? Color(primaryColor) : Color(int.parse('0xFF${schedule.color}')),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.all(8),
-                child: InkWell(
-                  onTap: ()=>setState(() {
-                    selectedCall = null;
-                    selectedSchedule = schedule;
-                  }),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text('${S.of(context).start} : '),
-                              Text(schedule.startTime(), style: TextStyle(fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('${S.of(context).end} : '),
-                              Text(schedule.endTime(), style: TextStyle(fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text('${S.of(context).shift} : '),
-                              Text('${schedule.shift?.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold),),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${S.of(context).project} : ', style: TextStyle(fontWeight: FontWeight.bold),),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  child: Text(schedule.projectTitle()),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('${S.of(context).task} : ', style: TextStyle(fontWeight: FontWeight.bold),),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  child: Text(schedule.taskTitle()),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            if(employee.hasTracking())
-              Container(
-                margin: EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(S.of(context).project),
-                    ProjectPicker(
-                      projects: projects,
-                      projectId: selectedProject?.id,
-                      onSelected: (v){
-                        setState(() {
-                          selectedCall = null;
-                          selectedProject = v;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 20,),
-                    Text(S.of(context).task),
-                    TaskPicker(
-                      tasks: tasks,
-                      taskId: selectedTask?.id,
-                      onSelected: (v){
-                        setState(() {
-                          selectedCall = null;
-                          selectedTask = v;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: isLoading?
-      Container(
-            margin: EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(color: Colors.green,),
-              ],
-            ),
-          ):
-      Container(
+      bottomNavigationBar: Container(
         margin: EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,

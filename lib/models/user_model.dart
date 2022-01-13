@@ -808,6 +808,10 @@ class User with HttpRequest{
     return ['call', 'call_shop_daily', 'call_shop_tracking'].contains(type);
   }
 
+  bool checkType(String v){
+    return type == v;
+  }
+
   bool hasNTCTracking(){
     return canNTCTracking??false;
   }
