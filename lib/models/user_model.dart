@@ -25,7 +25,7 @@ class UserModel extends BaseProvider{
       bool storageReady = await storage.ready;
       if(storageReady){
         var json = await storage.getItem('user');
-        if(json!=null){
+        if(json != null){
           user = User.fromJson(json);
           user = await getUserInfoFromServer(user!.token!);
           if(user != null){
@@ -429,7 +429,6 @@ class User with HttpRequest{
   String? lastName;
   String? phone;
   String? pin;
-  List<String>? projects;
   String? employeeCode;
   String? start;
   String? salary;
@@ -448,8 +447,6 @@ class User with HttpRequest{
   String? emailVerifyNumber;
   int? companyId;
   String? nfc;
-  bool? canNTCTracking = true;
-  bool? sendScheduleNotification = true;
   String? createdAt;
   String? updatedAt;
   bool? active = true;
@@ -464,11 +461,15 @@ class User with HttpRequest{
   Punch? lastPunch;
   String? token;
 
+  bool? canNTCTracking = true;
+  bool? sendScheduleNotification = true;
+  bool? canSelfPunch = true;
+  bool? show = true;
+
   User({
     this.id,
     this.name,
     this.email,
-    this.emailVerifiedAt,
     this.firstName,
     this.lastName,
     this.phone,
@@ -486,19 +487,11 @@ class User with HttpRequest{
     this.avatar,
     this.role,
     this.type,
-    this.firebaseToken,
-    this.emailVerifyNumber,
     this.companyId,
     this.employeeCode,
     this.nfc,
-    this.lastPunch,
-    this.createdAt,
-    this.updatedAt,
-    this.canNTCTracking,
     this.token,
-    this.sendScheduleNotification,
-    this.active,
-    this.projects
+    this.active
   });
 
   User.fromJson(Map<String, dynamic> json) {
@@ -539,14 +532,13 @@ class User with HttpRequest{
         lastPunch = Punch.fromJson(json['last_punch']);
       }
       nfc = json['nfc'];
-      canNTCTracking = json['can_nfc_tracking'] != null && json['can_nfc_tracking'] == 1;
-      sendScheduleNotification = json['send_schedule_notification'] != null && json['send_schedule_notification'] == 1;
       createdAt = json['created_at'];
       updatedAt = json['updated_at'];
-      if(json['projects'] != null){
-        projects = json['projects'].cast<String>();
-      }
-      active = json['active'] != null && json['active'] == 1;
+      active = json['active']??false;
+      canNTCTracking = json['can_nfc_tracking']??false;
+      sendScheduleNotification = json['send_schedule_notification']??false;
+      canSelfPunch = json['can_self_punch']??false;
+      show = json['show']??false;
       if(json['break'] != null){
         breakSetting = BreakSetting.fromJson(json['break']);
       }
@@ -584,18 +576,12 @@ class User with HttpRequest{
     data['employee_code'] = this.employeeCode;
     data['token'] = this.token;
     data['nfc'] = this.nfc;
-    if(this.canNTCTracking!=null){
-      data['can_nfc_tracking'] = this.canNTCTracking!?1:0;
-    }
-    if(this.sendScheduleNotification!=null){
-      data['send_schedule_notification'] = this.sendScheduleNotification!?1:0;
-    }
+    data['can_nfc_tracking'] = this.canNTCTracking;
+    data['send_schedule_notification'] = this.sendScheduleNotification;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
-    data['projects'] = this.projects;
-    if(this.active != null){
-      data['active'] = this.active!?1:0;
-    }
+    data['active'] = this.active;
+    data['show'] = this.show;
     if(this.breakSetting != null){
       data['break'] = this.breakSetting!.toJson();
     }

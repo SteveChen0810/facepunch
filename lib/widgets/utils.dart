@@ -18,7 +18,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '/models/notification.dart';
-import '/screens/employee/call_detail.dart';
 import '/models/app_const.dart';
 import '/lang/l10n.dart';
 import 'face_painter.dart';
@@ -345,7 +344,7 @@ class Tools {
     return result;
   }
 
-  static showNotificationDialog(AppNotification notification, BuildContext context){
+  static showNotificationDialog(AppNotification notification, BuildContext context, VoidCallback? onOpen){
     try{
       showDialog(
         context: context,
@@ -365,12 +364,9 @@ class Tools {
               },
               child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
             ),
-            if(notification.hasCall())
+            if(onOpen != null)
               TextButton(
-                onPressed: (){
-                  Navigator.pop(_context);
-                  Navigator.push(context, MaterialPageRoute(builder: (c)=>CallDetailScreen(notification.callId!)));
-                },
+                onPressed: onOpen,
                 child: Text(S.of(context).open,style: TextStyle(color: Colors.green),),
               ),
           ],

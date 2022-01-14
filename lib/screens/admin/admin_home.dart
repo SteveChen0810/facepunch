@@ -25,6 +25,7 @@ class AdminHomePage extends StatefulWidget {
 class _AdminHomePageState extends State<AdminHomePage> {
   PageController _pageController = PageController(initialPage: 0);
   int index = 0;
+  CompanySettings? settings;
 
   @override
   void initState() {
@@ -43,7 +44,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
       if(mounted){
         AppNotification newNotification = AppNotification.fromJsonFirebase(message.data);
         Tools.playSound();
-        Tools.showNotificationDialog(newNotification, context);
+        VoidCallback? onOpen;
+        switch (newNotification.type){
+          case 'revision_request':
+            onOpen = (){
+              Navigator.pop(context);
+              _pageController.jumpToPage(1);
+            };
+            break;
+        }
+        Tools.showNotificationDialog(newNotification, context, onOpen);
       }
     }catch(e){
       Tools.consoleLog('[AdminHome._onMessage]$e');
@@ -53,7 +63,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   @override
   Widget build(BuildContext context) {
     User? user = context.watch<UserModel>().user;
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    settings = context.watch<CompanyModel>().myCompanySettings;
     if(user == null) return Container();
 
     return Scaffold(
@@ -64,9 +74,9 @@ class _AdminHomePageState extends State<AdminHomePage> {
         child: PageView(
           children: [
             EmployeeList(),
+            NotificationPage(),
             if(settings?.useOwnData??false)
               CreateEditEmployee(pageController: _pageController,),
-            NotificationPage(),
             if(settings?.hasNFCHarvest??false)
               NFCScanPage(),
             if(settings?.hasHarvestReport??false)
@@ -87,17 +97,17 @@ class _AdminHomePageState extends State<AdminHomePage> {
               activeIcon: Image.asset('assets/images/ic_dashboard.png', color: Color(primaryColor), width: 30, height: 30,),
               label: S.of(context).calender
           ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.notifications),
+              activeIcon: Icon(Icons.notifications, color: Color(primaryColor),),
+              label: S.of(context).notifications
+          ),
           if(settings?.useOwnData??false)
             BottomNavigationBarItem(
                 icon: Icon(Icons.person_add),
                 activeIcon: Icon(Icons.person_add, color: Color(primaryColor),),
                 label: S.of(context).employee
             ),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              activeIcon: Icon(Icons.notifications, color: Color(primaryColor),),
-              label: S.of(context).notifications
-          ),
           if(settings?.hasNFCHarvest??false)
             BottomNavigationBarItem(
                 icon: Image.asset('assets/images/nfc.png', color: Colors.grey, width: 30, height: 30,),
