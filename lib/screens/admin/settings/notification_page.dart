@@ -236,6 +236,89 @@ class _NotificationPageState extends State<NotificationPage> {
           ],
         );
       }
+      if(revision.type == 'timebox'){
+        if(revision.isChanged('start')){
+          revision.correctStartTime = PunchDateUtils.toDateHourMinute(revision.newValue['start']);
+        }
+        if(revision.isChanged('end')){
+          revision.correctEndTime = PunchDateUtils.toDateHourMinute(revision.newValue['end']);
+        }
+        content = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if(revision.isChanged('start'))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.w500),),
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).incorrect}: "),
+                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TimeEditor(
+                      initTime: revision.newValue['start'],
+                      isOptional: false,
+                      label: S.of(context).correct,
+                      onChanged: (v){
+                        if(v != null){
+                          revision.correctStartTime = PunchDateUtils.toDateHourMinute(v);
+                        }else{
+                          revision.correctStartTime = null;
+                        }
+                      },
+                    ),
+                  )
+                ],
+              ),
+            if(!revision.isChanged('start'))
+              Row(
+                children: [
+                  Text('${S.of(context).start} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
+                ],
+              ),
+            if(revision.isChanged('end'))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.w500),),
+                  Row(
+                    children: [
+                      Text("  ${S.of(context).incorrect}: "),
+                      Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TimeEditor(
+                      initTime: revision.newValue['end'],
+                      isOptional: false,
+                      label: S.of(context).correct,
+                      onChanged: (v){
+                        if(v != null){
+                          revision.correctEndTime = PunchDateUtils.toDateHourMinute(v);
+                        }else{
+                          revision.correctEndTime = null;
+                        }
+                      },
+                    ),
+                  )
+                ],
+              ),
+            if(!revision.isChanged('end'))
+              Row(
+                children: [
+                  Text('${S.of(context).end} : ', style: TextStyle(fontWeight: FontWeight.w500),),
+                  Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
+                ],
+              ),
+          ],
+        );
+      }
       if(revision.type == 'punch'){
         revision.correctPunchTime = PunchDateUtils.toDateHourMinute(revision.newValue);
         content = Column(
@@ -553,7 +636,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 Text(S.of(context).description, style: TextStyle(fontWeight: FontWeight.w500),),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                  child: Text('${revision.description}'),
+                  child: Text('${revision.description??''}'),
                 ),
               ],
             ),

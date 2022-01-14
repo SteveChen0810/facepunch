@@ -156,6 +156,82 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
             ],
           ),
         );
+      }else if(revision.type == "timebox"){
+        content = InkWell(
+          onTap: revision.hasDescription()?null:(){
+            _showRevisionDialog(revision);
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('${revision.type?.toUpperCase()}'),
+                  Text('${revision.getTime()}', style: TextStyle(fontWeight: FontWeight.w500),),
+                  revision.statusWidget(context),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if(revision.isChanged('start'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.bold),),
+                        Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${S.of(context).incorrect}: "),
+                                Text("${S.of(context).correct}: "),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(PunchDateUtils.getTimeString(revision.oldValue['start'])),
+                                Text(PunchDateUtils.getTimeString(revision.newValue['start'])),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  if(revision.isChanged('end'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.bold),),
+                        Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("${S.of(context).incorrect}: "),
+                                Text("${S.of(context).correct}: "),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text(PunchDateUtils.getTimeString(revision.oldValue['end'])),
+                                Text(PunchDateUtils.getTimeString(revision.newValue['end'])),
+                              ],
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              if(!revision.hasDescription())
+                Text('*${S.of(context).tapToSubmitDescription}*', style: TextStyle(color: Colors.red),)
+            ],
+          ),
+        );
       }else if(revision.type == 'punch'){
         content = Column(
           children: [
