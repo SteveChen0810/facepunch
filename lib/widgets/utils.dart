@@ -572,4 +572,23 @@ class Tools {
     );
     return allow;
   }
+
+  static Future<void> showTimeOutDialog(BuildContext context, String message)async{
+    await showDialog(
+      context: context,
+      builder: (_context){
+        Future.delayed(Duration(seconds: 3)).whenComplete((){
+          try{
+            Navigator.of(_context).pop();
+          }catch(e){
+            Tools.consoleLog('[Tools.showTimeOutDialog.err]$e');
+          }
+        });
+        return AlertDialog(
+          backgroundColor: Colors.green,
+          content: Text(message, style: TextStyle(fontSize: 20, color: Colors.white), textAlign: TextAlign.center,),
+        );
+      },
+    );
+  }
 }

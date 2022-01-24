@@ -14,7 +14,7 @@ import 'create_edit_employee.dart';
 import 'nfc/harvest_report.dart';
 import 'nfc/nfc_scan.dart';
 import 'settings/admin_settings.dart';
-import 'settings/notification_page.dart';
+import 'notification_page.dart';
 
 class AdminHomePage extends StatefulWidget {
 

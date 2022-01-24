@@ -31,12 +31,12 @@ class AppConst{
   static String get punchByAdmin => baseUrl+"punch-by-admin";
 
   static String get sendTimeRevisionRequest => baseUrl+"send-time-revision";
-  static String get addRevisionDescription => baseUrl+"add-revision-description";
   static String get getRevisionRequest => baseUrl+"get-time-revisions";
   static String get getRevisionNotifications => baseUrl+"get-revision-notifications";
   static String get acceptRevision => baseUrl+"accept-revision";
   static String get declineRevision => baseUrl+"decline-revision";
   static String get deleteRevision => baseUrl+"delete-revision";
+  static String get addRevisionDescription => baseUrl+"update-revision";
 
   static String get getHarvestData => baseUrl+"get-harvest-data";
   static String get getHarvestsOfDate => baseUrl+"get-harvests-of-date";

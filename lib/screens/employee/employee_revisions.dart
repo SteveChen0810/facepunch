@@ -1,3 +1,4 @@
+import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +41,7 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
       Widget content = Text("Something went wrong.[${revision.id}]");
       if(revision.type == "schedule"){
         content = InkWell(
-          onTap: revision.hasDescription()?null:(){
+          onTap: (){
             _showRevisionDialog(revision);
           },
           child: Column(
@@ -158,7 +159,7 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
         );
       }else if(revision.type == "timebox"){
         content = InkWell(
-          onTap: revision.hasDescription()?null:(){
+          onTap: (){
             _showRevisionDialog(revision);
           },
           child: Column(
@@ -563,6 +564,12 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
   _showRevisionDialog(Revision revision){
     String description = '';
     String? errorMessage;
+    if(revision.isChanged('start')){
+      revision.correctStartTime = PunchDateUtils.toDateHourMinute(revision.newValue['start']);
+    }
+    if(revision.isChanged('end')){
+      revision.correctEndTime = PunchDateUtils.toDateHourMinute(revision.newValue['end']);
+    }
     showDialog(
         context: context,
         builder:(_)=> StatefulBuilder(
@@ -585,6 +592,62 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
                           )
                       ),
                       SizedBox(height: 8,),
+                      if(revision.isChanged('start'))
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(S.of(context).start, style: TextStyle(fontWeight: FontWeight.w500),),
+                            Row(
+                              children: [
+                                Text("  ${S.of(context).incorrect}: "),
+                                Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['start']))),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TimeEditor(
+                                initTime: revision.newValue['start'],
+                                isOptional: false,
+                                label: S.of(context).correct,
+                                onChanged: (v){
+                                  if(v != null){
+                                    revision.correctStartTime = PunchDateUtils.toDateHourMinute(v);
+                                  }else{
+                                    revision.correctStartTime = null;
+                                  }
+                                },
+                              ),
+                            )
+                          ],
+                        ),
+                      if(revision.isChanged('end'))
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(S.of(context).end, style: TextStyle(fontWeight: FontWeight.w500),),
+                            Row(
+                              children: [
+                                Text("  ${S.of(context).incorrect}: "),
+                                Expanded(child: Text(PunchDateUtils.getTimeString(revision.oldValue['end']))),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TimeEditor(
+                                initTime: revision.newValue['end'],
+                                isOptional: false,
+                                label: S.of(context).correct,
+                                onChanged: (v){
+                                  if(v != null){
+                                    revision.correctEndTime = PunchDateUtils.toDateHourMinute(v);
+                                  }else{
+                                    revision.correctEndTime = null;
+                                  }
+                                },
+                              ),
+                            )
+                          ],
+                        ),
                       TextField(
                         decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -629,7 +692,7 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
 
   _addDescription(Revision revision, description)async{
     context.loaderOverlay.show();
-    String? result = await revision.addDescription(description);
+    String? result = await revision.update(description);
     context.loaderOverlay.hide();
     if(result != null){
       Tools.showErrorMessage(context, result);

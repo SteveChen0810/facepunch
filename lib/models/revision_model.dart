@@ -238,13 +238,15 @@ class Revision with HttpRequest{
     return valid;
   }
 
-  Future<String?> addDescription(String description)async{
+  Future<String?> update(String description)async{
     try{
       var res = await sendPostRequest(
         AppConst.addRevisionDescription,
         GlobalData.token,
         {
           'id': id,
+          'correct_start_time': correctStartTime,
+          'correct_end_time': correctEndTime,
           'description': description
         },
       );

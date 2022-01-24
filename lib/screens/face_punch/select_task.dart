@@ -67,6 +67,9 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
       if(message != null){
         Tools.showErrorMessage(context, message);
       }else{
+        if(selectedProject != null && selectedTask != null){
+          await Tools.showTimeOutDialog(context, "${employee.name}, \n ${S.of(context).youAreNowWorkingOn} ${selectedProject!.name} - ${selectedTask!.name}");
+        }
         Navigator.pop(context);
       }
     }catch(e){
