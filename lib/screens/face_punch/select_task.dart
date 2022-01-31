@@ -343,7 +343,8 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 minWidth: MediaQuery.of(context).size.width-40,
                 height: 40,
-                onPressed: (){
+                onPressed: ()async{
+                  await Tools.showTimeOutDialog(context, "${S.of(context).bye} \n ${employee.name}", color: Colors.red);
                   Navigator.pop(context);
                 },
                 child: Text(S.of(context).punchOut.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),

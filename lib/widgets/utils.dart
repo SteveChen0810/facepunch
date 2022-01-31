@@ -409,49 +409,6 @@ class Tools {
     return allow;
   }
 
-  static showWelcomeDialog({required String userName, required bool isPunchIn, required BuildContext context})async{
-    await showDialog(
-      context: context,
-      builder: (_context){
-        Future.delayed(Duration(seconds: 3)).whenComplete((){
-          try{
-            Navigator.of(_context).pop();
-          }catch(e){
-            Tools.consoleLog('[Dialogs.showWelcomeDialog.err]$e');
-          }
-        });
-        return Align(
-          alignment: Alignment.center,
-          child: AnimatedContainer(
-            height: MediaQuery.of(context).size.height*0.25,
-            width: MediaQuery.of(context).size.width-80,
-            duration: const Duration(milliseconds: 300),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Material(
-                color: isPunchIn?Colors.green:Colors.red,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(isPunchIn?S.of(context).welcome:S.of(context).bye,style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("$userName",style: TextStyle(fontSize: 25),textAlign: TextAlign.center,),
-                    ),
-                  ],
-                ),
-                type: MaterialType.card,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   static Future<bool> confirmDeleting(BuildContext context, String message)async{
     bool allow = false;
     await showDialog(
@@ -573,11 +530,11 @@ class Tools {
     return allow;
   }
 
-  static Future<void> showTimeOutDialog(BuildContext context, String message)async{
+  static Future<void> showTimeOutDialog(BuildContext context, String message, {Color color = Colors.green, int time = 3})async{
     await showDialog(
       context: context,
       builder: (_context){
-        Future.delayed(Duration(seconds: 3)).whenComplete((){
+        Future.delayed(Duration(seconds: time)).whenComplete((){
           try{
             Navigator.of(_context).pop();
           }catch(e){
@@ -585,7 +542,7 @@ class Tools {
           }
         });
         return AlertDialog(
-          backgroundColor: Colors.green,
+          backgroundColor: color,
           content: Text(message, style: TextStyle(fontSize: 20, color: Colors.white), textAlign: TextAlign.center,),
         );
       },

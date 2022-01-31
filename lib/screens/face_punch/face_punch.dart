@@ -221,10 +221,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           builder: (context)=>SelectTaskScreen(data)
       ));
     }else{
-      await Tools.showWelcomeDialog(
-          userName: data.employee.getFullName(),
-          isPunchIn: data.punch.punch == "In",
-          context: context
+      await Tools.showTimeOutDialog(context,
+          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
+          color: data.punch.isIn() ? Colors.green : Colors.red
       );
     }
   }
@@ -235,10 +234,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           builder: (context)=>SelectTaskScreen(data)
       ));
     }else{
-      await Tools.showWelcomeDialog(
-          userName: data.employee.getFullName(),
-          isPunchIn: data.punch.punch == "In",
-          context: context
+      await Tools.showTimeOutDialog(context,
+          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
+          color: data.punch.isIn() ? Colors.green : Colors.red
       );
     }
   }
@@ -249,10 +247,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           builder: (context)=>SelectTaskScreen(data)
       ));
     }else{
-      await Tools.showWelcomeDialog(
-          userName: data.employee.getFullName(),
-          isPunchIn: data.punch.punch == "In",
-          context: context
+      await Tools.showTimeOutDialog(context,
+          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
+          color: data.punch.isIn() ? Colors.green : Colors.red
       );
     }
   }
@@ -263,10 +260,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           builder: (context)=>SelectTaskScreen(data)
       ));
     }else{
-      await Tools.showWelcomeDialog(
-          userName: data.employee.getFullName(),
-          isPunchIn: data.punch.punch == "In",
-          context: context
+      await Tools.showTimeOutDialog(context,
+          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
+          color: data.punch.isIn() ? Colors.green : Colors.red
       );
     }
   }
@@ -275,10 +271,9 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     if(data.calls.isNotEmpty || (data.projects.isNotEmpty && data.tasks.isNotEmpty) || (data.punch.isOut() && data.employee.isManualBreak())){
       await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectTaskScreen(data)));
     }else{
-      await Tools.showWelcomeDialog(
-          userName: data.employee.getFullName(),
-          isPunchIn: data.punch.punch == "In",
-          context: context
+      await Tools.showTimeOutDialog(context,
+          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
+          color: data.punch.isIn() ? Colors.green : Colors.red
       );
     }
   }
