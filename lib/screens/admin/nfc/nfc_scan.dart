@@ -147,7 +147,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          child: Text(S.of(context).save, style: TextStyle(color: Colors.green),),
+                          child: Text(S.of(context).save, style: TextStyle(color: Color(primaryColor)),),
                           onPressed: ()async{
                             if(task != null){
                               task!.field = selectedField;

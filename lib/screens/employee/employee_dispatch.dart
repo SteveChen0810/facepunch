@@ -353,7 +353,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
                         });
                         _addEditCall(call);
                       },
-                      child: Text(S.of(context).save, style: TextStyle(color: Colors.green),)
+                      child: Text(S.of(context).save, style: TextStyle(color: Color(primaryColor)),)
                   ),
                 ],
               );
@@ -400,7 +400,7 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
             height: kToolbarHeight+MediaQuery.of(context).padding.top,
             alignment: Alignment.center,
             color: Color(primaryColor),
-            child: Text(S.of(context).dispatch,style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
+            child: Text(S.of(context).dispatch,style: TextStyle(fontSize: 20, color: Colors.white),),
           ),
           Padding(
             padding: const EdgeInsets.all(4.0),

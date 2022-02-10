@@ -54,7 +54,7 @@ class Tools {
         SnackBar(
           content: Text(message),
           duration: Duration(seconds: 2),
-          backgroundColor: Colors.green,
+          backgroundColor: Color(primaryColor),
           action: SnackBarAction(onPressed: (){}, label: S.of(context).close, textColor: Colors.white,),
         )
     );
@@ -291,7 +291,7 @@ class Tools {
                     autofocus: true,
                     hideCharacter: true,
                     highlight: true,
-                    highlightColor: Colors.green,
+                    highlightColor: Color(primaryColor),
                     defaultBorderColor: Colors.grey,
                     hasTextBorderColor: Colors.black87,
                     maxLength: 4,
@@ -367,7 +367,7 @@ class Tools {
             if(onOpen != null)
               TextButton(
                 onPressed: onOpen,
-                child: Text(S.of(context).open,style: TextStyle(color: Colors.green),),
+                child: Text(S.of(context).open,style: TextStyle(color: Color(primaryColor)),),
               ),
           ],
         ),
@@ -432,7 +432,7 @@ class Tools {
             onPressed: ()async{
               Navigator.pop(context);
             },
-            child: Text(S.of(context).close,style: TextStyle(color: Colors.green),),
+            child: Text(S.of(context).close,style: TextStyle(color: Color(primaryColor)),),
           ),
           TextButton(
             onPressed: ()async{
@@ -479,7 +479,7 @@ class Tools {
                 launch('https://apps.apple.com/us/app/face-punch-vision/id1556243840');
               }
             },
-            child: Text(S.of(context).update, style: TextStyle(color: Colors.green),),
+            child: Text(S.of(context).update, style: TextStyle(color: Color(primaryColor)),),
           ),
           TextButton(
             onPressed: isForce?null:()async{
@@ -515,7 +515,7 @@ class Tools {
             onPressed: ()async{
               Navigator.pop(context);
             },
-            child: Text(S.of(context).close,style: TextStyle(color: Colors.green),),
+            child: Text(S.of(context).close,style: TextStyle(color: Color(primaryColor)),),
           ),
           TextButton(
             onPressed: ()async{

@@ -42,7 +42,7 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
   Widget _body(){
     if(call == null){
       return Center(
-        child: CircularProgressIndicator(color: Colors.green,),
+        child: CircularProgressIndicator(color: Color(primaryColor),),
       );
     }
     return Container(

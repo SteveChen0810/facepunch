@@ -2099,6 +2099,14 @@ class S {
       args: [],
     );
   }
+  String get signIn{
+    return Intl.message(
+      'Sign In',
+      name: 'signIn',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

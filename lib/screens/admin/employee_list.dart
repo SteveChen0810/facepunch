@@ -158,7 +158,7 @@ class _EmployeeListState extends State<EmployeeList> {
                           )
                       ),
                     if(user.id == loadingUser)
-                      Center(child: CircularProgressIndicator(color: Colors.green,)),
+                      Center(child: CircularProgressIndicator(color: Color(primaryColor),)),
                   ],
                 ),
               ),
@@ -232,7 +232,7 @@ class _EmployeeListState extends State<EmployeeList> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(S.of(context).inOut,style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 30),),
+        title: Text(S.of(context).inOut,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30),),
         elevation: 0,
         backgroundColor: Color(primaryColor),
         actions: [

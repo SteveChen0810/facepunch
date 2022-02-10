@@ -121,7 +121,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       );
     }else{
       image = Container(
-        color: Colors.green,
+        color: Color(primaryColor),
           child: Padding(
             padding: const EdgeInsets.all(10.0),
             child: Image.asset("assets/images/person.png",width: 100,height: 100,),

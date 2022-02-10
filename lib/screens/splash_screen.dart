@@ -75,9 +75,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/logo.png",width: width/3,),
+                    Image.asset("assets/images/logo.png",width: width/3, color: Colors.white,),
                     SizedBox(width: 10,),
-                    Text("FACE\nPUNCH",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 50),)
+                    Text("FACE\nPUNCH",style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50, color: Colors.white),)
                   ],
                 ),
               ),
@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 left: 0,
                 right: 0,
                 child: Center(
-                    child: Text(S.of(context).timeSheetSystemForEmployee,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)
+                    child: Text(S.of(context).timeSheetSystemForEmployee,style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500, color: Colors.white),)
                 ),
               )
             ],

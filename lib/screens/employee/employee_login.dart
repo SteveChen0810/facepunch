@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:facepunch/screens/navigation_page.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import '/lang/l10n.dart';
 import '/models/company_model.dart';
@@ -234,7 +235,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   final user = context.read<UserModel>().user;
                   if(mounted){setState(() {_pageIndex = 2; userName = "${user?.getFullName()}";});}
                   await context.read<CompanyModel>().getMyCompany(user?.companyId);
-                  if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
+                  if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>NavigationPage()));
                 }
               }else{
                 await initDetectFace();

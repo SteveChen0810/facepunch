@@ -655,7 +655,7 @@ class _NotificationPageState extends State<NotificationPage> {
                       setState(() {});
                     }
                   },
-                  child: Text(S.of(context).accept, style: TextStyle(color: Colors.green),)
+                  child: Text(S.of(context).accept, style: TextStyle(color: Color(primaryColor)),)
               ),
             if(revision.status == 'requested')
               TextButton(

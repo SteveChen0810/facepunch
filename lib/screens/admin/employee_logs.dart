@@ -169,7 +169,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
         children: [
           if(punch.hasLocation() && (settings?.hasGeolocationPunch??false))
             SlidableAction(
-              backgroundColor: Colors.green,
+              backgroundColor: Color(primaryColor),
               icon: Icons.pin_drop,
               foregroundColor: Colors.white,
               onPressed: (v){
@@ -676,7 +676,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
                           Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: Colors.green,
+                              color: Color(primaryColor),
                             ),
                             width: 55,
                             height: 25,

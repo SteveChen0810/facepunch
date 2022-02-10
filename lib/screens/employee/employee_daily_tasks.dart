@@ -475,7 +475,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
                           _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
                         }
                       },
-                      child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
+                      child: Text(S.of(context).submit, style: TextStyle(color: Color(primaryColor)),)
                   ),
                 ],
               );
@@ -639,7 +639,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
                           _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
                         }
                       },
-                      child: Text(S.of(context).submit, style: TextStyle(color: Colors.green),)
+                      child: Text(S.of(context).submit, style: TextStyle(color: Color(primaryColor)),)
                   ),
                 ],
               );

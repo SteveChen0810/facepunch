@@ -25,7 +25,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   bool isLoading = false;
   Color lowColor = Colors.red;
   Color mediumColor = Colors.yellow;
-  Color highColor = Colors.green;
+  Color highColor = Color(primaryColor);
   CompanySettings? companySettings;
   List<Field> fields = [];
   List<HContainer> containers = [];
@@ -130,7 +130,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2,),
                         ):Text(S.of(context).save,
-                          style: TextStyle(color: Colors.green),
+                          style: TextStyle(color: Color(primaryColor)),
                         ),
                         onPressed: ()async{
                           try{
@@ -228,7 +228,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2,),
-                          ):Text(S.of(context).save, style: TextStyle(color: Colors.green),),
+                          ):Text(S.of(context).save, style: TextStyle(color: Color(primaryColor)),),
                           onPressed: ()async{
                             try{
                               _containerNameError = null;

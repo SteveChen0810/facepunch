@@ -88,4 +88,4 @@ class GlobalData{
   static String lang = 'en';
 }
 
-const int primaryColor = 0xFF09d55b;
+const int primaryColor = 0xFF0f5386;

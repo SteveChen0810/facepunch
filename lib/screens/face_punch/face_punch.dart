@@ -223,7 +223,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }else{
       await Tools.showTimeOutDialog(context,
           "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Colors.green : Colors.red
+          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
       );
     }
   }
@@ -236,7 +236,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }else{
       await Tools.showTimeOutDialog(context,
           "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Colors.green : Colors.red
+          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
       );
     }
   }
@@ -249,7 +249,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }else{
       await Tools.showTimeOutDialog(context,
           "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Colors.green : Colors.red
+          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
       );
     }
   }
@@ -262,7 +262,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }else{
       await Tools.showTimeOutDialog(context,
           "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Colors.green : Colors.red
+          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
       );
     }
   }
@@ -273,7 +273,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }else{
       await Tools.showTimeOutDialog(context,
           "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Colors.green : Colors.red
+          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
       );
     }
   }
