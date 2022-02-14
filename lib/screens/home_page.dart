@@ -1,3 +1,4 @@
+import 'package:facepunch/screens/face_login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -5,7 +6,6 @@ import '/models/app_model.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
-import '/screens/employee/employee_login.dart';
 import 'face_punch/start_face_punch.dart';
 import '/widgets/utils.dart';
 
@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 height: MediaQuery.of(context).size.height*0.6-kBottomNavigationBarHeight,
                 child: TabBarView(
                   children: [
-                    EmployeeLogin(),
+                    FaceLogin(),
                     StartFacePunch(),
                   ],
                   controller: _tabController,

@@ -1,4 +1,11 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '/screens/admin/admin_settings.dart';
+import '/screens/admin/employee_list.dart';
+import '/screens/admin/notification_page.dart';
 import '/screens/bug_report_page.dart';
 import '/widgets/TimeEditor.dart';
 import '/widgets/project_picker.dart';
@@ -12,9 +19,6 @@ import '/models/work_model.dart';
 import '/screens/home_page.dart';
 import '/widgets/calendar_strip/calendar_strip.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class EmployeeTimeSheet extends StatefulWidget {
 
@@ -712,23 +716,55 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("${user!.getFullName()}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white),),
+                      Expanded(
+                          child: Text(
+                            "${user!.getFullName()}",
+                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white),
+                          )
+                      ),
                       Row(
                         children: [
-                          IconButton(
-                              icon: Icon(Icons.bug_report, color: Colors.white,),
-                              padding: EdgeInsets.zero,
-                              iconSize: 25,
-                              onPressed: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>BugReportPage()))
-                          ),
-                          IconButton(
-                              icon: Icon(Icons.logout, color: Colors.white,),
-                              padding: EdgeInsets.zero,
-                              iconSize: 25,
-                              onPressed: ()async{
-                                await context.read<UserModel>().logOut();
-                                await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                              }
+                          if(user!.isManager())
+                            InkWell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Image.asset('assets/images/ic_dashboard.png', color: Colors.white, width: 25, height: 25,)
+                                ),
+                                onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>EmployeeList()))
+                            ),
+                          if(user!.isManager())
+                            InkWell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Icon(Icons.settings, color: Colors.white,size: 30,),
+                                ),
+                                onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting()))
+                            ),
+                          if(user!.isManager())
+                            InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: Icon(Icons.notifications, color: Colors.white,size: 30,),
+                              ),
+                              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationPage()))
+                            ),
+                          if(user!.isManager())
+                            InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: Icon(Icons.bug_report, color: Colors.white, size: 30,),
+                              ),
+                              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>BugReportPage()))
+                            ),
+                          InkWell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Icon(Icons.logout, color: Colors.white, size: 30,),
+                            ),
+                            onTap: ()async{
+                              await context.read<UserModel>().logOut();
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                            }
                           )
                         ],
                       ),

@@ -1,35 +1,34 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:facepunch/screens/navigation_page.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '/screens/admin/admin_home.dart';
 import '/lang/l10n.dart';
 import '/models/company_model.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:wakelock/wakelock.dart';
 import '/models/user_model.dart';
 import '/screens/employee/employee_home.dart';
 import '/models/app_const.dart';
-import '/widgets/face_painter.dart';
 import '/widgets/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'dart:math' as math;
-import 'package:provider/provider.dart';
 
-class EmployeeLogin extends StatefulWidget {
+class FaceLogin extends StatefulWidget {
 
   @override
-  _EmployeeLoginState createState() => _EmployeeLoginState();
+  _FaceLoginState createState() => _FaceLoginState();
 }
 
-class _EmployeeLoginState extends State<EmployeeLogin> {
+class _FaceLoginState extends State<FaceLogin> {
   final FaceDetector faceDetector = GoogleMlKit.vision.faceDetector(FaceDetectorOptions(
-      mode: FaceDetectorMode.fast,
-      enableLandmarks: true,
-      enableClassification: true,
-      enableContours: true,
-      enableTracking: true,
+    mode: FaceDetectorMode.fast,
+    enableLandmarks: true,
+    enableClassification: true,
+    enableContours: true,
+    enableTracking: true,
   ));
   List<Face>? faces;
   CameraController? cameraController;
@@ -68,10 +67,10 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           description.sensorOrientation,
         );
         cameraController = CameraController(
-            description,
-            Platform.isIOS? ResolutionPreset.medium
-                : ResolutionPreset.high,
-            enableAudio: false,
+          description,
+          Platform.isIOS? ResolutionPreset.medium
+              : ResolutionPreset.high,
+          enableAudio: false,
         );
         await cameraController!.initialize();
         await initDetectFace();
@@ -91,13 +90,13 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         _isDetecting = true;
         Tools.detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!)
             .then((dynamic result) {
-              if(mounted)setState(() {faces = result;});
-              _isDetecting = false;
-            }).catchError((e) {
-              Tools.consoleLog('[EmployeeLogin.initDetectFace.detect.err]$e');
-              _isDetecting = false;
-              }
-            );
+          if(mounted)setState(() {faces = result;});
+          _isDetecting = false;
+        }).catchError((e) {
+          Tools.consoleLog('[EmployeeLogin.initDetectFace.detect.err]$e');
+          _isDetecting = false;
+        }
+        );
       }).catchError((e){
         Tools.consoleLog('[EmployeeLogin.initDetectFace.err]$e');
         Tools.showErrorMessage(context, e.toString());}
@@ -178,13 +177,13 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: size,
-                  height: size,
-                  padding: EdgeInsets.all(8),
-                  child: _photoPath.isEmpty
-                    ?(cameraController == null || !cameraController!.value.isInitialized)
-                    ?Center(child: CircularProgressIndicator(),)
-                    :ClipRect(
+                    width: size,
+                    height: size,
+                    padding: EdgeInsets.all(8),
+                    child: _photoPath.isEmpty
+                        ?(cameraController == null || !cameraController!.value.isInitialized)
+                        ?Center(child: CircularProgressIndicator(),)
+                        :ClipRect(
                       child: Transform.scale(
                           scale: cameraController!.value.aspectRatio,
                           child: Center(
@@ -195,14 +194,14 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                           )
                       ),
                     )
-                    :Transform(
+                        :Transform(
                       alignment: Alignment.center,
                       transform: Matrix4.rotationY(math.pi),
                       child: Image.file(
                         File(_photoPath),
                         fit: BoxFit.cover,
-                    ),
-                  )
+                      ),
+                    )
                 ),
                 Container(
                   alignment: Alignment.center,
@@ -235,7 +234,14 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   final user = context.read<UserModel>().user;
                   if(mounted){setState(() {_pageIndex = 2; userName = "${user?.getFullName()}";});}
                   await context.read<CompanyModel>().getMyCompany(user?.companyId);
-                  if(mounted)Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>NavigationPage()));
+                  if(mounted){
+                    if(user!.role == 'admin' || user.role == 'sub_admin'){
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
+                    }else{
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
+                    }
+
+                  }
                 }
               }else{
                 await initDetectFace();

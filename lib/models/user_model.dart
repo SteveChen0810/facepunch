@@ -1008,44 +1008,6 @@ class User with HttpRequest{
     }
     return result;
   }
-
-  bool canAccessPage(String page, CompanySettings settings){
-    switch(page){
-      case 'EmployeeList':
-        return ['admin', 'manager'].contains(role);
-      case 'NotificationPage':
-        return ['admin', 'manager'].contains(role);
-      case 'CreateEditEmployee':
-        return role == 'admin' && (settings.useOwnData??false);
-      case 'NFCScanPage':
-        if(settings.hasNFCHarvest??false){
-          if(role=='admin'){
-            return true;
-          }else{
-            return canNTCTracking??false;
-          }
-        }
-        return false;
-      case 'HarvestReportScreen':
-        return ['admin', 'manager'].contains(role) && (settings.hasHarvestReport??false);
-      case 'AdminSetting':
-        return role == 'admin';
-      case 'EmployeeTimeSheet':
-        return ['manager', 'employee'].contains(role);
-      case 'EmployeeDocument':
-        return ['manager', 'employee'].contains(role);
-      case 'EmployeeDailyTasks':
-        return ['manager', 'employee'].contains(role);
-      case 'EmployeeDispatch':
-        return ['manager', 'employee'].contains(role);
-      case 'EmployeeRevisions':
-        return ['manager', 'employee'].contains(role);
-      default:
-        return false;
-    }
-  }
-
-
 }
 
 class Punch{
