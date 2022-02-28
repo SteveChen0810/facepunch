@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:facepunch/models/notification.dart';
+import 'package:facepunch/models/revision_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -13,7 +15,6 @@ import 'package:wakelock/wakelock.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
-import '/models/work_model.dart';
 import '/widgets/utils.dart';
 import 'select_task.dart';
 
@@ -46,12 +47,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
   @override
   void initState() {
     super.initState();
-    Tools.checkCameraPermission().then((value){
-      setState(() {_isCameraAllowed = value;});
-      _initializeCamera();
-      _determinePosition();
-    });
-    Wakelock.enable();
+    _init();
   }
 
 
@@ -59,6 +55,84 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
   void dispose() {
     Wakelock.disable();
     super.dispose();
+  }
+
+  _init()async{
+    _isCameraAllowed = await Tools.checkCameraPermission();
+    if(mounted){
+      setState(() {});
+      _initializeCamera();
+      _determinePosition();
+      Wakelock.enable();
+      Tools.setupFirebaseNotification(_onMessage);
+    }
+  }
+
+  _onMessage(message){
+    try{
+      AppNotification notification = AppNotification.fromJsonFirebase(message.data);
+      if(mounted){
+        if(notification.hasRevision()){
+          String description = '';
+          String? errorMessage;
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder:(_)=> StatefulBuilder(builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                title: Text(
+                  S.of(context).revisionDescription,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                content: Container(
+                  width: MediaQuery.of(context).size.width-50,
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        isDense: true,
+                        labelText: S.of(context).description,
+                        alignLabelWithHint: true,
+                        errorText: errorMessage
+                    ),
+                    minLines: 3,
+                    maxLines: null,
+                    onChanged: (v){
+                      _setState(() {description = v;});
+                    },
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: (){
+                      Navigator.pop(_context);
+                    },
+                    child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
+                  ),
+                  TextButton(
+                    onPressed: (){
+                      if(description.isNotEmpty){
+                        Navigator.of(_context).pop();
+                        Revision(id: notification.revisionId).update(description);
+                      }else{
+                        _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                      }
+                    },
+                    child: Text(S.of(context).submit,style: TextStyle(color: Colors.blue),),
+                  ),
+                ],
+              );
+            }),
+          );
+        }
+      }
+    }catch(e){
+      Tools.consoleLog('[EmployeeHome._onMessage]$e');
+    }
   }
 
   _initializeCamera({CameraDescription? description}) async {
@@ -94,7 +168,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         if (_isDetecting || !mounted) return;
         _isDetecting = true;
         Tools.detect(image, GoogleMlKit.vision.faceDetector().processImage, rotation!).then((dynamic result) {
-          setState(() {faces = result;});
+          if(mounted)setState(() {faces = result;});
           _isDetecting = false;
         }).catchError((e) {
           Tools.consoleLog('[FacePunch.initDetectFace.detect]$e');
@@ -195,6 +269,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
           Tools.showSuccessMessage(context, result.message!);
         }
         User employee = result.employee;
+        GlobalData.token = employee.token!;
         if(employee.type == 'call'){
           await _punchCallEmployee(result);
         }else if(employee.type == 'shop_daily'){

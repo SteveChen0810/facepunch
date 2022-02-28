@@ -548,4 +548,22 @@ class Tools {
       },
     );
   }
+
+  static Future<String> getFirebaseToken()async{
+    try{
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('firebase_token');
+      if(token == null){
+        final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+        token = await _firebaseMessaging.getToken();
+        if(token != null){
+          prefs.setString('firebase_token', token);
+        }
+      }
+      return token??'';
+    }catch(e){
+      consoleLog('[Tools.getFirebaseToken]$e');
+      return '';
+    }
+  }
 }

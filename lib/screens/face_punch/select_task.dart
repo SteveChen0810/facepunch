@@ -29,6 +29,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
   EmployeeCall? selectedCall;
   Project? selectedProject;
   ScheduleTask? selectedTask;
+  WorkHistory? currentWork;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
     tasks = widget.facePunchData.tasks;
     employee = widget.facePunchData.employee;
     punch = widget.facePunchData.punch;
+    currentWork = widget.facePunchData.work;
   }
 
   bool canStartWork(){
@@ -68,7 +70,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
         Tools.showErrorMessage(context, message);
       }else{
         if(selectedProject != null && selectedTask != null){
-          await Tools.showTimeOutDialog(context, "${employee.name}, \n ${S.of(context).youAreNowWorkingOn} ${selectedProject!.name} - ${selectedTask!.name}");
+          Tools.showSuccessMessage(context, "${employee.name}, \n ${S.of(context).youAreNowWorkingOn} ${selectedProject!.name} - ${selectedTask!.name}");
         }
         Navigator.pop(context);
       }
@@ -114,6 +116,65 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              if(employee.hasTracking())
+                Container(
+                  margin: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if(currentWork != null)
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey)
+                          ),
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          margin: EdgeInsets.only(bottom: 10),
+                          child: Column(
+                            children: [
+                              Text(S.of(context).youAreNowWorkingOn, style: TextStyle(fontWeight: FontWeight.bold),),
+                              Row(
+                                children: [
+                                  Text('${S.of(context).project}: ',style: TextStyle(fontWeight: FontWeight.bold),),
+                                  Text('${currentWork!.projectName} - ${currentWork!.projectCode}'),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text('${S.of(context).task}: ',style: TextStyle(fontWeight: FontWeight.bold),),
+                                  Text('${currentWork!.taskName} - ${currentWork!.taskCode}'),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      Text(S.of(context).project),
+                      ProjectPicker(
+                        projects: projects,
+                        projectId: selectedProject?.id,
+                        onSelected: (v){
+                          setState(() {
+                            selectedCall = null;
+                            selectedProject = v;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 20,),
+                      Text(S.of(context).task),
+                      TaskPicker(
+                        tasks: tasks,
+                        taskId: selectedTask?.id,
+                        onSelected: (v){
+                          setState(() {
+                            selectedCall = null;
+                            selectedTask = v;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               for(var call in calls)
                 Container(
                   margin: EdgeInsets.all(8),
@@ -270,38 +331,6 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-              if(employee.hasTracking())
-                Container(
-                  margin: EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(S.of(context).project),
-                      ProjectPicker(
-                        projects: projects,
-                        projectId: selectedProject?.id,
-                        onSelected: (v){
-                          setState(() {
-                            selectedCall = null;
-                            selectedProject = v;
-                          });
-                        },
-                      ),
-                      SizedBox(height: 20,),
-                      Text(S.of(context).task),
-                      TaskPicker(
-                        tasks: tasks,
-                        taskId: selectedTask?.id,
-                        onSelected: (v){
-                          setState(() {
-                            selectedCall = null;
-                            selectedTask = v;
-                          });
-                        },
-                      ),
-                    ],
                   ),
                 ),
             ],

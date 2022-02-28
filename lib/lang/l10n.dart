@@ -2107,6 +2107,14 @@ class S {
       args: [],
     );
   }
+  String get revisionDescription{
+    return Intl.message(
+      'Revision Description',
+      name: 'revisionDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

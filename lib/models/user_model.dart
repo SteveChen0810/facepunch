@@ -2,10 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:localstorage/localstorage.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'company_model.dart';
 import 'work_model.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
@@ -17,7 +15,6 @@ import 'app_const.dart';
 class UserModel extends BaseProvider{
   User? user;
   final LocalStorage storage = LocalStorage('face_punch_user');
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   String locale = 'en';
   double yearTotalHours = 0;
 
@@ -75,14 +72,14 @@ class UserModel extends BaseProvider{
   Future<String?> adminLogin(String email, String password, bool isRememberMe)async{
     String? result = 'Oops, Unknown Errors!';
     try{
-      String? deviceToken = await _firebaseMessaging.getToken();
+      String? deviceToken = await Tools.getFirebaseToken();
       var res = await sendPostRequest(
           AppConst.adminLogin,
           null,
           {
             'email':email,
             'password':password,
-            'firebase_token': deviceToken??''
+            'firebase_token': deviceToken
           }
       );
       Tools.consoleLog("[UserModel.adminLogin.res] ${res.body}");
@@ -96,36 +93,6 @@ class UserModel extends BaseProvider{
       }
     }catch(e){
       Tools.consoleLog("[UserModel.adminLogin.err] $e");
-    }
-    return result;
-  }
-
-  Future<String?> adminRegister(String email,String password,String fName,String lName)async{
-    String result = 'Oops, Unknown Errors!';
-    try{
-      String? deviceToken  = await _firebaseMessaging.getToken();
-      var res = await sendPostRequest(
-          AppConst.adminRegister,
-          null,
-          {
-            'email':email,
-            'password':password,
-            'first_name':fName,
-            'last_name':lName,
-            'firebase_token':deviceToken??''
-          }
-      );
-      Tools.consoleLog("[UserModel.adminRegister.res] ${res.body}");
-      if(res.statusCode==200){
-        user = User.fromJson(jsonDecode(res.body));
-        GlobalData.token = user!.token!;
-        await saveUserToLocal();
-        return null;
-      }else{
-        return jsonDecode(res.body)['message'];
-      }
-    }catch(e){
-      Tools.consoleLog("[UserModel.adminRegister.err] $e");
     }
     return result;
   }
@@ -240,7 +207,7 @@ class UserModel extends BaseProvider{
   Future<String?> loginWithFace(String photo)async{
     String result = 'Oops, Unknown Errors!';
     try{
-      String? deviceToken = await _firebaseMessaging.getToken();
+      String? deviceToken = await Tools.getFirebaseToken();
       Tools.consoleLog("[UserModel.loginWithFace.deviceToken] $deviceToken");
       var res = await sendPostRequest(
           AppConst.loginWithFace,
@@ -248,7 +215,7 @@ class UserModel extends BaseProvider{
           {
             'photo':photo,
             'face_punch_key' : await Tools.getPunchKey(),
-            'firebase_token': deviceToken??''
+            'firebase_token': deviceToken
           }
       );
       Tools.consoleLog("[UserModel.loginWithFace.res] ${res.body}");
@@ -357,7 +324,7 @@ class UserModel extends BaseProvider{
     try{
       String? token = "disabled";
       if(user?.firebaseToken == null || user?.firebaseToken == "disabled"){
-        token = await _firebaseMessaging.getToken();
+        token = await Tools.getFirebaseToken();
       }
       var res = await sendPostRequest(
         AppConst.notificationSetting,
@@ -463,9 +430,6 @@ class User with HttpRequest{
   String? token;
 
   bool? canNTCTracking = true;
-  bool? sendScheduleNotification = true;
-  bool? canSelfPunch = true;
-  bool? show = true;
 
   User({
     this.id,
@@ -537,9 +501,6 @@ class User with HttpRequest{
       updatedAt = json['updated_at'];
       active = json['active']??false;
       canNTCTracking = json['can_nfc_tracking']??false;
-      sendScheduleNotification = json['send_schedule_notification']??false;
-      canSelfPunch = json['can_self_punch']??false;
-      show = json['show']??false;
       if(json['break'] != null){
         breakSetting = BreakSetting.fromJson(json['break']);
       }
@@ -578,11 +539,9 @@ class User with HttpRequest{
     data['token'] = this.token;
     data['nfc'] = this.nfc;
     data['can_nfc_tracking'] = this.canNTCTracking;
-    data['send_schedule_notification'] = this.sendScheduleNotification;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     data['active'] = this.active;
-    data['show'] = this.show;
     if(this.breakSetting != null){
       data['break'] = this.breakSetting!.toJson();
     }
@@ -1098,6 +1057,7 @@ class FacePunchData{
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
   String? message;
+  WorkHistory? work;
 
   FacePunchData.fromJson(Map<String, dynamic> json){
     try{
@@ -1123,6 +1083,9 @@ class FacePunchData{
         for(var task in json['tasks']){
           tasks.add(ScheduleTask.fromJson(task));
         }
+      }
+      if(json['work'] != null){
+        work = WorkHistory.fromJson(json['work']);
       }
     }catch(e){
       Tools.consoleLog("[FacePunchData.fromJson.err] $e");

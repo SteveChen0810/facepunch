@@ -21,6 +21,7 @@ class HttpRequest{
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }
+    headers['device-token'] = await Tools.getFirebaseToken();
     var logData = { ...data };
     if(logData['photo'] != null){
       logData['photo'] = '----Base 64 photo----';
@@ -43,6 +44,7 @@ class HttpRequest{
     if(token != null){
       headers['Authorization'] = 'Bearer '+token;
     }
+    headers['device-token'] = await Tools.getFirebaseToken();
     Tools.consoleLog('[GET][$url]');
     return await http.get(
         Uri.parse(url),

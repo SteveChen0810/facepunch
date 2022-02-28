@@ -46,6 +46,7 @@ class AppNotification {
   String? type;
   int? callId;
   int? scheduleId;
+  int? revisionId;
 
   AppNotification.fromJsonFirebase(Map<String, dynamic> json) {
     try {
@@ -63,6 +64,7 @@ class AppNotification {
       date = DateTime.now().toString();
       callId = int.tryParse(notification['call_id'].toString());
       scheduleId = int.tryParse(notification['schedule_id'].toString());
+      revisionId = int.tryParse(notification['revision_id'].toString());
     } catch (e) {
       Tools.consoleLog("[AppNotification.fromJsonFirebase.err]$e");
     }
@@ -70,6 +72,10 @@ class AppNotification {
 
   bool hasCall(){
     return callId != null;
+  }
+
+  bool hasRevision(){
+    return revisionId != null;
   }
 
 }
