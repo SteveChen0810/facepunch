@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:facepunch/models/notification.dart';
-import 'package:facepunch/models/revision_model.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -11,7 +9,10 @@ import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:loader_overlay/loader_overlay.dart';
 
+import '/models/notification.dart';
+import '/models/revision_model.dart';
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
@@ -108,21 +109,22 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
                 ),
                 actions: [
                   TextButton(
-                    onPressed: (){
-                      Navigator.pop(_context);
-                    },
-                    child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
-                  ),
-                  TextButton(
-                    onPressed: (){
+                    onPressed: ()async{
                       if(description.isNotEmpty){
                         Navigator.of(_context).pop();
-                        Revision(id: notification.revisionId).update(description);
+                        context.loaderOverlay.show();
+                        String? message = await Revision(id: notification.revisionId).update(description);
+                        context.loaderOverlay.hide();
+                        if(message == null){
+                          Tools.showSuccessMessage(context, S.of(context).revisionDescriptionSubmitted);
+                        }else{
+                          Tools.showErrorMessage(context, message);
+                        }
                       }else{
                         _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
                       }
                     },
-                    child: Text(S.of(context).submit,style: TextStyle(color: Colors.blue),),
+                    child: Text(S.of(context).submit, style: TextStyle(color: Colors.blue),),
                   ),
                 ],
               );
@@ -368,8 +370,8 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: CircleBorder(),
         padding: EdgeInsets.zero,
-        color: Colors.black87,
-        child: Icon(Icons.close, color: Color(primaryColor),),
+        color: Color(primaryColor),
+        child: Icon(Icons.close, color: Colors.white,),
       ),
     );
     Widget captureButton = Positioned(
