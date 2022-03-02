@@ -179,7 +179,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
                 Container(
                   margin: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: selectedCall==call?Color(primaryColor):Color(primaryColor),
+                    color: selectedCall==call?Color(primaryColor):Colors.green,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: EdgeInsets.all(8),
