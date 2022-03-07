@@ -29,6 +29,7 @@ class AppConst{
   static String get editPunch => baseUrl+"edit-punch";
   static String get deletePunch => baseUrl+"delete-punch";
   static String get punchByAdmin => baseUrl+"punch-by-admin";
+  static String get punchOut => baseUrl+"punch-out";
 
   static String get sendTimeRevisionRequest => baseUrl+"send-time-revision";
   static String get getRevisionRequest => baseUrl+"get-time-revisions";
@@ -63,6 +64,7 @@ class AppConst{
   static String get deleteCall => baseUrl+"delete-call";
   static String get startShopTracking => baseUrl+"start-shop-tracking";
   static String get startManualBreak => baseUrl+"start-manual-break";
+  static String get endManualBreak => baseUrl+"end-manual-break";
 
   static String get getDailyTasks => baseUrl+"get-daily-tasks";
   static String get getEmployeeSchedule => baseUrl+"get-employee-schedule";
@@ -80,7 +82,7 @@ class AppConst{
   static String get submitMobileLog => baseUrl+"submit-mobile-log";
 
   static const String LOG_FILE_PREFIX = "app_log_";
-  static const int currentVersion = 50;
+  static const int currentVersion = 51;
 }
 
 class GlobalData{

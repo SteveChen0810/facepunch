@@ -24,12 +24,15 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
   late User employee;
-  late Punch punch;
+  Punch? punch;
   WorkSchedule? selectedSchedule;
   EmployeeCall? selectedCall;
   Project? selectedProject;
   ScheduleTask? selectedTask;
   WorkHistory? currentWork;
+  double? latitude;
+  double? longitude;
+  bool isInManualBreak = false;
 
   @override
   void initState() {
@@ -41,6 +44,9 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
     employee = widget.facePunchData.employee;
     punch = widget.facePunchData.punch;
     currentWork = widget.facePunchData.work;
+    latitude = widget.facePunchData.latitude;
+    longitude = widget.facePunchData.longitude;
+    isInManualBreak = widget.facePunchData.isInManualBreak;
   }
 
   bool canStartWork(){
@@ -59,11 +65,16 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
       context.loaderOverlay.show();
       String? message;
       if(selectedCall != null){
-        message = await selectedCall!.startCall(employee.token);
+        message = await selectedCall!.startCall(token: employee.token, latitude: latitude, longitude: longitude);
       }else if(selectedSchedule != null){
-        message = await selectedSchedule!.startSchedule(employee.token);
+        message = await selectedSchedule!.startSchedule(token: employee.token, latitude: latitude, longitude: longitude);
       }else if(selectedProject != null && selectedTask != null){
-        message = await employee.startShopTracking(selectedProject!.id, selectedTask!.id);
+        message = await employee.startShopTracking(
+          projectId: selectedProject!.id,
+          taskId: selectedTask!.id,
+          latitude: latitude,
+          longitude: longitude
+        );
       }
       context.loaderOverlay.hide();
       if(message != null){
@@ -84,7 +95,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
   Future<void> startManualBreak()async{
     try{
       context.loaderOverlay.show();
-      String? message = await employee.startManualBreak();
+      String?  message = await employee.startManualBreak();
       context.loaderOverlay.hide();
       if(message != null){
         Tools.showErrorMessage(context, message);
@@ -96,6 +107,117 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
       Tools.consoleLog('[SelectTaskScreen.startManualBreak]$e');
       Tools.showErrorMessage(context, S.of(context).somethingWentWrong);
     }
+  }
+
+  Future<bool> endManualBreak()async{
+    try{
+      context.loaderOverlay.show();
+      String?  message = await employee.endManualBreak();
+      context.loaderOverlay.hide();
+      if(message != null){
+        Tools.showErrorMessage(context, message);
+      }else{
+        return true;
+      }
+    }catch(e){
+      context.loaderOverlay.hide();
+      Tools.consoleLog('[SelectTaskScreen.endManualBreak]$e');
+      Tools.showErrorMessage(context, S.of(context).somethingWentWrong);
+    }
+    return false;
+  }
+
+  Future<void> punchOut()async{
+    try{
+      context.loaderOverlay.show();
+      String? result = await employee.punchOut(
+          latitude: latitude,
+          longitude: longitude
+      );
+      context.loaderOverlay.hide();
+      if(result == null){
+        Tools.showErrorMessage(context, "${S.of(context).bye}, ${employee.name}");
+        Navigator.pop(context);
+      }else{
+        Tools.showErrorMessage(context, result);
+      }
+    }catch(e){
+      context.loaderOverlay.hide();
+      Tools.consoleLog('[SelectTaskScreen._punchOut]$e');
+      Tools.showErrorMessage(context, S.of(context).somethingWentWrong);
+    }
+  }
+
+  Widget _actionButtons(){
+    List<Widget> buttons = [];
+    if(employee.isPunchIn() && employee.isManualBreak() && isInManualBreak){
+      buttons.add(
+          MaterialButton(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            color: Colors.orange,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            minWidth: MediaQuery.of(context).size.width-40,
+            height: 40,
+            onPressed: ()async{
+              if(await endManualBreak()){
+                if(mounted)setState(() {isInManualBreak = false;});
+              }
+            },
+            child: Text(
+              S.of(context).endManualBreak.toUpperCase(),
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          )
+      );
+    }else{
+      if(employee.isPunchIn() && employee.isManualBreak()){
+        buttons.add(
+            MaterialButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              color: Colors.orange,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              minWidth: MediaQuery.of(context).size.width-40,
+              height: 40,
+              onPressed: startManualBreak,
+              child: Text(
+                S.of(context).startManualBreak.toUpperCase(),
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            )
+        );
+      }
+      buttons.add(SizedBox(height: 8,));
+      buttons.add(MaterialButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        color: Color(primaryColor),
+        disabledColor: Colors.grey,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        minWidth: MediaQuery.of(context).size.width-40,
+        height: 40,
+        onPressed: canStartWork()?startWork:null,
+        child: Text(startButtonTitle(), style: TextStyle(color: Colors.white, fontSize: 16),),
+      ));
+      buttons.add(SizedBox(height: 8,));
+      if(employee.isPunchIn()){
+        buttons.add(MaterialButton(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          color: Colors.red,
+          disabledColor: Colors.grey,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minWidth: MediaQuery.of(context).size.width-40,
+          height: 40,
+          onPressed: punchOut,
+          child: Text(S.of(context).punchOut.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
+        ));
+      }
+    }
+    return Container(
+      margin: EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: buttons,
+      ),
+    );
   }
 
   @override
@@ -337,50 +459,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.only(bottom: 20, left: 12, right: 12, top: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if(punch.isOut() && employee.isManualBreak())
-              MaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                color: Colors.orange,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                minWidth: MediaQuery.of(context).size.width-40,
-                height: 40,
-                onPressed: startManualBreak,
-                child: Text(S.of(context).manualBreak.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
-              ),
-            SizedBox(height: 8,),
-            MaterialButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              color: Color(primaryColor),
-              disabledColor: Colors.grey,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              minWidth: MediaQuery.of(context).size.width-40,
-              height: 40,
-              onPressed: canStartWork()?startWork:null,
-              child: Text(startButtonTitle(), style: TextStyle(color: Colors.white, fontSize: 16),),
-            ),
-            SizedBox(height: 8,),
-            if(punch.isOut())
-              MaterialButton(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                color: Colors.red,
-                disabledColor: Colors.grey,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                minWidth: MediaQuery.of(context).size.width-40,
-                height: 40,
-                onPressed: ()async{
-                  await Tools.showTimeOutDialog(context, "${S.of(context).bye} \n ${employee.name}", color: Colors.red);
-                  Navigator.pop(context);
-                },
-                child: Text(S.of(context).punchOut.toUpperCase(), style: TextStyle(color: Colors.white, fontSize: 16),),
-              ),
-          ],
-        ),
-      ),
+      bottomNavigationBar: _actionButtons(),
     );
   }
 }

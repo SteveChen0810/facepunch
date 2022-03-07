@@ -911,7 +911,7 @@ class User with HttpRequest{
     return breakSetting != null && breakSetting!.type == "manual";
   }
 
-  Future<String?> startShopTracking(int? projectId, int? taskId)async{
+  Future<String?> startShopTracking({int? projectId, int? taskId, double? latitude, double? longitude})async{
     try{
       var res = await sendPostRequest(
           AppConst.startShopTracking,
@@ -919,6 +919,8 @@ class User with HttpRequest{
           {
             'task_id': taskId,
             'project_id': projectId,
+            'latitude': latitude,
+            'longitude': longitude,
           }
       );
       Tools.consoleLog('[User.startShopTracking.res]${res.body}');
@@ -935,11 +937,7 @@ class User with HttpRequest{
 
   Future<String?> startManualBreak()async{
     try{
-      var res = await sendPostRequest(
-          AppConst.startManualBreak,
-          token,
-          {}
-      );
+      var res = await sendGetRequest(AppConst.startManualBreak, token);
       Tools.consoleLog('[User.startManualBreak.res]${res.body}');
       if(res.statusCode==200){
         return null;
@@ -948,6 +946,21 @@ class User with HttpRequest{
       }
     }catch(e){
       Tools.consoleLog('[User.startManualBreak.err]$e');
+      return e.toString();
+    }
+  }
+
+  Future<String?> endManualBreak()async{
+    try{
+      var res = await sendGetRequest(AppConst.endManualBreak, token);
+      Tools.consoleLog('[User.endManualBreak.res]${res.body}');
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog('[User.endManualBreak.err]$e');
       return e.toString();
     }
   }
@@ -966,6 +979,27 @@ class User with HttpRequest{
       Tools.consoleLog("[User.delete.err] $e");
     }
     return result;
+  }
+
+  Future<String?> punchOut({double? latitude, double? longitude})async{
+    try{
+      var res = await sendPostRequest(
+          AppConst.punchOut,
+          token,
+          {
+            'latitude':latitude,
+            'longitude':longitude
+          }
+      );
+      if(res.statusCode==200){
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog("[User.punchOut.err] $e");
+      return e.toString();
+    }
   }
 }
 
@@ -1051,19 +1085,24 @@ class Punch{
 
 class FacePunchData{
   late User employee;
-  late Punch punch;
+  Punch? punch;
   List<EmployeeCall> calls = [];
   List<WorkSchedule> schedules = [];
   List<Project> projects = [];
   List<ScheduleTask> tasks = [];
   String? message;
   WorkHistory? work;
+  double? latitude;
+  double? longitude;
+  bool isInManualBreak = false;
 
   FacePunchData.fromJson(Map<String, dynamic> json){
     try{
       employee = User.fromJson(json['employee']);
-      punch = Punch.fromJson(json['punch']);
       message = json['message'];
+      if(json['punch'] != null){
+        punch = Punch.fromJson(json['punch']);
+      }
       if(json['calls'] != null){
         for(var call in json['calls']){
           calls.add(EmployeeCall.fromJson(call));
@@ -1087,6 +1126,7 @@ class FacePunchData{
       if(json['work'] != null){
         work = WorkHistory.fromJson(json['work']);
       }
+      isInManualBreak = json['in_manual_break']??false;
     }catch(e){
       Tools.consoleLog("[FacePunchData.fromJson.err] $e");
     }

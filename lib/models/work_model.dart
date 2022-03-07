@@ -392,12 +392,16 @@ class WorkSchedule with HttpRequest{
     }
   }
 
-  Future<String?> startSchedule(String? token)async{
+  Future<String?> startSchedule({String? token, double? latitude, double? longitude})async{
     try{
       var res = await sendPostRequest(
         AppConst.startSchedule,
         token??GlobalData.token,
-        { 'id' : id }
+        {
+          'id' : id,
+          'latitude' : latitude,
+          'longitude' : longitude
+        }
       );
       Tools.consoleLog('[WorkSchedule.startSchedule.res]${res.body}');
       if(res.statusCode==200){
@@ -608,12 +612,16 @@ class EmployeeCall with HttpRequest{
     return '--:--';
   }
 
-  Future<String?> startCall(String? token)async{
+  Future<String?> startCall({String? token, double? latitude, double? longitude})async{
     try{
       var res = await sendPostRequest(
           AppConst.startCall,
           token,
-          {'id':id}
+          {
+            'id':id,
+            'latitude':latitude,
+            'longitude':longitude
+          }
       );
       Tools.consoleLog('[EmployeeCall.startCall.res]${res.body}');
       if(res.statusCode==200){

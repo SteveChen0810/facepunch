@@ -36,7 +36,7 @@ class Tools {
     }
   }
 
-  static showErrorMessage(BuildContext context, String message){
+  static showErrorMessage(BuildContext context, String message, ){
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -536,7 +536,9 @@ class Tools {
       builder: (_context){
         Future.delayed(Duration(seconds: time)).whenComplete((){
           try{
-            Navigator.of(_context).pop();
+            if(Navigator.canPop(_context)){
+              Navigator.pop(_context);
+            }
           }catch(e){
             Tools.consoleLog('[Tools.showTimeOutDialog.err]$e');
           }

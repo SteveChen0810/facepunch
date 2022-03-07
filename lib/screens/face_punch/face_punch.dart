@@ -203,6 +203,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       Tools.consoleLog('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }on PlatformException catch(e){
+      context.loaderOverlay.hide();
       Tools.consoleLog('[FacePunch.cameraClose]$e');
       Tools.showErrorMessage(context, e.toString());
     }
@@ -267,21 +268,20 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       if(result is String){
         Tools.showErrorMessage(context, result);
       }else if(result is FacePunchData){
-        if(result.message != null){
-          Tools.showSuccessMessage(context, result.message!);
-        }
         User employee = result.employee;
-        GlobalData.token = employee.token!;
-        if(employee.type == 'call'){
-          await _punchCallEmployee(result);
-        }else if(employee.type == 'shop_daily'){
-          await _punchShopDailyEmployee(result);
-        }else if(employee.type == 'shop_tracking'){
-          await _punchShopTrackingEmployee(result);
-        }else if(employee.type == 'call_shop_daily'){
-          await _punchCallShopDailyEmployee(result);
-        }else if(employee.type == 'call_shop_tracking'){
-          await _punchCallShopTrackingEmployee(result);
+        GlobalData.token = employee.token??'';
+        result.longitude = currentPosition?.longitude;
+        result.latitude = currentPosition?.latitude;
+        if(result.punch != null){
+          if(result.punch!.isIn()){
+            Tools.showSuccessMessage(context, "${S.of(context).welcome}, ${employee.name}");
+          }else{
+            Tools.showErrorMessage(context, "${S.of(context).bye}, ${employee.name}");
+          }
+        }else{
+          await Navigator.push(context, MaterialPageRoute(
+              builder: (context)=>SelectTaskScreen(result)
+          ));
         }
         await initDetectFace();
         setState(() {_photoPath="";});
@@ -289,69 +289,6 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }catch(e){
       Tools.consoleLog("[EmployeeLogin.punchWithFace] $e");
       Tools.showErrorMessage(context, e.toString());
-    }
-  }
-
-  Future<void> _punchCallEmployee(FacePunchData data)async{
-    if(data.calls.isNotEmpty || (data.punch.isOut() && data.employee.isManualBreak())){
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(data)
-      ));
-    }else{
-      await Tools.showTimeOutDialog(context,
-          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
-      );
-    }
-  }
-
-  Future<void> _punchShopDailyEmployee(FacePunchData data)async{
-    if(data.schedules.isNotEmpty || (data.punch.isOut() && data.employee.isManualBreak())){
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(data)
-      ));
-    }else{
-      await Tools.showTimeOutDialog(context,
-          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
-      );
-    }
-  }
-
-  Future<void> _punchShopTrackingEmployee(FacePunchData data)async{
-    if((data.projects.isNotEmpty && data.tasks.isNotEmpty) || (data.punch.isOut() && data.employee.isManualBreak())){
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(data)
-      ));
-    }else{
-      await Tools.showTimeOutDialog(context,
-          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
-      );
-    }
-  }
-
-  Future<void> _punchCallShopDailyEmployee(FacePunchData data)async{
-    if(data.schedules.isNotEmpty || data.calls.isNotEmpty || (data.punch.isOut() && data.employee.isManualBreak())){
-      await Navigator.push(context, MaterialPageRoute(
-          builder: (context)=>SelectTaskScreen(data)
-      ));
-    }else{
-      await Tools.showTimeOutDialog(context,
-          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
-      );
-    }
-  }
-
-  Future<void> _punchCallShopTrackingEmployee(FacePunchData data)async{
-    if(data.calls.isNotEmpty || (data.projects.isNotEmpty && data.tasks.isNotEmpty) || (data.punch.isOut() && data.employee.isManualBreak())){
-      await Navigator.push(context, MaterialPageRoute(builder: (context)=>SelectTaskScreen(data)));
-    }else{
-      await Tools.showTimeOutDialog(context,
-          "${data.punch.isIn()? S.of(context).welcome : S.of(context).bye } \n ${data.employee.name}",
-          color: data.punch.isIn() ? Color(primaryColor) : Colors.red
-      );
     }
   }
 
@@ -365,7 +302,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       child: MaterialButton(
         onPressed: ()async{
           await cameraClose();
-          if(mounted)Navigator.pop(context);
+          if(mounted && Navigator.canPop(context))Navigator.pop(context);
         },
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: CircleBorder(),

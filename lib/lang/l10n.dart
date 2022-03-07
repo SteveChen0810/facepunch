@@ -2083,9 +2083,17 @@ class S {
       args: [],
     );
   }
-  String get manualBreak{
+  String get startManualBreak{
     return Intl.message(
-      'Manual Break',
+      'Start manual break',
+      name: 'manualBreak',
+      desc: '',
+      args: [],
+    );
+  }
+  String get endManualBreak{
+    return Intl.message(
+      'End manual break',
       name: 'manualBreak',
       desc: '',
       args: [],
