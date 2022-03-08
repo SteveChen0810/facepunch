@@ -1395,9 +1395,17 @@ class S {
       args: [],
     );
   }
-  String get  youAreNowWorkingOn{
+  String get  youAreWorkingOn{
     return Intl.message(
-      'You Are Now Working On',
+      'You are working on',
+      name: 'youAreWorkingOn',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  youAreWorkingOnCall{
+    return Intl.message(
+      'You are working on a Call',
       name: 'youAreNowWorkingOn',
       desc: '',
       args: [],

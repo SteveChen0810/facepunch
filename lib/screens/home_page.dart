@@ -191,8 +191,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               child: Column(
                 children: [
                   Icon(Icons.keyboard_arrow_up, size: iconSize, color: _pageIndex == FACE_PUNCH ? Colors.white : Colors.black,),
+                  SizedBox(height: 8,),
                   Text(
-                    "Face\nPunch",
+                    "Face Punch",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _pageIndex == FACE_PUNCH ? Colors.white : Colors.black,),
                     textAlign: TextAlign.center,)
                 ],

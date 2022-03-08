@@ -116,7 +116,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
           margin: EdgeInsets.symmetric(vertical: 4),
           child: Text(date.day.toString(), style: normalStyle, maxLines: 1,)
       ),
-      Text("${user.getHoursOfDate(date).toStringAsFixed(2)}", style: TextStyle(fontSize: 12),),
+      Text("${PunchDateUtils.convertHoursToString(user.getHoursOfDate(date))}", style: TextStyle(fontSize: 12),),
     ];
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
@@ -349,7 +349,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
 
         punchDetail.add(
             Text(
-              "${S.of(context).total}: ${user.getHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} - ${user.getBreakTime(DateTime.parse(date)).toStringAsFixed(2)} (${S.of(context).breaks}) = ${user.calculateHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} h",
+              "${S.of(context).total}: ${PunchDateUtils.convertHoursToString(user.getHoursOfDate(DateTime.parse(date)))} - ${PunchDateUtils.convertHoursToString(user.getBreakTime(DateTime.parse(date)))} (${S.of(context).breaks}) = ${PunchDateUtils.convertHoursToString(user.calculateHoursOfDate(DateTime.parse(date)))}",
               style: TextStyle(color: Color(primaryColor), fontWeight: FontWeight.bold, fontSize: 16),
             )
         );

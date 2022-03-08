@@ -381,7 +381,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
-                          color: getLogColor(stats.avg(), settings),
+                        color: getLogColor(stats.avg(), settings),
                         border: Border(bottom: BorderSide(color: Colors.grey)),
                       ),
                       child: Row(

@@ -77,7 +77,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           margin: EdgeInsets.symmetric(vertical: 4),
           child: Text(date.day.toString(), style: normalStyle, maxLines: 1,)
       ),
-      Text("${user!.calculateHoursOfDate(date).toStringAsFixed(2)}", style: TextStyle(fontSize: 12),),
+      Text("${PunchDateUtils.convertHoursToString(user!.calculateHoursOfDate(date))}", style: TextStyle(fontSize: 12),),
     ];
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
@@ -186,7 +186,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 
         punchDetail.add(
             Text(
-              "${S.of(context).total}: ${user!.getHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} - ${user!.getBreakTime(DateTime.parse(date)).toStringAsFixed(2)} (${S.of(context).breaks}) = ${user!.calculateHoursOfDate(DateTime.parse(date)).toStringAsFixed(2)} h",
+              "${S.of(context).total}: ${PunchDateUtils.convertHoursToString(user!.getHoursOfDate(DateTime.parse(date)))} - ${PunchDateUtils.convertHoursToString(user!.getBreakTime(DateTime.parse(date)))} (${S.of(context).breaks}) = ${PunchDateUtils.convertHoursToString(user!.calculateHoursOfDate(DateTime.parse(date)))}",
               style: TextStyle(color: Color(primaryColor), fontWeight: FontWeight.bold, fontSize: 16),
             )
         );
@@ -662,7 +662,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfLastWeek())}H",
+                            Text("${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfLastWeek())}",
                               style: TextStyle(fontSize: 12),
                             ),
                             Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now().subtract(Duration(days: 7)))}",
@@ -701,7 +701,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(context.watch<UserModel>().yearTotalHours)}H", style: TextStyle(fontSize: 12)),
+                            Text("${PunchDateUtils.convertHoursToString(context.watch<UserModel>().yearTotalHours)}", style: TextStyle(fontSize: 12)),
                             Text(S.of(context).total,style: TextStyle(fontSize: 12)),
                           ],
                         ),
@@ -798,7 +798,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     weekStartsOnSunday: true,
                     selectedDate: selectedDate,
                   ),
-                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfWeek(startOfWeek))}H",
+                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfWeek(startOfWeek))}",
                     style: TextStyle(fontWeight: FontWeight.w500),
                   ),
                 ],

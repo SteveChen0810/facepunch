@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+
 import '/lang/l10n.dart';
 import '/models/app_const.dart';
 import '/models/user_model.dart';
@@ -6,7 +8,6 @@ import '/models/work_model.dart';
 import '/widgets/utils.dart';
 import '/widgets/project_picker.dart';
 import '/widgets/task_picker.dart';
-import 'package:loader_overlay/loader_overlay.dart';
 
 class SelectTaskScreen extends StatefulWidget{
 
@@ -81,7 +82,10 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
         Tools.showErrorMessage(context, message);
       }else{
         if(selectedProject != null && selectedTask != null){
-          Tools.showSuccessMessage(context, "${employee.name}, \n ${S.of(context).youAreNowWorkingOn} ${selectedProject!.name} - ${selectedTask!.name}");
+          Tools.showSuccessMessage(context, "${employee.name}, \n ${S.of(context).youAreWorkingOn} ${selectedProject!.name} - ${selectedTask!.name}");
+        }else if(selectedCall != null){
+          Tools.playSound();
+          Tools.showSuccessMessage(context, "${employee.name}, \n ${S.of(context).youAreWorkingOnCall}");
         }
         Navigator.pop(context);
       }
@@ -255,7 +259,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
                           margin: EdgeInsets.only(bottom: 10),
                           child: Column(
                             children: [
-                              Text(S.of(context).youAreNowWorkingOn, style: TextStyle(fontWeight: FontWeight.bold),),
+                              Text(S.of(context).youAreWorkingOn, style: TextStyle(fontWeight: FontWeight.bold),),
                               Row(
                                 children: [
                                   Text('${S.of(context).project}: ',style: TextStyle(fontWeight: FontWeight.bold),),
