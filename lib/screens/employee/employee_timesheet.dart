@@ -624,7 +624,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     child: Center(
                       child: ClipOval(
                         child: CachedNetworkImage(
-                          imageUrl: user!.avatarUrl(),
+                          imageUrl: '${user!.avatarUrl}',
                           height: 150,
                           width: 150,
                           alignment: Alignment.center,

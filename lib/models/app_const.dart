@@ -47,6 +47,7 @@ class AppConst{
   static String get createOrUpdateContainer => baseUrl+"update-create-container";
   static String get deleteContainer => baseUrl+"delete-container";
   static String get addHarvest => baseUrl+"add-harvest";
+  static String get updateHarvest => baseUrl+"update-harvest";
   static String get deleteHarvest => baseUrl+"delete-harvest";
   static String get createOrUpdateTask => baseUrl+"create-update-task";
   static String get deleteTask => baseUrl+"delete-task";

@@ -1,4 +1,3 @@
-import 'package:facepunch/screens/employee/employee_revisions.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,15 +6,17 @@ import '/models/work_model.dart';
 import '/models/app_const.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
+import '/models/harvest_model.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '../admin/nfc/nfc_scan.dart';
 import 'call_detail.dart';
 import 'employee_document.dart';
-import 'employee_revisions.dart';
 import 'employee_timesheet.dart';
 import 'employee_dispatch.dart';
 import 'employee_daily_tasks.dart';
+import 'employee_revisions.dart';
+
 class EmployeeHomePage extends StatefulWidget {
 
   @override
@@ -60,6 +61,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
       await context.read<CompanyModel>().getCompanyUsers();
     }
     await context.read<UserModel>().getYearTotalHours();
+    await context.read<HarvestModel>().getHarvestData();
   }
 
   @override

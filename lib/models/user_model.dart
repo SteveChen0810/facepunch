@@ -409,6 +409,7 @@ class User with HttpRequest{
   String? postalCode;
   String? language;
   String? avatar;
+  String? avatarUrl;
   String? role;
   String? type;
   String? firebaseToken;
@@ -483,9 +484,7 @@ class User with HttpRequest{
         language = 'English';
       }
       avatar = json['avatar'];
-      if(avatar==null){
-        avatar = 'user_avatar.png';
-      }
+      avatarUrl = json['avatar_url'];
       role = json['role'];
       type = json['type'];
       firebaseToken = json['firebase_token'];
@@ -529,7 +528,8 @@ class User with HttpRequest{
     data['state'] = this.state;
     data['postal_code'] = this.postalCode;
     if(language!=null)data['language'] = this.language;
-    if(avatar!=null)data['avatar'] = this.avatar;
+    data['avatar'] = this.avatar;
+    data['avatar_url'] = this.avatarUrl;
     data['role'] = this.role;
     data['type'] = this.type;
     data['firebase_token'] = this.firebaseToken;
@@ -776,13 +776,9 @@ class User with HttpRequest{
     return Uri.encodeFull('${AppConst.domainURL}harvest-reports/$companyId/Harvest_Report_${DateTime.now().toString().split(' ')[0]}.png');
   }
 
-  String avatarUrl(){
-    return Uri.encodeFull('${AppConst.domainURL}images/user_avatars/$avatar');
-  }
-
   Widget userAvatarImage(){
     return CachedNetworkImage(
-      imageUrl: avatarUrl(),
+      imageUrl: '$avatarUrl',
       alignment: Alignment.center,
       placeholder: (_,__)=>Image.asset("assets/images/person.png"),
       errorWidget: (_,__,___)=>Image.asset("assets/images/person.png"),

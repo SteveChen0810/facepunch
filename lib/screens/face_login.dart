@@ -315,7 +315,7 @@ class _FaceLoginState extends State<FaceLogin> {
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          Text(S.of(context).employeeSignIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          Text(S.of(context).signIn, style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
           SizedBox(height: 10,),
           Expanded(
               child: mainWidget()

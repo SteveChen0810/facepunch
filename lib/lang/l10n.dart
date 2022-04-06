@@ -20,7 +20,7 @@ class S {
 
   String get timeSheetSystemForEmployee {
     return Intl.message(
-      'Timesheet system for Employee',
+      'EMPLOYEE TIME MANAGEMENT SYSTEM',
       name: 'timeSheetSystemForEmployee',
       desc: '',
       args: [],
@@ -51,14 +51,6 @@ class S {
     );
   }
 
-  String get adminSignIn {
-    return Intl.message(
-      'Admin Sign In',
-      name: 'adminSignIn',
-      desc: '',
-      args: [],
-    );
-  }
   String get  email{
     return Intl.message(
       'E-mail',
@@ -117,7 +109,7 @@ class S {
   }
   String get  facePunch{
     return Intl.message(
-      'Facepunch',
+      'FACEPUNCH',
       name: 'facePunch',
       desc: '',
       args: [],
@@ -1107,34 +1099,10 @@ class S {
       args: [],
     );
   }
-  String get  chooseYourCompany{
-    return Intl.message(
-      'Choose Your Company',
-      name: 'chooseYourCompany',
-      desc: '',
-      args: [],
-    );
-  }
   String get  faceScanLogin{
     return Intl.message(
       'FACE SCAN LOGIN',
       name: 'faceScanLogin',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  employeeSignIn{
-    return Intl.message(
-      'Employee Sign In',
-      name: 'employeeSignIn',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  selectYourCompany{
-    return Intl.message(
-      'Select Your Company',
-      name: 'selectYourCompany',
       desc: '',
       args: [],
     );
@@ -1667,14 +1635,6 @@ class S {
       args: [],
     );
   }
-  String get  selectCallSchedule{
-    return Intl.message(
-      'Select Call or Schedule',
-      name: 'selectCallSchedule',
-      desc: '',
-      args: [],
-    );
-  }
   String get  breaks{
     return Intl.message(
       'Breaks',
@@ -2135,6 +2095,14 @@ class S {
     return Intl.message(
       'Revision Description Submitted',
       name: 'revisionDescriptionSubmitted',
+      desc: '',
+      args: [],
+    );
+  }
+  String get editHarvest{
+    return Intl.message(
+      'Edit Harvest',
+      name: 'editHarvest',
       desc: '',
       args: [],
     );

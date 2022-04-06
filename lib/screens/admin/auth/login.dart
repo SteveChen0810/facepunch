@@ -71,7 +71,7 @@ class _AdminSignInState extends State<AdminSignIn> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(child: Text(S.of(context).adminSignIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)),
+              Center(child: Text(S.of(context).signIn,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)),
               SizedBox(height: 20,),
               Text(S.of(context).email,style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500),),
               TextField(

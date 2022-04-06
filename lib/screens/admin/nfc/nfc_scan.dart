@@ -50,7 +50,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     super.dispose();
   }
 
-  showHarvestTaskDialog(HTask? task){
+  _showHarvestTaskDialog(HTask? task){
     List<HContainer> containers = context.read<HarvestModel>().containers;
     if(containers.isEmpty){
       Tools.showErrorMessage(context, S.of(context).addContainers);
@@ -147,11 +147,17 @@ class _NFCScanPageState extends State<NFCScanPage>{
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
+                          child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
+                          onPressed: ()=>Navigator.pop(_context),
+                        ),
+                        TextButton(
                           child: Text(S.of(context).save, style: TextStyle(color: Color(primaryColor)),),
                           onPressed: ()async{
                             if(task != null){
                               task!.field = selectedField;
+                              task!.fieldId = selectedField.id;
                               task!.container = selectedContainer;
+                              task!.containerId = selectedContainer.id;
                             }else{
                               task = HTask(field: selectedField, container: selectedContainer, containerId: selectedContainer.id, fieldId: selectedField.id);
                             }
@@ -163,10 +169,6 @@ class _NFCScanPageState extends State<NFCScanPage>{
                               Tools.showErrorMessage(context, result);
                             }
                           },
-                        ),
-                        TextButton(
-                          child: Text(S.of(context).close,style: TextStyle(color: Colors.red),),
-                          onPressed: ()=>Navigator.pop(_context),
                         ),
                       ],
                     )
@@ -233,6 +235,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
         },
         alertMessage: 'NFC Scanned!',
         onError: (NfcError error)async{
+          Tools.consoleLog('[NFCScanPage.onError]$error');
           Tools.showErrorMessage(context, error.message);
         },
       ).catchError((e){
@@ -272,16 +275,17 @@ class _NFCScanPageState extends State<NFCScanPage>{
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         child: AspectRatio(
           aspectRatio: 1.0,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('${task.field?.shortName()}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: FittedBox(child: Text('${task.field?.crop}',),),
-              ),
-              Text('${task.container?.shortName()}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('${task.field?.shortName()}', style: TextStyle(fontSize: 10),),
+                Text('${task.field?.crop}',style: TextStyle(fontSize: 10), maxLines: 1,),
+                Text('${task.field?.cropVariety}',style: TextStyle(fontSize: 10), maxLines: 1,),
+                Text('${task.container?.shortName()}',style: TextStyle(fontSize: 10),),
+              ],
+            ),
           ),
         ),
       ),
@@ -307,7 +311,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
               ),
               onTap: (){
                 Navigator.pop(_context);
-                showHarvestTaskDialog(task);
+                _showHarvestTaskDialog(task);
                 return true;
               },
             ),
@@ -335,6 +339,68 @@ class _NFCScanPageState extends State<NFCScanPage>{
         return true;
       },
       child: child,
+    );
+  }
+
+  _showHarvestEditDialog(Harvest harvest){
+    TextEditingController _quantity = TextEditingController(text: harvest.quantity.toString());
+    showDialog(
+      context: context,
+      builder: (_context){
+        return AlertDialog(
+            title: Text(S.of(context).editHarvest, textAlign: TextAlign.center,),
+            content: Container(
+              width: MediaQuery.of(context).size.width-40,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("${S.of(context).employee} : ${harvest.user?.name}"),
+                  Text("${S.of(context).container} : ${harvest.container?.name}"),
+                  Text("${S.of(context).field} : ${harvest.field?.name}"),
+                  SizedBox(height: 8,),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: S.of(context).quantity,
+                      isDense: true,
+                    ),
+                    controller: _quantity,
+                  ),
+                ],
+              ),
+            ),
+          actions: [
+            TextButton(
+                onPressed: (){
+                  Navigator.pop(_context);
+                },
+                child: Text(S.of(context).close, style: TextStyle(color: Colors.red),)
+            ),
+            TextButton(
+                onPressed: ()async{
+                  try{
+                    Navigator.pop(_context);
+                    context.loaderOverlay.show();
+                    String? result = await harvest.update(double.parse(_quantity.text));
+                    context.loaderOverlay.hide();
+                    if(result!=null){
+                      Tools.showErrorMessage(context, result);
+                    }else{
+                      if(mounted)setState(() {});
+                    }
+                  }catch(e){
+                    Tools.showErrorMessage(context, e.toString());
+                    Tools.consoleLog("[NFCScanPage._showHarvestEditDialog.err] $e");
+                    context.loaderOverlay.hide();
+                  }
+                },
+                child: Text(S.of(context).save, style: TextStyle(color: Colors.blue),)
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -413,13 +479,13 @@ class _NFCScanPageState extends State<NFCScanPage>{
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: MaterialButton(
-                    onPressed: (){showHarvestTaskDialog(null);},
+                    onPressed: ()=>_showHarvestTaskDialog(null),
                     height: 70,
                     minWidth: 0,
                     shape: CircleBorder(),
                     color: Color(primaryColor),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    child: Icon(Icons.add),
+                    child: Icon(Icons.add, color: Colors.white,),
                   ),
                 )
               ],
@@ -444,19 +510,19 @@ class _NFCScanPageState extends State<NFCScanPage>{
                     children: [
                       Expanded(
                         flex: 1,
-                          child: Text(S.of(context).employee,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).employee,style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),textAlign: TextAlign.center,)
                       ),
                       Expanded(
                           flex: 1,
-                          child: Text(S.of(context).field,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).field,style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),textAlign: TextAlign.center,)
                       ),
                       Expanded(
                           flex: 1,
-                          child: Text(S.of(context).container,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).container,style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),textAlign: TextAlign.center,)
                       ),
                       Expanded(
                           flex: 1,
-                          child: Text(S.of(context).quantity,style: TextStyle(fontWeight: FontWeight.w500),textAlign: TextAlign.center,)
+                          child: Text(S.of(context).quantity,style: TextStyle(fontWeight: FontWeight.w500, color: Colors.white),textAlign: TextAlign.center,)
                       ),
                     ],
                   ),
@@ -474,8 +540,14 @@ class _NFCScanPageState extends State<NFCScanPage>{
                           Slidable(
                             endActionPane: ActionPane(
                               motion: ScrollMotion(),
-                              extentRatio: 0.15,
+                              extentRatio: 0.3,
                               children: [
+                                SlidableAction(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  icon: Icons.edit,
+                                  onPressed: (c)=>_showHarvestEditDialog(harvest),
+                                ),
                                 SlidableAction(
                                   backgroundColor: Colors.red,
                                   foregroundColor: Colors.white,
@@ -494,7 +566,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                               ],
                             ),
                             child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 6),
+                              padding: EdgeInsets.symmetric(vertical: 8),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 border: Border(bottom: BorderSide(color: Colors.grey))

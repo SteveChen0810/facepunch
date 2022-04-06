@@ -53,6 +53,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         _fName = TextEditingController(text: widget.employee?.firstName);
         _lName = TextEditingController(text: widget.employee?.lastName);
         _email = TextEditingController(text: widget.employee?.email);
+
         _password = TextEditingController(text: widget.employee?.pin);
         _address1 = TextEditingController(text: widget.employee?.address1);
         _address2 = TextEditingController(text: widget.employee?.address2);
@@ -111,7 +112,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       image = Image.file(_photoFile!, width: 120,height: 120,fit: BoxFit.cover,);
     }else if(widget.employee != null){
       image = CachedNetworkImage(
-        imageUrl: widget.employee!.avatarUrl(),
+        imageUrl: '${widget.employee!.avatarUrl}',
         height: 120,
         width: 120,
         alignment: Alignment.center,
@@ -128,6 +129,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
           )
       );
     }
+
     return ClipOval(
       child: image,
     );

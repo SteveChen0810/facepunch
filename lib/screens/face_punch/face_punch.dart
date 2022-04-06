@@ -44,6 +44,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
   String _photoPath="";
   bool _isCameraAllowed = false;
   Position? currentPosition;
+  OverlayEntry? _revisionOverlay;
 
   @override
   void initState() {
@@ -69,71 +70,75 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     }
   }
 
-  _onMessage(message){
+  _onMessage(message)async{
     try{
       AppNotification notification = AppNotification.fromJsonFirebase(message.data);
       if(mounted){
         if(notification.hasRevision()){
           String description = '';
           String? errorMessage;
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder:(_)=> StatefulBuilder(builder: (BuildContext _context, StateSetter _setState){
-              return AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                contentPadding: EdgeInsets.zero,
-                insetPadding: EdgeInsets.zero,
-                title: Text(
-                  S.of(context).revisionDescription,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                content: Container(
-                  width: MediaQuery.of(context).size.width-50,
-                  padding: const EdgeInsets.all(12.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                        labelText: S.of(context).description,
-                        alignLabelWithHint: true,
-                        errorText: errorMessage
+          _revisionOverlay = OverlayEntry(
+            builder: (_)=>StatefulBuilder(builder: (BuildContext _context, StateSetter _setState){
+              return Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.black.withOpacity(0.8),
+                child: AlertDialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  contentPadding: EdgeInsets.zero,
+                  insetPadding: EdgeInsets.zero,
+                  title: Text(
+                    S.of(context).revisionDescription,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  content: Container(
+                    width: MediaQuery.of(context).size.width-50,
+                    padding: const EdgeInsets.all(12.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          labelText: S.of(context).description,
+                          alignLabelWithHint: true,
+                          errorText: errorMessage
+                      ),
+                      minLines: 3,
+                      maxLines: null,
+                      onChanged: (v){
+                        _setState(() {description = v;});
+                      },
                     ),
-                    minLines: 3,
-                    maxLines: null,
-                    onChanged: (v){
-                      _setState(() {description = v;});
-                    },
                   ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: ()async{
-                      if(description.isNotEmpty){
-                        Navigator.of(_context).pop();
-                        context.loaderOverlay.show();
-                        String? message = await Revision(id: notification.revisionId).update(description);
-                        context.loaderOverlay.hide();
-                        if(message == null){
-                          Tools.showSuccessMessage(context, S.of(context).revisionDescriptionSubmitted);
+                  actions: [
+                    TextButton(
+                      onPressed: ()async{
+                        if(description.isNotEmpty){
+                          _revisionOverlay?.remove();
+                          context.loaderOverlay.show();
+                          String? message = await Revision(id: notification.revisionId).update(description);
+                          context.loaderOverlay.hide();
+                          if(message == null){
+                            Tools.showSuccessMessage(context, S.of(context).revisionDescriptionSubmitted);
+                          }else{
+                            Tools.showErrorMessage(context, message);
+                          }
                         }else{
-                          Tools.showErrorMessage(context, message);
+                          _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
                         }
-                      }else{
-                        _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
-                      }
-                    },
-                    child: Text(S.of(context).submit, style: TextStyle(color: Colors.blue),),
-                  ),
-                ],
+                      },
+                      child: Text(S.of(context).submit, style: TextStyle(color: Colors.blue),),
+                    ),
+                  ],
+                ),
               );
             }),
           );
+          Overlay.of(context)!.insert(_revisionOverlay!);
         }
       }
     }catch(e){
-      Tools.consoleLog('[EmployeeHome._onMessage]$e');
+      Tools.consoleLog('[FacePunchScreen._onMessage]$e');
     }
   }
 
@@ -401,8 +406,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     return Scaffold(
       body: WillPopScope(
         onWillPop: ()async{
-          await cameraClose();
-          return true;
+          return false;
         },
         child: _body(),
       ),

@@ -25,7 +25,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   bool isLoading = false;
   Color lowColor = Colors.red;
   Color mediumColor = Colors.yellow;
-  Color highColor = Color(primaryColor);
+  Color highColor = Colors.green;
   CompanySettings? companySettings;
   List<Field> fields = [];
   List<HContainer> containers = [];
@@ -69,7 +69,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
           title: Text(field==null?S.of(context).createNewField:S.of(context).updateField,textAlign: TextAlign.center,),
           insetPadding: EdgeInsets.zero,
           contentPadding: EdgeInsets.all(8),
-          content:StatefulBuilder(
+          content: StatefulBuilder(
             builder: (_, setState)=>Container(
               width: MediaQuery.of(context).size.width - 40,
               child: Column(
@@ -86,10 +86,10 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       labelStyle: TextStyle(color: Colors.black54),
                       isDense: true,
                       contentPadding: EdgeInsets.zero,
-                      errorText: _fieldNameError
+                      errorText: _fieldNameError,
                     ),
+                    maxLength: 5,
                   ),
-                  SizedBox(height: 8,),
                   TextField(
                     controller: _fieldCrop,
                     textCapitalization: TextCapitalization.words,
@@ -103,8 +103,8 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       contentPadding: EdgeInsets.zero,
                       errorText: _fieldCropError
                     ),
+                    maxLength: 12,
                   ),
-                  SizedBox(height: 8,),
                   TextField(
                     controller: _fieldCropVariety,
                     textCapitalization: TextCapitalization.words,
@@ -118,14 +118,22 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       contentPadding: EdgeInsets.zero,
                       errorText: _fieldVarietyError
                     ),
+                    maxLength: 12,
                   ),
-                  SizedBox(height: 16,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
+                        child: Text(S.of(context).close
+                          ,style: TextStyle(color: Colors.red),
+                        ),
+                        onPressed: ()async{
+                          Navigator.pop(_context);
+                        },
+                      ),
+                      TextButton(
                         child: isSavingField
-                        ?SizedBox(
+                            ?SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2,),
@@ -165,14 +173,6 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           }catch(e){
                             Navigator.pop(_context);
                           }
-                        },
-                      ),
-                      TextButton(
-                        child: Text(S.of(context).close
-                          ,style: TextStyle(color: Colors.red),
-                        ),
-                        onPressed: ()async{
-                          Navigator.pop(_context);
                         },
                       ),
                     ],
@@ -217,14 +217,20 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           contentPadding: EdgeInsets.zero,
                           errorText: _containerNameError
                       ),
+                      maxLength: 5,
                     ),
-                    SizedBox(height: 16,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
+                          child: Text(S.of(context).close, style: TextStyle(color: Colors.red),),
+                          onPressed: ()async{
+                            Navigator.pop(_context);
+                          },
+                        ),
+                        TextButton(
                           child: isSavingContainer
-                          ?SizedBox(
+                              ?SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2,),
@@ -253,12 +259,6 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                               Tools.consoleLog('[showContainerDialog.onPressed]$e');
                               Navigator.pop(_context);
                             }
-                          },
-                        ),
-                        TextButton(
-                          child: Text(S.of(context).close, style: TextStyle(color: Colors.red),),
-                          onPressed: ()async{
-                            Navigator.pop(_context);
                           },
                         ),
                       ],
@@ -597,7 +597,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       child: InkWell(
                         onTap: (){showFieldDialog(null);},
                           borderRadius: BorderRadius.circular(30),
-                          child: Icon(Icons.add,size: 30,)
+                          child: Icon(Icons.add, size: 30, color: Colors.white,)
                       ),
                     ),
                   ],
@@ -633,7 +633,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                       child: InkWell(
                           onTap: (){ showContainerDialog(null); },
                           borderRadius: BorderRadius.circular(30),
-                          child: Icon(Icons.add,size: 30,)
+                          child: Icon(Icons.add,size: 30,color: Colors.white,)
                       ),
                     ),
                   ],
@@ -799,13 +799,13 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
               SizedBox(height: 8,),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('${S.of(context).reportTime}:\n${_reportTime.format(context)}', style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
-                        SizedBox(width: 8,),
+                        Text('${S.of(context).reportTime}: ${_reportTime.format(context)}', style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+                        SizedBox(width: 16,),
                         InkWell(
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
@@ -816,7 +816,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                         )
                       ],
                     ),
-                    Text('${S.of(context).lastUpdated}: ${_lastUpdated==null?'':_lastUpdated.toString().split(' ')[0]}',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
+                    Text('${S.of(context).lastUpdated}: ${_lastUpdated.toString().split(' ')[0]}',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),
                   ],
                 ),
               ),

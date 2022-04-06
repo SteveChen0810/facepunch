@@ -32,7 +32,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 30
 
     lintOptions {
         disable 'InvalidPackage'
@@ -41,7 +41,7 @@ android {
     defaultConfig {
         applicationId "com.golden.star.facepunch"
         minSdkVersion 28
-        targetSdkVersion 31
+        targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -68,12 +68,19 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    packagingOptions {
+        exclude 'META-INF/com.android.tools/proguard/coroutines.pro'
+    }
+
+    android {
+        buildToolsVersion "30.0.3"
+    }
 }
 dependencies {
     testImplementation 'junit:junit:4.13.1'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    implementation 'com.google.firebase:firebase-analytics:20.0.0'
+    implementation 'com.google.firebase:firebase-analytics:20.1.0'
     implementation 'com.google.firebase:firebase-ml-vision-face-model:20.0.2'
     implementation 'com.android.support:multidex:1.0.3'
 }

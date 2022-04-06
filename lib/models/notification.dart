@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 
 import 'base_model.dart';

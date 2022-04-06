@@ -361,7 +361,7 @@ class HarvestModel extends BaseProvider{
   }
 }
 
-class Harvest{
+class Harvest with HttpRequest{
   int? id;
   int? userId;
   int? fieldId;
@@ -388,7 +388,7 @@ class Harvest{
       if(json['field']!=null)field = Field.fromJson(json['field']);
       if(json['container']!=null)container = HContainer.fromJson(json['container']);
     }catch(e){
-      Tools.consoleLog("[Field.fromJson.err] $e");
+      Tools.consoleLog("[Harvest.fromJson.err] $e");
     }
   }
 
@@ -403,6 +403,28 @@ class Harvest{
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
+  }
+
+  Future<String?> update(double quantity)async{
+    try{
+      var res = await sendPostRequest(
+          AppConst.updateHarvest,
+          GlobalData.token,
+          {
+            'id':id,
+            'quantity': quantity
+          }
+      );
+      Tools.consoleLog("[Field.update.res] ${res.body}");
+      if(res.statusCode == 200){
+        this.quantity = quantity;
+        return null;
+      }else{
+        return jsonDecode(res.body)['message'];
+      }
+    }catch(e){
+      Tools.consoleLog("[Field.update.err] $e");
+    }
   }
 }
 
