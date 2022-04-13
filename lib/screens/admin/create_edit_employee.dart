@@ -210,7 +210,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
         birthday: _startDate!=null?_birthDay.toString().split(" ").first:null,
         nfc: _nfc.text,
         language: language,
-        role: "employee",
+        role: (widget.employee?.role)??'employee',
         companyId: widget.employee?.companyId,
         token: widget.employee?.token,
         type: widget.employee?.type??'shop_daily',

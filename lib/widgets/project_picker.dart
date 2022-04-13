@@ -1,7 +1,7 @@
 import 'package:facepunch/lang/l10n.dart';
 import 'package:facepunch/models/work_model.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class ProjectPicker extends StatefulWidget{
   final List<Project> projects;
@@ -18,36 +18,37 @@ class _ProjectPickerState extends State<ProjectPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black54),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      clipBehavior: Clip.hardEdge,
-      margin: EdgeInsets.only(top: 4),
-      child: DropdownButton<Project>(
-        items: widget.projects.map((Project value) {
-          return DropdownMenuItem<Project>(
-            value: value,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${value.name}', maxLines: 1, overflow: TextOverflow.ellipsis,),
-                if(value.hasCode())
-                  Text('${value.code} ${value.address}', style: TextStyle(fontSize: 10),),
-              ],
-            ),
-          );
-        }).toList(),
-        value: widget.projects.firstWhereOrNull((p) => p.id == widget.projectId),
-        isExpanded: true,
-        menuMaxHeight: MediaQuery.of(context).size.height*0.9,
-        underline: SizedBox(),
-        hint: Text(S.of(context).selectProject),
-        onChanged: widget.onSelected,
-      ),
+    return DropdownSearch<Project>(
+      items: widget.projects,
+      onChanged: (Project? p) => widget.onSelected!(p),
+      showSearchBox: true,
+      searchDelay: Duration.zero,
+      itemAsString: (p)=>'${p?.name}, ${p?.code}',
+      popupItemBuilder: (_, p, selected){
+        return Container(
+          padding: EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${p.name}'),
+              Text('${p.code}', style: TextStyle(fontSize: 10),),
+            ],
+          ),
+        );
+      },
+      dropdownBuilder: (_, p){
+        if(p == null) return Text(S.of(context).selectProject);
+        return Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${p.name}'),
+              Text('${p.code}', style: TextStyle(fontSize: 10),),
+            ],
+          ),
+        );
+      },
+      maxHeight: 300,
     );
   }
 }

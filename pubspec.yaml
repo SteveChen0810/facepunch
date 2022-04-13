@@ -47,6 +47,8 @@ dependencies:
   device_info: ^2.0.3
   assets_audio_player: ^3.0.4+1
   loader_overlay: ^2.0.5
+  dropdown_search: ^2.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
