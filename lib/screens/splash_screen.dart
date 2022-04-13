@@ -86,7 +86,11 @@ class _SplashScreenState extends State<SplashScreen> {
                 left: 0,
                 right: 0,
                 child: Center(
-                    child: Text(S.of(context).timeSheetSystemForEmployee,style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500, color: Colors.white),)
+                    child: Text(
+                      S.of(context).timeSheetSystemForEmployee,
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    )
                 ),
               )
             ],
