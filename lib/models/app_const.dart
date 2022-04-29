@@ -1,9 +1,9 @@
 class AppConst{
   static String devDomain = "https://dev2.facepunch.app/";
-  static String liveDomain = "https://dev2.facepunch.app/";
+  static String liveDomain = "https://facepunch.app/";
   static String localDomain = "http://192.168.3.2/";
 
-  static String domainURL = "https://dev.facepunch.app/";
+  static String domainURL = "https://facepunch.app/";
   static String get baseUrl => domainURL+"api/";
 
   static String get adminRegister => baseUrl+"admin-register";
@@ -83,7 +83,7 @@ class AppConst{
   static String get submitMobileLog => baseUrl+"submit-mobile-log";
 
   static const String LOG_FILE_PREFIX = "app_log_";
-  static const int currentVersion = 56;
+  static const int currentVersion = 57;
 }
 
 class GlobalData{
