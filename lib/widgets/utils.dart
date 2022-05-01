@@ -131,12 +131,15 @@ class Tools {
     return false;
   }
 
-  static Future<bool> checkLocationPermission()async{
+  static Future<bool> checkLocationPermission(BuildContext context)async{
     try{
       var status = await Permission.location.status;
       if(status.isGranted){
         return true;
       }else{
+        if(Platform.isAndroid){
+          await showLocationPermissionDialog(context);
+        }
         status = await Permission.location.request();
         if(status.isGranted){
           return true;
@@ -390,9 +393,15 @@ class Tools {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('This app collects location data to enable EmployeePunch even when the app is closed or not in use.',style: TextStyle(fontSize: 18),textAlign: TextAlign.center,),
+              Text('This app collects location data to enable EmployeePunch even when the app is closed or not in use.',
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
               SizedBox(height: 8,),
-              Text('This app tracks locations data of this phone when your employees punch with their face on this phone.',style: TextStyle(fontSize: 14),textAlign: TextAlign.center,),
+              Text('This app tracks locations data of this phone when your employees punch with their face on this phone.',
+                style: TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
