@@ -23,7 +23,7 @@ class EmployeeList extends StatefulWidget {
   _EmployeeListState createState() => _EmployeeListState();
 }
 
-class _EmployeeListState extends State<EmployeeList> {
+class _EmployeeListState extends State<EmployeeList>{
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   RefreshController _refreshController = RefreshController(initialRefresh: true);
@@ -40,13 +40,13 @@ class _EmployeeListState extends State<EmployeeList> {
   }
 
   _determinePosition() async {
-    Tools.checkLocationPermission().then((v){
+    Tools.checkLocationPermission(context).then((v){
       if(v){
         Geolocator.getCurrentPosition()
             .then((value){currentPosition = value;})
             .catchError((e){
-          Tools.consoleLog('[FacePunchScreen.getCurrentPosition]$e');
-        });
+              Tools.consoleLog('[FacePunchScreen.getCurrentPosition]$e');
+            });
       }else{
         Tools.showErrorMessage(context, S.of(context).locationPermissionDenied);
       }

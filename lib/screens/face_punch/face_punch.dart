@@ -250,7 +250,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
   }
 
   _determinePosition() async {
-    Tools.checkLocationPermission().then((v){
+    Tools.checkLocationPermission(context).then((v){
       if(v){
         Geolocator.getCurrentPosition().then((value){currentPosition = value;}).catchError((e){
           Tools.consoleLog('[FacePunchScreen.getCurrentPosition]$e');
