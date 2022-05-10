@@ -683,10 +683,10 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: currentPunch!=null?Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${currentPunch.getTime()}",style: TextStyle(fontSize: 12)),
-                            Text("${currentPunch.punch} ${S.of(context).time}",style: TextStyle(fontSize: 12)),
+                            Text("${currentPunch.getTime()}",style: TextStyle(fontSize: 12, color: Colors.white)),
+                            Text("${currentPunch.punch} ${S.of(context).time}",style: TextStyle(fontSize: 12, color: Colors.white)),
                           ],
-                        ):Text(S.of(context).noPunch,style: TextStyle(fontSize: 12)),
+                        ):Text(S.of(context).noPunch, style: TextStyle(fontSize: 12, color: Colors.white), textAlign: TextAlign.center,),
                       ),
                       Container(
                         decoration: BoxDecoration(
