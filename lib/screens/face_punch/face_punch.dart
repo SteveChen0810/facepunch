@@ -226,10 +226,6 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
       if (cameraController!.value.isTakingPicture) {
         return ;
       }
-      if(faces==null || faces!.isEmpty){
-        Tools.showErrorMessage(context, S.of(context).thereIsNotAnyFaces);
-        return ;
-      }
       if(cameraController!.value.isStreamingImages){
         await cameraController!.stopImageStream();
       }
