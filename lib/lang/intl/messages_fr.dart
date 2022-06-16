@@ -18,10 +18,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "enterYourEmailAddress" : MessageLookupByLibrary.simpleMessage("Entrez votre adresse courriel"),
     "password" : MessageLookupByLibrary.simpleMessage("Mot de passe "),
     "enterYourPassword" : MessageLookupByLibrary.simpleMessage("Entrez votre mot de passe"),
+    "passwordTooShort" : MessageLookupByLibrary.simpleMessage("Entrez 8 caractères minimum"),
     "rememberMe" : MessageLookupByLibrary.simpleMessage("Mémoriser"),
     "cannotLogin" : MessageLookupByLibrary.simpleMessage("Impossible de se connecter"),
     "login" : MessageLookupByLibrary.simpleMessage("Ouverture de session"),
-    "facePunch" : MessageLookupByLibrary.simpleMessage("FACEPUNCH"),
+    "facePunch" : MessageLookupByLibrary.simpleMessage("Facepunch"),
     "weWillSendNewPasswordToYourEmail" : MessageLookupByLibrary.simpleMessage("Un nouveau mot de passe vous a été envoyé par courriel"),
     "done" : MessageLookupByLibrary.simpleMessage("Terminer"),
     "firstNameIsRequired" : MessageLookupByLibrary.simpleMessage("Votre prénom est requis"),
@@ -271,5 +272,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "revisionDescription" : MessageLookupByLibrary.simpleMessage("Révision de la description"),
     "revisionDescriptionSubmitted" : MessageLookupByLibrary.simpleMessage("Révision de la description soumise"),
     "editHarvest" : MessageLookupByLibrary.simpleMessage("modifier la récolte"),
+    "welcomeToFacePunch" : MessageLookupByLibrary.simpleMessage("Bienvenue sur Facepunch"),
+    "theBestEmployeeClockingSystem" : MessageLookupByLibrary.simpleMessage("Le meilleur système de pointage des employés"),
+    "employeePortal" : MessageLookupByLibrary.simpleMessage("Portail employé")
   };
 }

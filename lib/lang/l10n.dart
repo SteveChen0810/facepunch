@@ -50,6 +50,14 @@ class S {
       args: [],
     );
   }
+  String get passwordTooShort {
+    return Intl.message(
+      'Input 8 characters minimum.',
+      name: 'passwordTooShort',
+      desc: '',
+      args: [],
+    );
+  }
 
   String get  email{
     return Intl.message(
@@ -109,7 +117,7 @@ class S {
   }
   String get  facePunch{
     return Intl.message(
-      'FACEPUNCH',
+      'Facepunch',
       name: 'facePunch',
       desc: '',
       args: [],
@@ -2103,6 +2111,30 @@ class S {
     return Intl.message(
       'Edit Harvest',
       name: 'editHarvest',
+      desc: '',
+      args: [],
+    );
+  }
+  String get welcomeToFacePunch{
+    return Intl.message(
+      'Welcome to Facepunch',
+      name: 'welcomeToFacePunch',
+      desc: '',
+      args: [],
+    );
+  }
+  String get theBestEmployeeClockingSystem{
+    return Intl.message(
+      'The Best Employee Clocking System',
+      name: 'theBestEmployeeClockingSystem',
+      desc: '',
+      args: [],
+    );
+  }
+  String get employeePortal{
+    return Intl.message(
+      'Employee Portal',
+      name: 'employeePortal',
       desc: '',
       args: [],
     );

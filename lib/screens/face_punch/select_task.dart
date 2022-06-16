@@ -86,6 +86,8 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
         }else if(selectedCall != null){
           Tools.playSound();
           Tools.showSuccessMessage(context, "${employee.name}, \n ${S.of(context).youAreWorkingOnCall}");
+        }else{
+          Tools.showSuccessMessage(context, "${S.of(context).welcome}, ${employee.name}");
         }
         Navigator.pop(context);
       }

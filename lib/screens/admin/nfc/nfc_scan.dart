@@ -235,7 +235,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
         },
         alertMessage: 'NFC Scanned!',
         onError: (NfcError error)async{
-          Tools.consoleLog('[NFCScanPage.onError]$error');
+          Tools.consoleLog('[NFCScanPage.onError][${error.message}][${error.details}]');
           Tools.showErrorMessage(context, error.message);
         },
       ).catchError((e){

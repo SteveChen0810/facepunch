@@ -1,3 +1,4 @@
+import 'package:facepunch/screens/admin/nfc/harvest_report.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -67,6 +68,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<UserModel>().user;
+    final settings = context.watch<CompanyModel>().myCompanySettings;
     if(user==null)return Container();
     return Scaffold(
       key: _scaffoldKey,
@@ -80,6 +82,8 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
             EmployeeDocument(),
             if(user.hasNTCTracking())
               NFCScanPage(),
+            if((settings?.hasHarvestReport??false) && user.isManager())
+              HarvestReportScreen(),
             EmployeeDailyTasks(),
             if(user.canManageDispatch())
               EmployeeDispatch(),
@@ -109,6 +113,12 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
                 icon: Image.asset("assets/images/nfc.png",width: 30,color: Colors.black,),
                 activeIcon: Image.asset("assets/images/nfc.png",width: 30,color: Color(primaryColor),),
                 label: S.of(context).nfc
+            ),
+          if((settings?.hasHarvestReport??false) && user.isManager())
+            BottomNavigationBarItem(
+                icon: Image.asset('assets/images/ic_harvest.png', color: Colors.black, width: 30, height: 30,),
+                activeIcon: Image.asset('assets/images/ic_harvest.png', color: Color(primaryColor),width: 30, height: 30,),
+                label: S.of(context).harvestReport
             ),
           BottomNavigationBarItem(
               icon: Image.asset("assets/images/ic_schedule.png",width: 30,color: Colors.black,),

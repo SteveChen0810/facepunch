@@ -594,12 +594,12 @@ class HarvestCompanyStats{
 
   HarvestCompanyStats.fromJson(Map<String, dynamic> json){
     try{
-      harvestTimeOfDate = double.tryParse(json['date']['time'].toString())??0.0;
-      harvestTimeOfYear = double.tryParse(json['year']['time'].toString())??0.0;
-      quantityOfDate = double.tryParse(json['date']['quantity'].toString())??0.0;
-      quantityOfYear = double.tryParse(json['year']['quantity'].toString())??0.0;
-      containersOfDate = json['date']['containers'];
-      containersOfYear = json['year']['containers'];
+      harvestTimeOfDate = double.tryParse(json['date_stats']['time'].toString())??0.0;
+      harvestTimeOfYear = double.tryParse(json['year_stats']['time'].toString())??0.0;
+      quantityOfDate = double.tryParse(json['date_stats']['quantity'].toString())??0.0;
+      quantityOfYear = double.tryParse(json['year_stats']['quantity'].toString())??0.0;
+      containersOfDate = json['date_stats']['containers'];
+      containersOfYear = json['year_stats']['containers'];
     }catch(e){
       Tools.consoleLog('[HarvestCompanyStats.fromJson.err]$e');
     }
@@ -630,7 +630,7 @@ class HarvestDateStats{
       fieldName = json['name'];
       containers = json['containers'];
     }catch(e){
-      Tools.consoleLog('[HarvestCompanyStats.fromJson.err]$e');
+      Tools.consoleLog('[HarvestDateStats.fromJson.err]$e');
     }
   }
 

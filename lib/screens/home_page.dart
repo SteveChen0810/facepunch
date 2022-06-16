@@ -116,12 +116,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 Column(
                   children: [
                     Text(
-                      "Welcome to Facepunch",
+                      S.of(context).welcomeToFacePunch,
                       style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     SizedBox(height: 4,),
                     Text(
-                      "THE BEST EMPLOYEE CLOCKING SYSTEM",
+                      S.of(context).theBestEmployeeClockingSystem.toUpperCase(),
                       style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Colors.white),
                       textAlign: TextAlign.center,
                     ),
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Icon(Icons.keyboard_arrow_up, size: iconSize, color: _pageIndex == EMPLOYEE_SIGN_IN ? Colors.white : Colors.black,),
                   SizedBox(height: 8,),
                   Text(
-                    S.of(context).signIn,
+                    S.of(context).employeePortal,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _pageIndex == EMPLOYEE_SIGN_IN ? Colors.white : Colors.black),
                     textAlign: TextAlign.center,
                   )
@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Icon(Icons.keyboard_arrow_up, size: iconSize, color: _pageIndex == FACE_PUNCH ? Colors.white : Colors.black,),
                   SizedBox(height: 8,),
                   Text(
-                    "Face Punch",
+                    S.of(context).facePunch,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _pageIndex == FACE_PUNCH ? Colors.white : Colors.black,),
                     textAlign: TextAlign.center,)
                 ],

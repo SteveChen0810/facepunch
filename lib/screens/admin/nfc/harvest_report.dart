@@ -215,12 +215,26 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text('${task.field?.shortName()}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+                                      Text('${task.field?.shortName()}',
+                                        style: TextStyle(
+                                          color: selectedTask==task?Colors.white:Colors.black87
+                                        ),
+                                      ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 2),
-                                        child: FittedBox(child: Text('${task.field?.crop}',),),
+                                        child: FittedBox(
+                                          child: Text('${task.field?.crop}',
+                                            style: TextStyle(
+                                                color: selectedTask==task?Colors.white:Colors.black87
+                                            ),
+                                          ),
+                                        )
                                       ),
-                                      Text('${task.container?.shortName()}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+                                      Text('${task.container?.shortName()}',
+                                        style: TextStyle(
+                                            color: selectedTask==task?Colors.white:Colors.black87
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),

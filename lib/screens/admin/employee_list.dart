@@ -69,7 +69,7 @@ class _EmployeeListState extends State<EmployeeList>{
           children: <Widget>[
             CupertinoPopoverMenuItem(
               child: Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -86,7 +86,7 @@ class _EmployeeListState extends State<EmployeeList>{
             ),
             CupertinoPopoverMenuItem(
               child: Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -104,7 +104,7 @@ class _EmployeeListState extends State<EmployeeList>{
             if(settings!.useOwnData??false)
               CupertinoPopoverMenuItem(
                 child: Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -129,15 +129,13 @@ class _EmployeeListState extends State<EmployeeList>{
       child: Container(
         margin: EdgeInsets.all(3),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                  border: Border.all(color: selectedUser?.id==user.id?Colors.red:Colors.transparent,width: 2),
-                  shape: BoxShape.circle
-              ),
-              child: ClipOval(
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                ),
+                clipBehavior: Clip.hardEdge,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -159,20 +157,31 @@ class _EmployeeListState extends State<EmployeeList>{
                       ),
                     if(user.id == loadingUser)
                       Center(child: CircularProgressIndicator(color: Color(primaryColor),)),
+                    if(selectedUser?.id == user.id)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        top: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.red, width: 2),
+                            shape: BoxShape.circle
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
             ),
-            if(user.hasCode())
-              Text('${user.employeeCode}',
-                style: TextStyle(fontSize: 10),
-                maxLines: 1,
-                textAlign: TextAlign.center,
-              ),
-            Expanded(
-              child: Text('${user.getFullName()}',
-                style: TextStyle(fontSize: 12), maxLines: 1, textAlign: TextAlign.center,),
+            Text('${user.employeeCode??''}',
+              style: TextStyle(fontSize: 10),
+              maxLines: 1,
+              textAlign: TextAlign.center,
             ),
+            Text('${user.getFullName()}',
+              style: TextStyle(fontSize: 12), maxLines: 1, textAlign: TextAlign.center,
+            )
           ],
         ),
       ),

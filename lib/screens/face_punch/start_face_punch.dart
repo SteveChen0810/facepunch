@@ -19,7 +19,10 @@ class _StartFacePunchState extends State<StartFacePunch> {
       padding: EdgeInsets.all(16),
       child: Column(
         children: [
-          Text(S.of(context).facePunch,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+          Text(
+            S.of(context).facePunch.toUpperCase(),
+            style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 10,),
           Expanded(
               child: Stack(

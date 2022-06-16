@@ -183,6 +183,10 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       _passwordError = S.of(context).passwordIsRequired;
       return false;
     }
+    if(_password.text.length < 8){
+      _passwordError = S.of(context).passwordTooShort;
+      return false;
+    }
     return true;
   }
 
@@ -407,7 +411,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                     errorText: _passwordError
                 ),
                 enabled: settings?.useOwnData??false,
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.visiblePassword,
                 textInputAction: TextInputAction.next,
                 maxLines: 1,
                 controller: _password,
@@ -637,6 +641,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
                 value: language,
                 disabledHint: Text('$language', style: TextStyle(fontSize: 14),),
               ),
+
               MaterialButton(
                 minWidth: MediaQuery.of(context).size.width,
                 height: 40,
