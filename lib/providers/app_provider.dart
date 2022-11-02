@@ -5,10 +5,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/widgets/utils.dart';
-import 'app_const.dart';
-import 'base_model.dart';
+import '/config/app_const.dart';
+import 'base_provider.dart';
 
-class AppModel extends BaseProvider{
+class AppProvider extends BaseProvider{
   bool isDebug = false;
   final LocalStorage storage = LocalStorage('app_config');
 

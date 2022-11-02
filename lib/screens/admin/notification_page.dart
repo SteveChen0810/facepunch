@@ -1,3 +1,4 @@
+import 'package:facepunch/providers/notification_provider.dart';
 import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -5,8 +6,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/notification.dart';
+import '/config/app_const.dart';
 import '/models/revision_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/widgets/utils.dart';
@@ -23,7 +23,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
 
   void _onRefresh() async{
-    await context.read<NotificationModel>().getNotificationFromServer();
+    await context.read<NotificationProvider>().getNotificationFromServer();
     _refreshController.refreshCompleted();
   }
 
@@ -40,7 +40,7 @@ class _NotificationPageState extends State<NotificationPage> {
                 String? result = await revision.delete();
                 context.loaderOverlay.hide();
                 if(result == null){
-                  context.read<NotificationModel>().removeRevision(revision);
+                  context.read<NotificationProvider>().removeRevision(revision);
                 }else{
                   Tools.showErrorMessage(context, result);
                 }
@@ -679,7 +679,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Revision> revisions = context.watch<NotificationModel>().revisions;
+    List<Revision> revisions = context.watch<NotificationProvider>().revisions;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(

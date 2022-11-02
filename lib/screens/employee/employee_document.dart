@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/company_model.dart';
-import '/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:provider/provider.dart';
+
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
+import '/lang/l10n.dart';
+import '/config/app_const.dart';
 
 class EmployeeDocument extends StatefulWidget {
 
@@ -24,8 +25,8 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final user = context.watch<UserModel>().user;
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    final user = context.watch<UserProvider>().user;
+    final settings = context.watch<CompanyProvider>().myCompanySettings;
 
     return Container(
       child: Column(

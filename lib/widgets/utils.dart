@@ -18,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '/models/notification.dart';
-import '/models/app_const.dart';
+import '../config/app_const.dart';
 import '/lang/l10n.dart';
 import 'face_painter.dart';
 

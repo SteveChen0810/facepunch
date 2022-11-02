@@ -12,13 +12,15 @@ import '/widgets/project_picker.dart';
 import '/widgets/task_picker.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/revision_model.dart';
+import '/config/app_const.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
 import '/screens/home_page.dart';
 import '/widgets/calendar_strip/calendar_strip.dart';
 import '/widgets/calendar_strip/date-utils.dart';
+import '/providers/revision_provider.dart';
+import '/providers/user_provider.dart';
+import '/providers/work_provider.dart';
 
 class EmployeeTimeSheet extends StatefulWidget {
 
@@ -40,7 +42,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   @override
   void initState() {
     super.initState();
-    user = context.read<UserModel>().user;
+    user = context.read<UserProvider>().user;
     if(user?.punches == null || user!.punches.isEmpty){
       _refreshController = RefreshController(initialRefresh: true);
     }else{
@@ -527,7 +529,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   }
 
   _sendPunchRevisionRequest(int? punchId, String newValue, String? oldValue, String description)async{
-    String? result = await context.read<RevisionModel>().sendPunchRevisionRequest(
+    String? result = await context.read<RevisionProvider>().sendPunchRevisionRequest(
         punchId: punchId,
         newValue: newValue,
         oldValue:oldValue,
@@ -541,7 +543,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   }
 
   _sendBreakRevisionRequest(EmployeeBreak oldBreak, EmployeeBreak newBreak, String description)async{
-    String? result = await context.read<RevisionModel>().sendBreakRevisionRequest(
+    String? result = await context.read<RevisionProvider>().sendBreakRevisionRequest(
         oldBreak: oldBreak,
         newBreak:newBreak,
         description: description
@@ -554,7 +556,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   }
 
   _sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
-    String? result = await context.read<RevisionModel>().sendWorkRevisionRequest(
+    String? result = await context.read<RevisionProvider>().sendWorkRevisionRequest(
         newWork: newWork,
         oldWork: oldWork,
         description: description
@@ -568,7 +570,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 
   void _onRefresh() async{
     try{
-      await context.read<UserModel>().getUserTimeSheetData(startOfWeek);
+      await context.read<UserProvider>().getUserTimeSheetData(startOfWeek);
       selectedPunches = user!.getPunchesGroupOfWeek(startOfWeek);
       _refreshController.refreshCompleted();
       if(mounted)setState(() {});
@@ -582,8 +584,8 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     Punch? currentPunch = user!.getTodayPunch();
-    projects = context.watch<WorkModel>().projects;
-    tasks = context.watch<WorkModel>().tasks;
+    projects = context.watch<WorkProvider>().projects;
+    tasks = context.watch<WorkProvider>().tasks;
 
     return Container(
       child: Column(
@@ -701,7 +703,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(context.watch<UserModel>().yearTotalHours)}", style: TextStyle(fontSize: 12)),
+                            Text("${PunchDateUtils.convertHoursToString(context.watch<UserProvider>().yearTotalHours)}", style: TextStyle(fontSize: 12)),
                             Text(S.of(context).total,style: TextStyle(fontSize: 12)),
                           ],
                         ),
@@ -762,7 +764,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                               child: Icon(Icons.logout, color: Colors.white, size: 30,),
                             ),
                             onTap: ()async{
-                              await context.read<UserModel>().logOut();
+                              await context.read<UserProvider>().logOut();
                               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
                             }
                           )

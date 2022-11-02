@@ -1,15 +1,15 @@
-import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/revision_model.dart';
-import '/models/user_model.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/widgets/utils.dart';
+import '/widgets/TimeEditor.dart';
+import '/providers/user_provider.dart';
 
 class EmployeeRevisions extends StatefulWidget {
 
@@ -23,7 +23,7 @@ class _EmployeeRevisionState extends State<EmployeeRevisions> {
   List<Revision> revisions = [];
 
   _onRefresh()async{
-    final user = context.read<UserModel>().user;
+    final user = context.read<UserProvider>().user;
     String? result = await user!.getRevisionNotifications();
     if(result == null){
       revisions = user.revisions;

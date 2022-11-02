@@ -1,9 +1,11 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/work_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+
 import '/widgets/utils.dart';
+import '/lang/l10n.dart';
+import '/config/app_const.dart';
+import '/models/work_model.dart';
+import '/providers/work_provider.dart';
 
 class CallDetailScreen extends StatefulWidget {
 
@@ -25,7 +27,7 @@ class _CallDetailScreenState extends State<CallDetailScreen> {
 
   _getCallFromServer()async{
     try{
-      var result = await context.read<WorkModel>().getCall(widget.callId);
+      var result = await context.read<WorkProvider>().getCall(widget.callId);
       if(!mounted)return;
       if(result is EmployeeCall){
         setState(() {

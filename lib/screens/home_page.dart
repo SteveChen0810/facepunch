@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '/models/app_model.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/user_model.dart';
+import '/config/app_const.dart';
 import 'face_punch/start_face_punch.dart';
 import '/widgets/utils.dart';
 import '/screens/face_login.dart';
+import '/providers/app_provider.dart';
+import '/providers/user_provider.dart';
 
 class HomePage extends StatefulWidget{
 
@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       blurRadius: 1,
       offset: Offset(0, 0),
     );
-    String lang = context.watch<UserModel>().locale;
+    String lang = context.watch<UserProvider>().locale;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ],
             padding: EdgeInsets.zero,
             onSelected: (l){
-              context.read<UserModel>().changeAppLanguage(l.toString());
+              context.read<UserProvider>().changeAppLanguage(l.toString());
             },
             child: Container(
               child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black87),),
@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   child: GestureDetector(
                     onLongPress: ()async{
                       if(await Tools.confirmDialog(context, 'Are you going to switch app mode?')){
-                        context.read<AppModel>().switchDebug();
+                        context.read<AppProvider>().switchDebug();
                       }
                     },
                     child: Padding(

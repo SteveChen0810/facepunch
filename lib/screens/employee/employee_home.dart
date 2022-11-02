@@ -1,22 +1,22 @@
-import 'package:facepunch/screens/admin/nfc/harvest_report.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '/models/notification.dart';
-import '/models/work_model.dart';
-import '/models/app_const.dart';
-import '/models/company_model.dart';
-import '/models/user_model.dart';
-import '/models/harvest_model.dart';
+import '/config/app_const.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
-import '../admin/nfc/nfc_scan.dart';
+import '/screens/admin/nfc/nfc_scan.dart';
 import 'call_detail.dart';
 import 'employee_document.dart';
 import 'employee_timesheet.dart';
 import 'employee_dispatch.dart';
 import 'employee_daily_tasks.dart';
 import 'employee_revisions.dart';
+import '/screens/admin/nfc/harvest_report.dart';
+import '/providers/company_provider.dart';
+import '/providers/harvest_provider.dart';
+import '/providers/user_provider.dart';
+import '/providers/work_provider.dart';
 
 class EmployeeHomePage extends StatefulWidget {
 
@@ -56,20 +56,21 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   }
 
   _fetchData()async{
-    await context.read<WorkModel>().getProjectsAndTasks();
-    final user = context.read<UserModel>().user;
+    await context.read<WorkProvider>().getProjectsAndTasks();
+    final user = context.read<UserProvider>().user;
     if(user?.canManageDispatch()??false){
-      await context.read<CompanyModel>().getCompanyUsers();
+      await context.read<CompanyProvider>().getCompanyUsers();
     }
-    await context.read<UserModel>().getYearTotalHours();
-    await context.read<HarvestModel>().getHarvestData();
+    await context.read<UserProvider>().getYearTotalHours();
+    await context.read<HarvestProvider>().getHarvestData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserModel>().user;
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    final user = context.watch<UserProvider>().user;
+    final settings = context.watch<CompanyProvider>().myCompanySettings;
     if(user==null)return Container();
+
     return Scaffold(
       key: _scaffoldKey,
       body: WillPopScope(

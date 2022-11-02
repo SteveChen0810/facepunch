@@ -7,10 +7,12 @@ import '/widgets/project_picker.dart';
 import '/widgets/task_picker.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/revision_model.dart';
+import '/config/app_const.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
+import '/providers/revision_provider.dart';
+import '/providers/user_provider.dart';
+import '/providers/work_provider.dart';
 
 class EmployeeDailyTasks extends StatefulWidget {
 
@@ -49,7 +51,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
   }
 
   _onRefresh()async{
-    final user = context.read<UserModel>().user;
+    final user = context.read<UserProvider>().user;
     String? result = await user!.getDailyTasks(selectedDate.toString());
     if(result == null){
       schedules = user.schedules;
@@ -486,7 +488,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
 
   _sendScheduleRevision(WorkSchedule newValue, WorkSchedule oldValue, String description)async{
     setState(() { _selected = oldValue;});
-    final result = await context.read<RevisionModel>().sendScheduleRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
+    final result = await context.read<RevisionProvider>().sendScheduleRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     setState(() { _selected = null;});
     if(result != null){
       Tools.showErrorMessage(context, result);
@@ -650,7 +652,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
 
   _sendCallRevision(EmployeeCall newValue, EmployeeCall oldValue, String description)async{
     setState(() { _selected = oldValue;});
-    final result = await context.read<RevisionModel>().sendCallRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
+    final result = await context.read<RevisionProvider>().sendCallRevision(newSchedule: newValue, oldSchedule: oldValue, description: description);
     if(!mounted) return;
     setState(() { _selected = null;});
     if(result != null){
@@ -775,7 +777,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
 
   _sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
     setState(() { _selected = oldWork;});
-    String? result = await context.read<RevisionModel>().sendWorkRevisionRequest(
+    String? result = await context.read<RevisionProvider>().sendWorkRevisionRequest(
         newWork: newWork,
         oldWork: oldWork,
         description: description
@@ -791,9 +793,10 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
 
   @override
   Widget build(BuildContext context) {
-    projects = context.watch<WorkModel>().projects;
-    tasks = context.watch<WorkModel>().tasks;
-    user = context.watch<UserModel>().user;
+    projects = context.watch<WorkProvider>().projects;
+    tasks = context.watch<WorkProvider>().tasks;
+    user = context.watch<UserProvider>().user;
+
     return Container(
       child: Column(
         children: [

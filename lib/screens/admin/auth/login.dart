@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '/providers/user_provider.dart';
 import '/lang/l10n.dart';
-import '/../models/user_model.dart';
 import 'recovery_password.dart';
 import '/widgets/utils.dart';
 
@@ -47,7 +47,7 @@ class _AdminSignInState extends State<AdminSignIn> {
       if(!isLoading){
         if(loginValidator()){
           setState(() {isLoading = true;});
-          String? result = await context.read<UserModel>().adminLogin(_email.text, _password.text, isRememberMe);
+          String? result = await context.read<UserProvider>().adminLogin(_email.text, _password.text, isRememberMe);
           await widget.onLogin(result);
           setState(() {isLoading = false;});
         }else{

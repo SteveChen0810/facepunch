@@ -1,4 +1,4 @@
-import 'package:facepunch/models/app_const.dart';
+import 'package:facepunch/config/app_const.dart';
 
 import '/lang/l10n.dart';
 import 'package:flutter/material.dart';

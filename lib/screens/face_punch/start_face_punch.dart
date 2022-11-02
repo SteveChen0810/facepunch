@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '/lang/l10n.dart';
 import 'face_punch.dart';
-import '/models/app_const.dart';
+import '../../config/app_const.dart';
 
 class StartFacePunch extends StatefulWidget {
 

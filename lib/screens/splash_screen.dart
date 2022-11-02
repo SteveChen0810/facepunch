@@ -1,16 +1,17 @@
 import 'dart:io';
-import 'package:facepunch/models/app_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '/lang/l10n.dart';
 import '/screens/home_page.dart';
-import '/models/company_model.dart';
 import '/models/user_model.dart';
 import '/screens/admin/admin_home.dart';
 import '/screens/employee/employee_home.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/widgets/utils.dart';
+import '/providers/app_provider.dart';
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
 
 class SplashScreen extends StatefulWidget {
 
@@ -29,17 +30,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   _init()async{
     try{
-      final appVersions = await context.read<AppModel>().getAppVersions();
+      final appVersions = await context.read<AppProvider>().getAppVersions();
       if(appVersions != null){
         if(appVersions[Platform.isAndroid?'android':'ios'] > AppConst.currentVersion){
           await Tools.checkAppVersionDialog(context, appVersions['force']);
         }
       }
-      User? user  = await context.read<UserModel>().getUserFromLocal();
+      User? user  = await context.read<UserProvider>().getUserFromLocal();
       if(user == null){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
       }else{
-        bool result = await context.read<CompanyModel>().getMyCompany(user.companyId);
+        bool result = await context.read<CompanyProvider>().getMyCompany(user.companyId);
         if(result){
           if(user.isAdmin()){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));

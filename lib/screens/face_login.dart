@@ -9,12 +9,12 @@ import 'package:provider/provider.dart';
 
 import '/screens/admin/admin_home.dart';
 import '/lang/l10n.dart';
-import '/models/company_model.dart';
-import '/models/user_model.dart';
 import '/screens/employee/employee_home.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/widgets/utils.dart';
 import 'dart:math' as math;
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
 
 class FaceLogin extends StatefulWidget {
 
@@ -149,7 +149,7 @@ class _FaceLoginState extends State<FaceLogin> {
   Future<bool> loginWithFace(String path)async{
     try{
       String base64Image = base64Encode(File(path).readAsBytesSync());
-      String? result = await context.read<UserModel>().loginWithFace(base64Image);
+      String? result = await context.read<UserProvider>().loginWithFace(base64Image);
       if(result==null){
         return true;
       }else{
@@ -227,9 +227,9 @@ class _FaceLoginState extends State<FaceLogin> {
                 }
                 _btnController.reset();
                 if(result){
-                  final user = context.read<UserModel>().user;
+                  final user = context.read<UserProvider>().user;
                   if(mounted){setState(() {_pageIndex = 2; userName = "${user?.getFullName()}";});}
-                  await context.read<CompanyModel>().getMyCompany(user?.companyId);
+                  await context.read<CompanyProvider>().getMyCompany(user?.companyId);
                   if(mounted){
                     if(user!.role == 'admin' || user.role == 'sub_admin'){
                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));

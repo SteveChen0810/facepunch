@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/company_model.dart';
-import '/models/harvest_model.dart';
 import '/models/notification.dart';
 import '/models/user_model.dart';
-import '/models/work_model.dart';
 import '/screens/admin/employee_list.dart';
 import '/widgets/utils.dart';
 import 'create_edit_employee.dart';
@@ -14,6 +13,10 @@ import 'nfc/harvest_report.dart';
 import 'nfc/nfc_scan.dart';
 import 'admin_settings.dart';
 import 'notification_page.dart';
+import '/providers/company_provider.dart';
+import '/providers/harvest_provider.dart';
+import '/providers/user_provider.dart';
+import '/providers/work_provider.dart';
 
 class AdminHomePage extends StatefulWidget {
 
@@ -34,8 +37,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   _fetchCompanyData()async{
-    await context.read<WorkModel>().getProjectsAndTasks();
-    await context.read<HarvestModel>().getHarvestData();
+    await context.read<WorkProvider>().getProjectsAndTasks();
+    await context.read<HarvestProvider>().getHarvestData();
   }
 
   _onMessage(message){
@@ -61,8 +64,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    User? user = context.watch<UserModel>().user;
-    settings = context.watch<CompanyModel>().myCompanySettings;
+    User? user = context.watch<UserProvider>().user;
+    settings = context.watch<CompanyProvider>().myCompanySettings;
     if(user == null) return Container();
 
     return Scaffold(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '/providers/user_provider.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/user_model.dart';
+import '/config/app_const.dart';
 import '/widgets/utils.dart';
 
 class RecoveryPasswordScreen extends StatefulWidget{
@@ -22,7 +22,7 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
       FocusScope.of(context).requestFocus(FocusNode());
       if(controller.text.contains("@") & controller.text.contains(".")){
         setState(() { isLoading = true;});
-        String? result = await context.read<UserModel>().recoverPassword(controller.text);
+        String? result = await context.read<UserProvider>().recoverPassword(controller.text);
         setState(() { isLoading = false;});
         if(result != null){showMessage(result);}
       }else{

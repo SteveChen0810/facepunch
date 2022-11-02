@@ -1,13 +1,15 @@
-import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
 
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/company_model.dart';
 import '/models/harvest_model.dart';
 import '/widgets/popover/cool_ui.dart';
+import '/widgets/utils.dart';
+import '/providers/company_provider.dart';
+import '/providers/harvest_provider.dart';
 
 class NFCSettingPage extends StatefulWidget{
 
@@ -34,7 +36,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
 
   @override
   void initState() {
-    companySettings = context.read<CompanyModel>().myCompanySettings;
+    companySettings = context.read<CompanyProvider>().myCompanySettings;
     _init();
     super.initState();
   }
@@ -163,7 +165,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                             }else{
                               field = Field(name: _fieldName.text,crop: _fieldCrop.text,cropVariety: _fieldCropVariety.text);
                             }
-                            String? result = await context.read<HarvestModel>().createOrUpdateField(field!);
+                            String? result = await context.read<HarvestProvider>().createOrUpdateField(field!);
                             if(result != null){
                               _fieldVarietyError = result;
                             }else{
@@ -248,7 +250,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                               }else{
                                 container = HContainer(name: _containerName.text);
                               }
-                              String? result = await context.read<HarvestModel>().createOrUpdateContainer(container!);
+                              String? result = await context.read<HarvestProvider>().createOrUpdateContainer(container!);
                               if(result != null){
                                 _containerNameError = result;
                               }else{
@@ -441,7 +443,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   _deleteField(Field field)async{
     if(await Tools.confirmDeleting(context, S.of(context).deleteFieldConfirm)){
       setState(() { selectedField = field; });
-      String? result = await context.read<HarvestModel>().deleteField(field);
+      String? result = await context.read<HarvestProvider>().deleteField(field);
       if(result != null) Tools.showErrorMessage(context, result);
       if(mounted)setState(() {
         selectedField = null;
@@ -543,7 +545,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
   _deleteContainer(HContainer container)async{
     if(await Tools.confirmDeleting(context, S.of(context).deleteContainerConfirm)){
       setState(() { selectedContainer = container; });
-      String? result = await context.read<HarvestModel>().deleteContainer(container);
+      String? result = await context.read<HarvestProvider>().deleteContainer(container);
       if(result != null) Tools.showErrorMessage(context, result);
       if(mounted)setState(() {
         selectedContainer = null;
@@ -553,8 +555,8 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
 
   @override
   Widget build(BuildContext context) {
-    fields = context.watch<HarvestModel>().fields;
-    containers = context.watch<HarvestModel>().containers;
+    fields = context.watch<HarvestProvider>().fields;
+    containers = context.watch<HarvestProvider>().containers;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -841,7 +843,7 @@ class _NFCSettingPageState extends State<NFCSettingPage>{
                           companySettings!.highValue = _highValue.text;
                           companySettings!.lowValue = _lowValue.text;
                           setState(() { isLoading=true; });
-                          String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings!);
+                          String? result = await context.read<CompanyProvider>().updateCompanySetting(companySettings!);
                           setState(() { isLoading=false; });
                           if(result != null){
                             Tools.showErrorMessage(context, result);

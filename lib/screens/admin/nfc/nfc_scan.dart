@@ -7,12 +7,12 @@ import 'package:collection/collection.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/harvest_model.dart';
 import '/screens/admin/nfc/nfc_settings.dart';
 import '/widgets/utils.dart';
 import '/widgets/popover/cool_ui.dart';
-
+import '/providers/harvest_provider.dart';
 
 class NFCScanPage extends StatefulWidget{
 
@@ -31,7 +31,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
   List<HTask> tasks = [];
 
   void _onRefresh() async{
-    harvests = await context.read<HarvestModel>().getHarvestsOfDate(selectedDate.toString());
+    harvests = await context.read<HarvestProvider>().getHarvestsOfDate(selectedDate.toString());
     _refreshController.refreshCompleted();
     if(mounted)setState(() {});
   }
@@ -51,12 +51,12 @@ class _NFCScanPageState extends State<NFCScanPage>{
   }
 
   _showHarvestTaskDialog(HTask? task){
-    List<HContainer> containers = context.read<HarvestModel>().containers;
+    List<HContainer> containers = context.read<HarvestProvider>().containers;
     if(containers.isEmpty){
       Tools.showErrorMessage(context, S.of(context).addContainers);
       return null;
     }
-    List<Field> fields = context.read<HarvestModel>().fields;
+    List<Field> fields = context.read<HarvestProvider>().fields;
     if(fields.isEmpty){
       Tools.showErrorMessage(context, S.of(context).addFields);
       return null;
@@ -163,7 +163,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                             }
                             Navigator.pop(_context);
                             context.loaderOverlay.show();
-                            String? result = await context.read<HarvestModel>().createOrUpdateTask(task!);
+                            String? result = await context.read<HarvestProvider>().createOrUpdateTask(task!);
                             context.loaderOverlay.hide();
                             if(result != null){
                               Tools.showErrorMessage(context, result);
@@ -198,7 +198,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
     try{
       if(!mounted)return;
       setState(() {isLoading=true;});
-      var result = await context.read<HarvestModel>().addHarvest(task: selectedTask!, date: selectedDate.toString(),nfc: nfc);
+      var result = await context.read<HarvestProvider>().addHarvest(task: selectedTask!, date: selectedDate.toString(),nfc: nfc);
       if(!mounted)return;
       setState(() {isLoading=false;});
       if(result != null){
@@ -249,7 +249,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
   _deleteHarvestTask(HTask task)async{
     if(await Tools.confirmDeleting(context, S.of(context).deleteTaskConfirm)){
       context.loaderOverlay.show();
-      String? result = await context.read<HarvestModel>().deleteTask(task);
+      String? result = await context.read<HarvestProvider>().deleteTask(task);
       context.loaderOverlay.hide();
       if(result != null){
         Tools.showErrorMessage(context, result);
@@ -407,7 +407,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    tasks = context.watch<HarvestModel>().tasks;
+    tasks = context.watch<HarvestProvider>().tasks;
 
     return Scaffold(
       appBar: AppBar(
@@ -555,7 +555,7 @@ class _NFCScanPageState extends State<NFCScanPage>{
                                   onPressed: (c)async{
                                     if(await Tools.confirmDeleting(context, S.of(context).deleteHarvestConfirm)){
                                       setState(() {harvests.remove(harvest);});
-                                      context.read<HarvestModel>().deleteHarvest(harvest.id).then((message){
+                                      context.read<HarvestProvider>().deleteHarvest(harvest.id).then((message){
                                         if(mounted && message!=null && (message is String)){
                                           Tools.showErrorMessage(context, message);
                                         }

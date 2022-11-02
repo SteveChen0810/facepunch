@@ -4,18 +4,21 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/user_model.dart';
 import '/models/company_model.dart';
 import '/screens/admin/employee_logs.dart';
 import '/screens/bug_report_page.dart';
-import '../home_page.dart';
+import '/screens/home_page.dart';
 import '/widgets/autocomplete_textfield.dart';
 import '/widgets/calendar_strip/date-utils.dart';
 import '/widgets/utils.dart';
 import '/widgets/popover/cool_ui.dart';
 import 'create_edit_employee.dart';
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
 
 class EmployeeList extends StatefulWidget {
 
@@ -54,7 +57,7 @@ class _EmployeeListState extends State<EmployeeList>{
   }
 
   void _onRefresh() async{
-    await context.read<CompanyModel>().getCompanyUsers();
+    await context.read<CompanyProvider>().getCompanyUsers();
     _refreshController.refreshCompleted();
   }
 
@@ -194,7 +197,7 @@ class _EmployeeListState extends State<EmployeeList>{
       String? result = await employee.delete();
       context.loaderOverlay.hide();
       if(result == null){
-        context.read<CompanyModel>().deleteEmployee(employee.id!);
+        context.read<CompanyProvider>().deleteEmployee(employee.id!);
       }else{
         Tools.showErrorMessage(context, result);
       }
@@ -216,7 +219,7 @@ class _EmployeeListState extends State<EmployeeList>{
       if(picked==null)return;
       DateTime now = DateTime.now();
       setState(() { loadingUser = user.id; });
-      String? result = await context.read<CompanyModel>().punchByAdmin(
+      String? result = await context.read<CompanyProvider>().punchByAdmin(
           userId: user.id,
           action: user.isPunchIn()?'Out':'In',
           latitude: currentPosition?.latitude,
@@ -233,10 +236,10 @@ class _EmployeeListState extends State<EmployeeList>{
 
   @override
   Widget build(BuildContext context) {
-    List<User> inUsers = context.watch<CompanyModel>().users.where((u) => u.isPunchIn()).toList();
-    List<User> outUsers = context.watch<CompanyModel>().users.where((u) => !u.isPunchIn()).toList();
-    settings = context.watch<CompanyModel>().myCompanySettings;
-    List<User> users = context.watch<CompanyModel>().users;
+    List<User> inUsers = context.watch<CompanyProvider>().users.where((u) => u.isPunchIn()).toList();
+    List<User> outUsers = context.watch<CompanyProvider>().users.where((u) => !u.isPunchIn()).toList();
+    settings = context.watch<CompanyProvider>().myCompanySettings;
+    List<User> users = context.watch<CompanyProvider>().users;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -258,7 +261,7 @@ class _EmployeeListState extends State<EmployeeList>{
               color: Colors.white,
               iconSize: 35,
               onPressed: ()async{
-                await context.read<UserModel>().logOut();
+                await context.read<UserProvider>().logOut();
                 await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
               }
           ),

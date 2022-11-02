@@ -1,4 +1,3 @@
-import 'package:facepunch/widgets/TimeEditor.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter/material.dart';
@@ -12,11 +11,15 @@ import '/models/work_model.dart';
 import '/screens/admin/pdf_full_screen.dart';
 import '/widgets/calendar_strip/calendar_strip.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/user_model.dart';
 import '/widgets/project_picker.dart';
 import '/widgets/task_picker.dart';
 import '/widgets/utils.dart';
+import '/providers/user_provider.dart';
+import '/widgets/TimeEditor.dart';
+import '/providers/company_provider.dart';
+import '/providers/work_provider.dart';
 
 class EmployeeLogs extends StatefulWidget {
 
@@ -61,7 +64,7 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   }
 
   void _onRefresh()async{
-    await context.read<UserModel>().getEmployeeTimeSheetData(startOfWeek, widget.employee);
+    await context.read<UserProvider>().getEmployeeTimeSheetData(startOfWeek, widget.employee);
     selectedPunches = user.getPunchesGroupOfWeek(startOfWeek);
     _refreshController.refreshCompleted();
     if(mounted)setState(() {
@@ -558,9 +561,9 @@ class _EmployeeLogsState extends State<EmployeeLogs> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    settings = context.watch<CompanyModel>().myCompanySettings;
-    projects = context.watch<WorkModel>().projects;
-    tasks = context.watch<WorkModel>().tasks;
+    settings = context.watch<CompanyProvider>().myCompanySettings;
+    projects = context.watch<WorkProvider>().projects;
+    tasks = context.watch<WorkProvider>().tasks;
 
     return Scaffold(
       appBar: AppBar(

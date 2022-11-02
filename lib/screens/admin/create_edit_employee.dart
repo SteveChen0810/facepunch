@@ -7,13 +7,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+
+import '/providers/company_provider.dart';
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
 import '/widgets/calendar_strip/date-utils.dart';
-import '/models/company_model.dart';
 import '/widgets/address_picker/country_state_city_picker.dart';
 import '/models/user_model.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 
 class CreateEditEmployee extends StatefulWidget {
   final User? employee;
@@ -224,7 +225,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
       if(_photoFile != null){
         base64Image = base64Encode(_photoFile!.readAsBytesSync());
       }
-      String? result = await context.read<CompanyModel>().createEditEmployee(user, base64Image);
+      String? result = await context.read<CompanyProvider>().createEditEmployee(user, base64Image);
       context.loaderOverlay.hide();
       if(result == null){
         Tools.showSuccessMessage(context, S.of(context).success);
@@ -253,7 +254,7 @@ class _CreateEditEmployeeState extends State<CreateEditEmployee> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    final settings = context.watch<CompanyProvider>().myCompanySettings;
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(

@@ -1,14 +1,17 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/company_model.dart';
 import '/models/user_model.dart';
 import '/screens/about_page.dart';
 import '/widgets/address_picker/country_state_city_picker.dart';
 import '/widgets/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:loader_overlay/loader_overlay.dart';
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
 
 class AdminSetting extends StatefulWidget {
 
@@ -39,12 +42,12 @@ class _AdminSettingState extends State<AdminSetting> {
   @override
   void initState() {
     super.initState();
-    User user = context.read<UserModel>().user!;
+    User user = context.read<UserProvider>().user!;
     _email = TextEditingController(text: user.email);
     _fName = TextEditingController(text: user.firstName);
     _lName = TextEditingController(text: user.lastName);
 
-    myCompany = context.read<CompanyModel>().myCompany!;
+    myCompany = context.read<CompanyProvider>().myCompany!;
     _name = TextEditingController(text: myCompany.name);
     _address1 = TextEditingController(text: user.address1);
     _address2 = TextEditingController(text: user.address2);
@@ -122,7 +125,7 @@ class _AdminSettingState extends State<AdminSetting> {
     try{
       if(profileValidator()){
         context.loaderOverlay.show();
-        String? result = await context.read<UserModel>().updateAdmin(
+        String? result = await context.read<UserProvider>().updateAdmin(
             email: _email.text,
             fName: _fName.text,
             lName: _lName.text,
@@ -145,7 +148,7 @@ class _AdminSettingState extends State<AdminSetting> {
   updateCompany()async{
     try{
       context.loaderOverlay.show();
-      String? result = await context.read<CompanyModel>().updateCompany(
+      String? result = await context.read<CompanyProvider>().updateCompany(
           name: _name.text,
           phone: _phone.text,
           postalCode: _postalCode.text,
@@ -167,8 +170,8 @@ class _AdminSettingState extends State<AdminSetting> {
 
   @override
   Widget build(BuildContext context) {
-    User? user = context.watch<UserModel>().user;
-    CompanySettings companySettings = context.watch<CompanyModel>().myCompanySettings!;
+    User? user = context.watch<UserProvider>().user;
+    CompanySettings companySettings = context.watch<CompanyProvider>().myCompanySettings!;
     if(user==null)return Container();
     return Scaffold(
       key: _scaffoldKey,
@@ -442,7 +445,7 @@ class _AdminSettingState extends State<AdminSetting> {
                       onChanged: (v)async{
                         context.loaderOverlay.show();
                         companySettings.receiveRevisionNotification = v;
-                        String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                        String? result = await context.read<CompanyProvider>().updateCompanySetting(companySettings);
                         context.loaderOverlay.hide();
                         if(result!=null)Tools.showErrorMessage(context, result);
                       },
@@ -455,7 +458,7 @@ class _AdminSettingState extends State<AdminSetting> {
                       onChanged: (v)async{
                         context.loaderOverlay.show();
                         companySettings.receivePunchNotification = v;
-                        String? result = await context.read<CompanyModel>().updateCompanySetting(companySettings);
+                        String? result = await context.read<CompanyProvider>().updateCompanySetting(companySettings);
                         context.loaderOverlay.hide();
                         if(result!=null)Tools.showErrorMessage(context, result);
                       },

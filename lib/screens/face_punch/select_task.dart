@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '../../config/app_const.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
 import '/widgets/utils.dart';

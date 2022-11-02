@@ -1,10 +1,12 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:facepunch/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'app_const.dart';
+import 'dart:convert';
+import 'dart:io';
+import '/widgets/utils.dart';
+
+import '../config/app_const.dart';
+
 class BaseProvider with ChangeNotifier, HttpRequest{
 
 }
@@ -28,9 +30,9 @@ class HttpRequest{
     }
     Tools.consoleLog('[POST][$url][$logData]');
     return await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode(data)
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode(data)
     );
   }
 

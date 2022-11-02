@@ -1,12 +1,15 @@
 import 'dart:async';
-import '/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
+
+import '/widgets/utils.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/company_model.dart';
 import '/models/harvest_model.dart';
+import '/providers/company_provider.dart';
+import '/providers/harvest_provider.dart';
 
 class HarvestReportScreen extends StatefulWidget{
 
@@ -64,7 +67,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
 
   _getEmployeeStats()async{
     if(selectedTask!=null){
-      final result = await context.read<HarvestModel>().getEmployeeHarvestStats(selectedDate.toString(), selectedTask?.fieldId);
+      final result = await context.read<HarvestProvider>().getEmployeeHarvestStats(selectedDate.toString(), selectedTask?.fieldId);
       if(result is String){
         Tools.showErrorMessage(context, result);
       }else{
@@ -75,7 +78,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
   }
 
   _getDateStats()async{
-    final result = await context.read<HarvestModel>().getDateHarvestStats(selectedDate.toString());
+    final result = await context.read<HarvestProvider>().getDateHarvestStats(selectedDate.toString());
     if(result is String){
       Tools.showErrorMessage(context, result);
     }else{
@@ -95,7 +98,7 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
 
   _getCompanyStats()async{
     if(selectedTask!=null){
-      final result = await context.read<HarvestModel>().getCompanyHarvestStats(selectedDate.toString(), selectedTask?.fieldId);
+      final result = await context.read<HarvestProvider>().getCompanyHarvestStats(selectedDate.toString(), selectedTask?.fieldId);
       if(result is String){
         Tools.showErrorMessage(context, result);
       }else{
@@ -137,8 +140,8 @@ class _HarvestReportScreenState extends State<HarvestReportScreen>{
 
   @override
   Widget build(BuildContext context) {
-    List<HTask> tasks = context.watch<HarvestModel>().tasks;
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    List<HTask> tasks = context.watch<HarvestProvider>().tasks;
+    final settings = context.watch<CompanyProvider>().myCompanySettings;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(primaryColor),

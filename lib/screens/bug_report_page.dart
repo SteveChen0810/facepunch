@@ -6,8 +6,8 @@ import 'package:provider/provider.dart';
 
 import '/widgets/utils.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/app_model.dart';
+import '/config/app_const.dart';
+import '/providers/app_provider.dart';
 
 
 class BugReportPage extends StatefulWidget{
@@ -168,7 +168,7 @@ class _BugReportPageState extends State<BugReportPage>{
                     FocusScope.of(context).requestFocus(FocusNode());
                     if(!isSubmitting){
                       setState(() {isSubmitting = true;});
-                      String? result = await context.read<AppModel>().submitMobileLog(comment: _comment.text, deviceInfo: _deviceData);
+                      String? result = await context.read<AppProvider>().submitMobileLog(comment: _comment.text, deviceInfo: _deviceData);
                       if(!mounted) return;
                       setState(() {isSubmitting = false;});
                       if(result != null){

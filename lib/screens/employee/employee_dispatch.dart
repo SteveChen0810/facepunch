@@ -3,14 +3,15 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
-import '/models/company_model.dart';
+import '/config/app_const.dart';
 import '/models/user_model.dart';
 import '/models/work_model.dart';
 import '/widgets/TimeEditor.dart';
 import '/widgets/project_picker.dart';
 import '/widgets/task_picker.dart';
 import '/widgets/utils.dart';
+import '/providers/company_provider.dart';
+import '/providers/work_provider.dart';
 
 class EmployeeDispatch extends StatefulWidget{
 
@@ -384,9 +385,9 @@ class _EmployeeDispatchState extends State<EmployeeDispatch> {
 
   @override
   Widget build(BuildContext context) {
-    employees = context.watch<CompanyModel>().users.where((u) => u.hasCall()).toList();
-    projects = context.watch<WorkModel>().projects;
-    tasks = context.watch<WorkModel>().tasks;
+    employees = context.watch<CompanyProvider>().users.where((u) => u.hasCall()).toList();
+    projects = context.watch<WorkProvider>().projects;
+    tasks = context.watch<WorkProvider>().tasks;
     if(selectedUser == null && employees.isNotEmpty){
       selectedUser = employees.first;
     }

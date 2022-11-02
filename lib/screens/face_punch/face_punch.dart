@@ -14,10 +14,11 @@ import 'package:loader_overlay/loader_overlay.dart';
 import '/models/notification.dart';
 import '/models/revision_model.dart';
 import '/lang/l10n.dart';
-import '/models/app_const.dart';
+import '/config/app_const.dart';
 import '/models/user_model.dart';
 import '/widgets/utils.dart';
 import 'select_task.dart';
+import '/providers/user_provider.dart';
 
 class FacePunchScreen extends StatefulWidget {
 
@@ -261,7 +262,7 @@ class _FacePunchScreenState extends State<FacePunchScreen>{
     try{
       Tools.playSound();
       String base64Image = base64Encode(File(path).readAsBytesSync());
-      var result = await context.read<UserModel>().punchWithFace(
+      var result = await context.read<UserProvider>().punchWithFace(
           photo: base64Image,
           latitude: currentPosition?.latitude,
           longitude: currentPosition?.longitude
