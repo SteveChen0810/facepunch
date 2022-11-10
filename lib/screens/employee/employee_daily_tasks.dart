@@ -100,7 +100,7 @@ class _EmployeeDailyTasksState extends State<EmployeeDailyTasks> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                      child: Text('${s.shift?.toUpperCase()}',
+                      child: Text('${s.shift?.name?.toUpperCase()}',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       )
                   ),

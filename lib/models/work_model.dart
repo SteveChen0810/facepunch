@@ -206,7 +206,7 @@ class WorkSchedule with HttpRequest{
   String? taskCode;
   String? start;
   String? end;
-  String? shift;
+  Shift? shift;
   String? color;
   String? noAvailable;
   String? status;
@@ -245,7 +245,9 @@ class WorkSchedule with HttpRequest{
       taskCode = json['task_code'];
       start = json['start'];
       end = json['end'];
-      shift = json['shift'];
+      if(json['shift'] != null){
+        shift = Shift.fromJson(json['shift']);
+      }
       noAvailable = json['no_available'];
       color = json['color'];
       status = json['status'];
@@ -700,5 +702,25 @@ class EmployeeBreak{
       'created_at':createdAt,
       'updated_at':updatedAt
     };
+  }
+}
+
+class Shift{
+  int? id;
+  String? name;
+  String? start;
+  String? end;
+  String? color;
+
+  Shift.fromJson(Map<String, dynamic> json){
+    try{
+      id = json['id'];
+      name = json['name'];
+      start = json['start'];
+      end = json['end'];
+      color = json['color'];
+    }catch(e){
+      Tools.consoleLog('[Shift.fromJson.err]$e');
+    }
   }
 }

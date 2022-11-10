@@ -418,7 +418,7 @@ class _SelectTaskScreenState extends State<SelectTaskScreen> {
                           Row(
                             children: [
                               Text('${S.of(context).shift} : '),
-                              Text('${schedule.shift?.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold),),
+                              Text('${schedule.shift?.name?.toUpperCase()}', style: TextStyle(fontWeight: FontWeight.bold),),
                             ],
                           ),
                         ],
