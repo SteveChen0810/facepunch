@@ -287,6 +287,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "editHarvest" : MessageLookupByLibrary.simpleMessage("Edit Harvest"),
     "welcomeToFacePunch" : MessageLookupByLibrary.simpleMessage("Welcome to Facepunch"),
     "theBestEmployeeClockingSystem" : MessageLookupByLibrary.simpleMessage("The Best Employee Clocking System"),
-    "employeePortal" : MessageLookupByLibrary.simpleMessage("Employee Portal")
+    "employeePortal" : MessageLookupByLibrary.simpleMessage("Employee Portal"),
+    "team" : MessageLookupByLibrary.simpleMessage("Team"),
+    "my" : MessageLookupByLibrary.simpleMessage("My"),
+    "day" : MessageLookupByLibrary.simpleMessage("Day"),
   };
 }

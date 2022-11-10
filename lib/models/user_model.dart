@@ -48,7 +48,6 @@ class User with HttpRequest{
   List<EmployeeBreak> breaks = [];
   List<WorkSchedule> schedules = [];
   List<EmployeeCall> calls = [];
-  List<Revision> revisions = [];
   Punch? lastPunch;
   String? token;
 
@@ -440,26 +439,43 @@ class User with HttpRequest{
     }
   }
 
-  Future<String?> getRevisionNotifications()async{
-    try{
-      var res = await sendGetRequest(
-          AppConst.getRevisionNotifications,
-          token
-      );
-      Tools.consoleLog('[User.getRevisionNotifications.res]${res.body}');
-      final body = jsonDecode(res.body);
-      if(res.statusCode==200){
-        revisions.clear();
-        for(var revision in body){
-          revisions.add(Revision.fromJson(revision));
-        }
-        return null;
-      }else{
-        return body['message']??'Something went wrong.';
+  Future<List<Revision>> getMyRevisionNotifications()async{
+    var res = await sendGetRequest(
+        AppConst.getRevisionNotifications,
+        token
+    );
+    Tools.consoleLog('[User.getMyRevisionNotifications.res]${res.body}');
+    final json = jsonDecode(res.body);
+    if(res.statusCode==200){
+      List<Revision> revisions = [];
+      for(var revision in json){
+        revisions.add(Revision.fromJson(revision));
       }
-    }catch(e){
-      Tools.consoleLog('[User.getRevisionNotifications.err]$e');
-      return e.toString();
+      return revisions;
+    }else{
+      throw handleError(json);
+    }
+  }
+
+  Future<List<Revision>> getTeamRevisionNotifications(String date, bool isWeek)async{
+    var res = await sendPostRequest(
+        AppConst.getTeamRevisionNotifications,
+        token,
+      {
+        'date': date,
+        'is_week': isWeek
+      }
+    );
+    Tools.consoleLog('[User.getTeamRevisionNotifications.res]${res.body}');
+    final json = jsonDecode(res.body);
+    if(res.statusCode==200){
+      List<Revision> revisions = [];
+      for(var revision in json){
+        revisions.add(Revision.fromJson(revision));
+      }
+      return revisions;
+    }else{
+      throw handleError(json);
     }
   }
 
@@ -511,6 +527,10 @@ class User with HttpRequest{
 
   bool isAdmin(){
     return role == 'admin';
+  }
+
+  bool isEmployee(){
+    return role == 'employee';
   }
 
   bool isManager(){

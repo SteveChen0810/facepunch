@@ -1227,6 +1227,14 @@ class S {
       args: [],
     );
   }
+  String get  day{
+    return Intl.message(
+      'Day',
+      name: 'day',
+      desc: '',
+      args: [],
+    );
+  }
   String get  time{
     return Intl.message(
       'Time',
@@ -2135,6 +2143,22 @@ class S {
     return Intl.message(
       'Employee Portal',
       name: 'employeePortal',
+      desc: '',
+      args: [],
+    );
+  }
+  String get my{
+    return Intl.message(
+      'My',
+      name: 'my',
+      desc: '',
+      args: [],
+    );
+  }
+  String get team{
+    return Intl.message(
+      'Team',
+      name: 'team',
       desc: '',
       args: [],
     );

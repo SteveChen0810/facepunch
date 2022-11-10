@@ -34,6 +34,7 @@ class AppConst{
   static String get sendTimeRevisionRequest => baseUrl+"send-time-revision";
   static String get getRevisionRequest => baseUrl+"get-time-revisions";
   static String get getRevisionNotifications => baseUrl+"get-revision-notifications";
+  static String get getTeamRevisionNotifications => baseUrl+"get-team-revision-notifications";
   static String get acceptRevision => baseUrl+"accept-revision";
   static String get declineRevision => baseUrl+"decline-revision";
   static String get deleteRevision => baseUrl+"delete-revision";

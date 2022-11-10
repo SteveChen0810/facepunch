@@ -182,8 +182,12 @@ class PunchDateUtils {
 
   static String getTimeString(date){
     if(date is String){
+      if(date.isEmpty){
+        return '';
+      }
       return DateFormat("hh:mm").format(DateTime.parse(date));
     }
+
     return DateFormat("hh:mm").format(date);
   }
 
@@ -218,6 +222,9 @@ class PunchDateUtils {
 
   static String toDateHourMinute(date){
     if(date is String){
+      if(date.isEmpty){
+        return '';
+      }
       return DateFormat("y-MM-dd hh:mm").format(DateTime.parse(date));
     }
     return DateFormat("y-MM-dd hh:mm").format(date);

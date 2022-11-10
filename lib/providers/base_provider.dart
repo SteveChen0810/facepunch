@@ -54,4 +54,14 @@ class HttpRequest{
     );
   }
 
+  String handleError(Map json){
+    if(json['message'] != null){
+      return json['message'].toString();
+    }
+    if(json['messages'] != null && json['messages'] is List){
+      return (json['messages'] as List).join('\n');
+    }
+    return 'OOPS, Something went wrong.';
+  }
+
 }

@@ -1,3 +1,4 @@
+import 'package:facepunch/models/company_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ import '/providers/company_provider.dart';
 import '/providers/harvest_provider.dart';
 import '/providers/user_provider.dart';
 import '/providers/work_provider.dart';
+import '/models/user_model.dart';
 
 class EmployeeHomePage extends StatefulWidget {
 
@@ -28,12 +30,15 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   PageController _pageController = PageController(initialPage: 0);
   int index = 0;
+  late User user;
+  CompanySettings? settings;
 
   @override
   void initState() {
     super.initState();
     Tools.setupFirebaseNotification(_onMessage);
     _fetchData();
+    user = context.read<UserProvider>().user!;
   }
 
   _onMessage(message){
@@ -46,6 +51,21 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
           onOpen = (){
             Navigator.pop(context);
             Navigator.push(context, MaterialPageRoute(builder: (c)=>CallDetailScreen(notification.callId!)));
+          };
+        }else if(notification.hasRevision()){
+          int _revisionPage = 3;
+          if(user.hasNTCTracking()){
+            _revisionPage++;
+          }
+          if((settings?.hasHarvestReport??false) && user.isManager()){
+            _revisionPage++;
+          }
+          if(user.canManageDispatch()){
+            _revisionPage++;
+          }
+          onOpen = (){
+            _pageController.jumpToPage(_revisionPage);
+            setState(() {index = _revisionPage;});
           };
         }
         Tools.showNotificationDialog(notification, context, onOpen);
@@ -67,9 +87,7 @@ class _EmployeeHomePageState extends State<EmployeeHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>().user;
-    final settings = context.watch<CompanyProvider>().myCompanySettings;
-    if(user==null)return Container();
+    settings = context.watch<CompanyProvider>().myCompanySettings;
 
     return Scaffold(
       key: _scaffoldKey,

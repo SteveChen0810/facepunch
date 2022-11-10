@@ -274,6 +274,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "editHarvest" : MessageLookupByLibrary.simpleMessage("modifier la récolte"),
     "welcomeToFacePunch" : MessageLookupByLibrary.simpleMessage("Bienvenue sur Facepunch"),
     "theBestEmployeeClockingSystem" : MessageLookupByLibrary.simpleMessage("Le meilleur système de pointage des employés"),
-    "employeePortal" : MessageLookupByLibrary.simpleMessage("Portail employé")
+    "employeePortal" : MessageLookupByLibrary.simpleMessage("Portail employé"),
+    "team" : MessageLookupByLibrary.simpleMessage("équipe"),
+    "my" : MessageLookupByLibrary.simpleMessage("Mes"),
+    "day" : MessageLookupByLibrary.simpleMessage("Journée"),
   };
 }

@@ -5,7 +5,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '/screens/admin/admin_settings.dart';
 import '/screens/admin/employee_list.dart';
-import '/screens/admin/notification_page.dart';
 import '/screens/bug_report_page.dart';
 import '/widgets/TimeEditor.dart';
 import '/widgets/project_picker.dart';
@@ -741,14 +740,6 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                                   child: Icon(Icons.settings, color: Colors.white,size: 30,),
                                 ),
                                 onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting()))
-                            ),
-                          if(user!.isManager())
-                            InkWell(
-                              child: Padding(
-                                padding: const EdgeInsets.all(2.0),
-                                child: Icon(Icons.notifications, color: Colors.white,size: 30,),
-                              ),
-                              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>NotificationPage()))
                             ),
                           if(user!.isManager())
                             InkWell(

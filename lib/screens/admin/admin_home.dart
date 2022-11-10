@@ -12,7 +12,6 @@ import 'create_edit_employee.dart';
 import 'nfc/harvest_report.dart';
 import 'nfc/nfc_scan.dart';
 import 'admin_settings.dart';
-import 'notification_page.dart';
 import '/providers/company_provider.dart';
 import '/providers/harvest_provider.dart';
 import '/providers/user_provider.dart';
@@ -76,7 +75,6 @@ class _AdminHomePageState extends State<AdminHomePage> {
         child: PageView(
           children: [
             EmployeeList(),
-            NotificationPage(),
             if(settings?.useOwnData??false)
               CreateEditEmployee(pageController: _pageController,),
             if(settings?.hasNFCHarvest??false)
