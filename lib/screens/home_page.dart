@@ -1,14 +1,13 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/screens/employee/employee_login.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'admin/admin_home.dart';
-import 'admin/auth/login.dart';
-import 'admin/face_punch/start_face_punch.dart';
-import 'employee/employee_home.dart';
+
+import '/lang/l10n.dart';
+import '/config/app_const.dart';
+import 'face_punch/start_face_punch.dart';
+import '/widgets/utils.dart';
+import '/screens/face_login.dart';
+import '/providers/app_provider.dart';
+import '/providers/user_provider.dart';
 
 class HomePage extends StatefulWidget{
 
@@ -20,41 +19,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   static const EMPLOYEE_SIGN_IN =0;
   static const FACE_PUNCH =1;
-  static const ADMIN_SIGN_IN =2;
 
-  TabController _tabController;
+  late TabController _tabController;
   int _pageIndex = FACE_PUNCH;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this, initialIndex: FACE_PUNCH);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: FACE_PUNCH);
     super.initState();
-  }
-
-  onLogin(String result)async{
-    if(result==null){
-      User user = context.read<UserModel>().user;
-      await context.read<CompanyModel>().getMyCompany(user.companyId);
-      if(user.role=="admin"){
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
-      }else{
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
-      }
-    }else{
-      _showMessage(result);
-    }
-  }
-
-  _showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: Duration(seconds: 2),
-          action: SnackBarAction(onPressed: (){},label: 'Close',textColor: Colors.white,),
-        )
-    );
   }
 
   @override
@@ -64,14 +37,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     double width = MediaQuery.of(context).size.width;
     double borderRadius = 16.0;
     double iconSize = 16.0;
-    TextStyle _style = TextStyle(fontWeight: FontWeight.w500, fontSize: 16);
     final shadow = BoxShadow(
       color: Colors.black.withOpacity(0.3),
       spreadRadius: 1,
       blurRadius: 1,
       offset: Offset(0, 0),
     );
-    String lang = context.watch<UserModel>().locale;
+    String lang = context.watch<UserProvider>().locale;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -95,10 +68,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ],
             padding: EdgeInsets.zero,
             onSelected: (l){
-              context.read<UserModel>().changeAppLanguage(l);
+              context.read<UserProvider>().changeAppLanguage(l.toString());
             },
             child: Container(
-              child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500),),
+              child: Text(lang.toUpperCase(),style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black87),),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
@@ -121,12 +94,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Image.asset(
-                      "assets/images/logo.png",
-                      width: imageSize,
-                      height: imageSize,
+                  child: GestureDetector(
+                    onLongPress: ()async{
+                      if(await Tools.confirmDialog(context, 'Are you going to switch app mode?')){
+                        context.read<AppProvider>().switchDebug();
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Image.asset(
+                        "assets/images/logo.png",
+                        width: imageSize,
+                        height: imageSize,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -134,9 +115,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               if(!isShowKeyBoard)
                 Column(
                   children: [
-                    Text("Welcome to Facepunch",style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold),),
+                    Text(
+                      S.of(context).welcomeToFacePunch,
+                      style: TextStyle(fontSize: 25,fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
                     SizedBox(height: 4,),
-                    Text("THE BEST EMPLOYEE CLOCKING SYSTEM",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+                    Text(
+                      S.of(context).theBestEmployeeClockingSystem.toUpperCase(),
+                      style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
                     SizedBox(height: 4,),
                   ],
                 ),
@@ -148,9 +136,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 height: MediaQuery.of(context).size.height*0.6-kBottomNavigationBarHeight,
                 child: TabBarView(
                   children: [
-                    EmployeeLogin(showMessage: _showMessage,),
-                    StartFacePunch(showMessage: _showMessage,),
-                    AdminSignIn(onLogin: onLogin,),
+                    FaceLogin(),
+                    StartFacePunch(),
                   ],
                   controller: _tabController,
                   physics: NeverScrollableScrollPhysics(),
@@ -171,9 +158,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           },
           indicatorPadding: EdgeInsets.zero,
           labelPadding: EdgeInsets.zero,
+          indicatorColor: Colors.blue,
           tabs: [
             Container(
-              width: width/3-4,
+              width: width/2,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
                   color: _pageIndex == EMPLOYEE_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
@@ -181,41 +169,36 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               ),
               child: Column(
                 children: [
-                  Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                  Text(S.of(context).employeeSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
+                  Icon(Icons.keyboard_arrow_up, size: iconSize, color: _pageIndex == EMPLOYEE_SIGN_IN ? Colors.white : Colors.black,),
+                  SizedBox(height: 8,),
+                  Text(
+                    S.of(context).employeePortal,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _pageIndex == EMPLOYEE_SIGN_IN ? Colors.white : Colors.black),
+                    textAlign: TextAlign.center,
+                  )
                 ],
               ),
             ),
             Container(
-              width: width/3-4,
+              width: width/2,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white.withOpacity(0.8),
+                  color: _pageIndex == FACE_PUNCH?Color(primaryColor):Colors.white,
                   boxShadow: [
                     shadow,
                   ]
               ),
               child: Column(
                 children: [
-                  Icon(Icons.keyboard_arrow_up, size: iconSize,),
-                  Text("Face\nPunch", style: _style, textAlign: TextAlign.center,)
+                  Icon(Icons.keyboard_arrow_up, size: iconSize, color: _pageIndex == FACE_PUNCH ? Colors.white : Colors.black,),
+                  SizedBox(height: 8,),
+                  Text(
+                    S.of(context).facePunch,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: _pageIndex == FACE_PUNCH ? Colors.white : Colors.black,),
+                    textAlign: TextAlign.center,)
                 ],
               ),
             ),
-            Container(
-              width: width/3-4,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(borderRadius)),
-                  color: _pageIndex == ADMIN_SIGN_IN?Color(primaryColor):Colors.white.withOpacity(0.8),
-                  boxShadow: [shadow]
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.keyboard_arrow_up,size: iconSize,),
-                  Text(S.of(context).adminSignIn.replaceFirst(' ', '\n'),style: _style,textAlign: TextAlign.center,)
-                ],
-              ),
-            )
           ],
         ),
       ),

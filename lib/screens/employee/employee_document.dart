@@ -1,12 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/company_model.dart';
-import 'package:facepunch/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_date_pickers/flutter_date_pickers.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:provider/provider.dart';
+
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
+import '/lang/l10n.dart';
+import '/config/app_const.dart';
 
 class EmployeeDocument extends StatefulWidget {
 
@@ -17,20 +18,16 @@ class EmployeeDocument extends StatefulWidget {
 class _EmployeeDocumentState extends State<EmployeeDocument> {
   DateTime startDate = DateTime.parse("${DateTime.now().year}-01-01");
   DateTime endDate = DateTime.parse("${DateTime.now().year}-12-31");
-  DateTime selectedDate;
+  DateTime? selectedDate;
   String pdfError = "";
-
-  String harvestReportImage(){
-    final user = context.watch<UserModel>().user;
-    final imageUrl = 'harvest-reports/${user.companyId}/Harvest_Report_${DateTime.now().toString().split(' ')[0]}.png';
-    return Uri.encodeFull('https://facepunch.app/$imageUrl');
-  }
+  double? pdfHeight;
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final user = context.watch<UserModel>().user;
-    final settings = context.watch<CompanyModel>().myCompanySettings;
+    final user = context.watch<UserProvider>().user;
+    final settings = context.watch<CompanyProvider>().myCompanySettings;
+
     return Container(
       child: Column(
         children: [
@@ -41,7 +38,7 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
             height: kToolbarHeight+MediaQuery.of(context).padding.top,
             alignment: Alignment.center,
             color: Color(primaryColor),
-            child: Text(S.of(context).document,style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),),
+            child: Text(S.of(context).document,style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),),
           ),
           Container(
             decoration: BoxDecoration(
@@ -85,25 +82,31 @@ class _EmployeeDocumentState extends State<EmployeeDocument> {
                   child: Container(
                     child: Column(
                       children: [
-                        pdfError.isNotEmpty?
-                        Container(
+                        if (pdfError.isNotEmpty) Container(
                           alignment: Alignment.center,
                           height: 200,
                           child: Text(S.of(context).pdfNotGenerated),
-                        ):
-                        Padding(
+                        ) else Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: SfPdfViewer.network(
-                            user.pdfUrl(selectedDate),
-                            key: Key(user.pdfUrl(selectedDate)),
-                            onDocumentLoadFailed: (v){
-                                if(mounted)setState(() {pdfError = v.description;});
-                            },
+                          child: SizedBox(
+                            height: pdfHeight == null ? 200 : pdfHeight!,
+                            child: SfPdfViewer.network(
+                              user!.pdfUrl(selectedDate),
+                              key: Key(user.pdfUrl(selectedDate)),
+                              onDocumentLoadFailed: (v){
+                                  if(mounted)setState(() {pdfError = v.description;});
+                              },
+                              onDocumentLoaded: (v){
+                                setState(() {
+                                  pdfHeight = v.document.pageSettings.size.height/2;
+                                });
+                              },
+                            ),
                           ),
                         ),
-                        if(settings.hasHarvestReport)
+                        if(settings!.hasHarvestReport??false)
                           CachedNetworkImage(
-                          imageUrl: harvestReportImage(),
+                          imageUrl: user!.harvestReportUrl(),
                           width: width,
                           placeholder: (_,__)=>Container(
                             alignment: Alignment.center,

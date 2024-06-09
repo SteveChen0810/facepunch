@@ -1,5 +1,12 @@
 part of cool_ui;
-
+/**
+ * @Author: thl
+ * @GitHub: https://github.com/Sky24n
+ * @JianShu: https://www.jianshu.com/u/cbf2ad25d33a
+ * @Email: 863764940@qq.com
+ * @Description: Screen Util.
+ * @Date: 2018/9/8
+ */
 
 ///默认设计稿尺寸（单位 dp or pt）
 double _designW = 360.0;
@@ -21,7 +28,7 @@ class _ScreenUtil {
   double _bottomBarHeight = 0.0;
   double _appBarHeight = 0.0;
   double _textScaleFactor = 0.0;
-  MediaQueryData _mediaQueryData;
+  MediaQueryData? _mediaQueryData;
 
   static final _ScreenUtil _singleton = _ScreenUtil();
 
@@ -69,9 +76,7 @@ class _ScreenUtil {
   double get bottomBarHeight => _bottomBarHeight;
 
   /// media Query Data
-  MediaQueryData get mediaQueryData => _mediaQueryData;
-
-
+  MediaQueryData? get mediaQueryData => _mediaQueryData;
 
   /// 返回根据屏幕宽适配后尺寸（单位 dp or pt）
   /// size 单位 dp or pt

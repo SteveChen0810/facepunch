@@ -15,12 +15,12 @@ class S {
   } 
 
   static S of(BuildContext context) {
-    return Localizations.of<S>(context, S);
+    return Localizations.of<S>(context, S)!;
   }
 
   String get timeSheetSystemForEmployee {
     return Intl.message(
-      'Timesheet system for Employee',
+      'EMPLOYEE TIME MANAGEMENT SYSTEM',
       name: 'timeSheetSystemForEmployee',
       desc: '',
       args: [],
@@ -50,15 +50,15 @@ class S {
       args: [],
     );
   }
-
-  String get adminSignIn {
+  String get passwordTooShort {
     return Intl.message(
-      'Admin Sign In',
-      name: 'adminSignIn',
+      'Input 8 characters minimum.',
+      name: 'passwordTooShort',
       desc: '',
       args: [],
     );
   }
+
   String get  email{
     return Intl.message(
       'E-mail',
@@ -307,66 +307,10 @@ class S {
       args: [],
     );
   }
-  String get  next{
-    return Intl.message(
-      'Next',
-      name: 'next',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  pleaseEnterYourEmployeeRange{
-    return Intl.message(
-      'Please enter your Employee Range',
-      name: 'pleaseEnterYourEmployeeRange',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  free{
-    return Intl.message(
-      'Free',
-      name: 'free',
-      desc: '',
-      args: [],
-    );
-  }
   String get  employees{
     return Intl.message(
       'Employees',
       name: 'employees',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  theNumberMustBe6Digits{
-    return Intl.message(
-      'The number must be 6 digits.',
-      name: 'theNumberMustBe6Digits',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  thankYouForRegisteringWithUs{
-    return Intl.message(
-      'Thank you for registering with us',
-      name: 'thankYouForRegisteringWithUs',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  pleaseEnterThe6DigitsConfirmationNumberSentToYouByEmail{
-    return Intl.message(
-      'Please enter the 6 digits confirmation number send to you by email',
-      name: 'pleaseEnterThe6DigitsConfirmationNumberSentToYouByEmail',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  didNotGetAVerificationCode{
-    return Intl.message(
-      'Did not get a verification code?',
-      name: 'didNotGetAVerificationCode',
       desc: '',
       args: [],
     );
@@ -379,18 +323,10 @@ class S {
       args: [],
     );
   }
-  String get  registration{
+  String get  allowCameraPermissionToTakePictures{
     return Intl.message(
-      'Registration',
-      name: 'registration',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  allowFacePunchToTakePictures{
-    return Intl.message(
-      'Allow Facepunch to take pictures.',
-      name: 'allowFacePunchToTakePictures',
+      'Allow Camera permission to take pictures.',
+      name: 'allowCameraPermissionToTakePictures',
       desc: '',
       args: [],
     );
@@ -447,14 +383,6 @@ class S {
     return Intl.message(
       'Try Again',
       name: 'tryAgain',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  selectCompany{
-    return Intl.message(
-      'Please select your company.',
-      name: 'selectCompany',
       desc: '',
       args: [],
     );
@@ -867,14 +795,6 @@ class S {
       args: [],
     );
   }
-  String get  companyPlan{
-    return Intl.message(
-      'Company Plan',
-      name: 'companyPlan',
-      desc: '',
-      args: [],
-    );
-  }
   String get  receiveRevisionNotification{
     return Intl.message(
       'Receive Revision Notification',
@@ -1187,34 +1107,10 @@ class S {
       args: [],
     );
   }
-  String get  chooseYourCompany{
-    return Intl.message(
-      'Choose Your Company',
-      name: 'chooseYourCompany',
-      desc: '',
-      args: [],
-    );
-  }
   String get  faceScanLogin{
     return Intl.message(
       'FACE SCAN LOGIN',
       name: 'faceScanLogin',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  employeeSignIn{
-    return Intl.message(
-      'Employee Sign In',
-      name: 'employeeSignIn',
-      desc: '',
-      args: [],
-    );
-  }
-  String get  selectYourCompany{
-    return Intl.message(
-      'Select Your Company',
-      name: 'selectYourCompany',
       desc: '',
       args: [],
     );
@@ -1327,6 +1223,14 @@ class S {
     return Intl.message(
       'Week',
       name: 'week',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  day{
+    return Intl.message(
+      'Day',
+      name: 'day',
       desc: '',
       args: [],
     );
@@ -1475,10 +1379,18 @@ class S {
       args: [],
     );
   }
-  String get  youAreNowWorkingOn{
+  String get  youAreWorkingOn{
     return Intl.message(
-      'You Are Now Working On',
-      name: 'youAreNowWorkingOn',
+      'You are working on',
+      name: 'youAreWorkingOn',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  youAreWorkingOnCall{
+    return Intl.message(
+      'You are working on a Call',
+      name: 'youAreWorkingOnCall',
       desc: '',
       args: [],
     );
@@ -1535,6 +1447,14 @@ class S {
     return Intl.message(
       'Start',
       name: 'start',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  resume{
+    return Intl.message(
+      'Resume',
+      name: 'resume',
       desc: '',
       args: [],
     );
@@ -1651,6 +1571,598 @@ class S {
       args: [],
     );
   }
+  String get  selectCall{
+    return Intl.message(
+      'Select Call',
+      name: 'selectCall',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  startCall{
+    return Intl.message(
+      'Start Call',
+      name: 'startCall',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  task{
+    return Intl.message(
+      'Task',
+      name: 'task',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  note{
+    return Intl.message(
+      'Note',
+      name: 'note',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  selectSchedule{
+    return Intl.message(
+      'Select Schedule',
+      name: 'selectSchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  shift{
+    return Intl.message(
+      'Shift',
+      name: 'shift',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  startSchedule{
+    return Intl.message(
+      'Start Schedule',
+      name: 'startSchedule',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  description{
+    return Intl.message(
+      'Description',
+      name: 'description',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  youMustWriteDescription{
+    return Intl.message(
+      'You must write description.',
+      name: 'youMustWriteDescription',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  startWorking{
+    return Intl.message(
+      'Start Working',
+      name: 'startWorking',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  breaks{
+    return Intl.message(
+      'Breaks',
+      name: 'breaks',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  incorrectBreakTime{
+    return Intl.message(
+      'Incorrect Break Time',
+      name: 'incorrectBreakTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  correctBreakTime{
+    return Intl.message(
+      'Correct Break Time',
+      name: 'correctBreakTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get  length{
+    return Intl.message(
+      'Length',
+      name: 'length',
+      desc: '',
+      args: [],
+    );
+  }
+  String get breakLengthCanNotBeZero{
+    return Intl.message(
+      'Break Length can not be 0.',
+      name: 'breakLengthCanNotBeZero',
+      desc: '',
+      args: [],
+    );
+  }
+  String get invalidBreakLength{
+    return Intl.message(
+      'Invalid Break Length',
+      name: 'invalidBreakLength',
+      desc: '',
+      args: [],
+    );
+  }
+  String get dailyTasks{
+    return Intl.message(
+      'Daily Tasks',
+      name: 'dailyTasks',
+      desc: '',
+      args: [],
+    );
+  }
+  String get schedules{
+    return Intl.message(
+      'Schedules',
+      name: 'schedules',
+      desc: '',
+      args: [],
+    );
+  }
+  String get calls{
+    return Intl.message(
+      'Calls',
+      name: 'calls',
+      desc: '',
+      args: [],
+    );
+  }
+  String get incorrect{
+    return Intl.message(
+      'Incorrect',
+      name: 'incorrect',
+      desc: '',
+      args: [],
+    );
+  }
+  String get correct{
+    return Intl.message(
+      'Correct',
+      name: 'correct',
+      desc: '',
+      args: [],
+    );
+  }
+  String get selectPriority{
+    return Intl.message(
+      'Select Priority',
+      name: 'selectPriority',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deletePunchConfirm{
+    return Intl.message(
+      'Are you sure to delete the punch?',
+      name: 'deletePunchConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deleteWorkConfirm{
+    return Intl.message(
+      'Are you sure to delete the work?',
+      name: 'deleteWorkConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deleteBreakConfirm{
+    return Intl.message(
+      'Are you sure to delete the break?',
+      name: 'deleteBreakConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get breakTime{
+    return Intl.message(
+      'Break Time',
+      name: 'breakTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get newVersionAvailable{
+    return Intl.message(
+      'New version is available now. Do you want to update?',
+      name: 'newVersionAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+  String get update{
+    return Intl.message(
+      'Update',
+      name: 'update',
+      desc: '',
+      args: [],
+    );
+  }
+  String get callRevision{
+    return Intl.message(
+      'Call Revision',
+      name: 'callRevision',
+      desc: '',
+      args: [],
+    );
+  }
+  String get addCall{
+    return Intl.message(
+      'Add Call',
+      name: 'addCall',
+      desc: '',
+      args: [],
+    );
+  }
+  String get bugReport{
+    return Intl.message(
+      'Bug Report',
+      name: 'bugReport',
+      desc: '',
+      args: [],
+    );
+  }
+  String get make{
+    return Intl.message(
+      'Make',
+      name: 'make',
+      desc: '',
+      args: [],
+    );
+  }
+  String get model{
+    return Intl.message(
+      'Model',
+      name: 'model',
+      desc: '',
+      args: [],
+    );
+  }
+  String get os{
+    return Intl.message(
+      'OS',
+      name: 'os',
+      desc: '',
+      args: [],
+    );
+  }
+  String get version{
+    return Intl.message(
+      'Version',
+      name: 'version',
+      desc: '',
+      args: [],
+    );
+  }
+  String get brand{
+    return Intl.message(
+      'Brand',
+      name: 'brand',
+      desc: '',
+      args: [],
+    );
+  }
+  String get name{
+    return Intl.message(
+      'Name',
+      name: 'name',
+      desc: '',
+      args: [],
+    );
+  }
+  String get system{
+    return Intl.message(
+      'System',
+      name: 'system',
+      desc: '',
+      args: [],
+    );
+  }
+  String get bugReportDescription{
+    return Intl.message(
+      'Include a description of your issue here...',
+      name: 'bugReportDescription',
+      desc: '',
+      args: [],
+    );
+  }
+  String get punchTime{
+    return Intl.message(
+      'Punch Time',
+      name: 'punchTime',
+      desc: '',
+      args: [],
+    );
+  }
+  String get revisionHasBeenSent{
+    return Intl.message(
+      'A revision request has been sent.',
+      name: 'revisionHasBeenSent',
+      desc: '',
+      args: [],
+    );
+  }
+  String get sent{
+    return Intl.message(
+      'Sent',
+      name: 'sent',
+      desc: '',
+      args: [],
+    );
+  }
+  String get accepted{
+    return Intl.message(
+      'Accepted',
+      name: 'accepted',
+      desc: '',
+      args: [],
+    );
+  }
+  String get declined{
+    return Intl.message(
+      'Declined',
+      name: 'declined',
+      desc: '',
+      args: [],
+    );
+  }
+  String get tapToSubmitDescription{
+    return Intl.message(
+      'Tap to submit a description.',
+      name: 'tapToSubmitDescription',
+      desc: '',
+      args: [],
+    );
+  }
+  String get invalidNFC{
+    return Intl.message(
+      'Can not find identifier from the NFC.',
+      name: 'invalidNFC',
+      desc: '',
+      args: [],
+    );
+  }
+  String get notAllowedNFC{
+    return Intl.message(
+      'Allow NFC permission.',
+      name: 'notAllowedNFC',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deleteHarvestConfirm{
+    return Intl.message(
+      'Are you sure to delete this harvest?',
+      name: 'deleteHarvestConfirm',
+      desc: '',
+      args: [],
+    );
+  }
+  String get thankYouForReporting{
+    return Intl.message(
+      'Thank you for reporting.',
+      name: 'thankYouForReporting',
+      desc: '',
+      args: [],
+    );
+  }
+  String get open{
+    return Intl.message(
+      'Open',
+      name: 'open',
+      desc: '',
+      args: [],
+    );
+  }
+  String get callDetail{
+    return Intl.message(
+      'Call Detail',
+      name: 'callDetail',
+      desc: '',
+      args: [],
+    );
+  }
+  String get date{
+    return Intl.message(
+      'Date',
+      name: 'date',
+      desc: '',
+      args: [],
+    );
+  }
+  String get thisPunchHasBeenSentAlready{
+    return Intl.message(
+      'This punch has been sent already.',
+      name: 'thisPunchHasBeenSentAlready',
+      desc: '',
+      args: [],
+    );
+  }
+  String get canNotSendRevisionAfterStart{
+    return Intl.message(
+      'Can not send a revision after start.',
+      name: 'canNotSendRevisionAfterStart',
+      desc: '',
+      args: [],
+    );
+  }
+  String get canNotEditDeleteCall{
+    return Intl.message(
+      'Can neither edit nor delete a worked call.',
+      name: 'canNotEditDeleteCall',
+      desc: '',
+      args: [],
+    );
+  }
+  String get workingNow{
+    return Intl.message(
+      'Working Now',
+      name: 'workingNow',
+      desc: '',
+      args: [],
+    );
+  }
+  String get works{
+    return Intl.message(
+      'Works',
+      name: 'works',
+      desc: '',
+      args: [],
+    );
+  }
+  String get workRevision{
+    return Intl.message(
+      'Work Revision',
+      name: 'workRevision',
+      desc: '',
+      args: [],
+    );
+  }
+  String get revisions{
+    return Intl.message(
+      'Revisions',
+      name: 'revisions',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deviceIdForPunch{
+    return Intl.message(
+      'Device ID for Punch',
+      name: 'deviceIdForPunch',
+      desc: '',
+      args: [],
+    );
+  }
+  String get clickToCopy{
+    return Intl.message(
+      'Click to copy',
+      name: 'clickToCopy',
+      desc: '',
+      args: [],
+    );
+  }
+  String get deviceIdCopied{
+    return Intl.message(
+      'Device Id copied',
+      name: 'deviceIdCopied',
+      desc: '',
+      args: [],
+    );
+  }
+  String get startManualBreak{
+    return Intl.message(
+      'Start manual break',
+      name: 'manualBreak',
+      desc: '',
+      args: [],
+    );
+  }
+  String get endManualBreak{
+    return Intl.message(
+      'End manual break',
+      name: 'manualBreak',
+      desc: '',
+      args: [],
+    );
+  }
+  String get somethingWentWrong{
+    return Intl.message(
+      'Something went wrong',
+      name: 'somethingWentWrong',
+      desc: '',
+      args: [],
+    );
+  }
+  String get signIn{
+    return Intl.message(
+      'Sign In',
+      name: 'signIn',
+      desc: '',
+      args: [],
+    );
+  }
+  String get revisionDescription{
+    return Intl.message(
+      'Revision Description',
+      name: 'revisionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+  String get revisionDescriptionSubmitted{
+    return Intl.message(
+      'Revision Description Submitted',
+      name: 'revisionDescriptionSubmitted',
+      desc: '',
+      args: [],
+    );
+  }
+  String get editHarvest{
+    return Intl.message(
+      'Edit Harvest',
+      name: 'editHarvest',
+      desc: '',
+      args: [],
+    );
+  }
+  String get welcomeToFacePunch{
+    return Intl.message(
+      'Welcome to Facepunch',
+      name: 'welcomeToFacePunch',
+      desc: '',
+      args: [],
+    );
+  }
+  String get theBestEmployeeClockingSystem{
+    return Intl.message(
+      'The Best Employee Clocking System',
+      name: 'theBestEmployeeClockingSystem',
+      desc: '',
+      args: [],
+    );
+  }
+  String get employeePortal{
+    return Intl.message(
+      'Employee Portal',
+      name: 'employeePortal',
+      desc: '',
+      args: [],
+    );
+  }
+  String get my{
+    return Intl.message(
+      'My',
+      name: 'my',
+      desc: '',
+      args: [],
+    );
+  }
+  String get team{
+    return Intl.message(
+      'Team',
+      name: 'team',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -1674,11 +2186,9 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   bool shouldReload(AppLocalizationDelegate old) => false;
 
   bool _isSupported(Locale locale) {
-    if (locale != null) {
-      for (Locale supportedLocale in supportedLocales) {
-        if (supportedLocale.languageCode == locale.languageCode) {
-          return true;
-        }
+    for (Locale supportedLocale in supportedLocales) {
+      if (supportedLocale.languageCode == locale.languageCode) {
+        return true;
       }
     }
     return false;

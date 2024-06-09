@@ -1,5 +1,5 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
+import '/lang/l10n.dart';
+import '../config/app_const.dart';
 import 'package:flutter/material.dart';
 
 class AboutPage extends StatefulWidget {
@@ -24,7 +24,7 @@ class _AboutScreenState extends State<AboutPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 20,),
-            Text("App Version: 1.0.0",style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),),
+            Text("App Version: 2.0.0",style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.bold),),
             SizedBox(height: 20,),
             Text("Created By Philippe Vernier & Li Qiang",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.bold),),
             SizedBox(height: 20,),

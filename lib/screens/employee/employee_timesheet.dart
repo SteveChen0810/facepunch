@@ -1,15 +1,25 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-import 'package:facepunch/models/revision_model.dart';
-import 'package:facepunch/models/user_model.dart';
-import 'package:facepunch/models/work_model.dart';
-import 'package:facepunch/screens/home_page.dart';
-import 'package:facepunch/widgets/calendar_strip/calendar_strip.dart';
-import 'package:facepunch/widgets/calendar_strip/date-utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '/screens/admin/admin_settings.dart';
+import '/screens/admin/employee_list.dart';
+import '/screens/bug_report_page.dart';
+import '/widgets/TimeEditor.dart';
+import '/widgets/project_picker.dart';
+import '/widgets/task_picker.dart';
+import '/widgets/utils.dart';
+import '/lang/l10n.dart';
+import '/config/app_const.dart';
+import '/models/user_model.dart';
+import '/models/work_model.dart';
+import '/screens/home_page.dart';
+import '/widgets/calendar_strip/calendar_strip.dart';
+import '/widgets/calendar_strip/date-utils.dart';
+import '/providers/revision_provider.dart';
+import '/providers/user_provider.dart';
+import '/providers/work_provider.dart';
 
 class EmployeeTimeSheet extends StatefulWidget {
 
@@ -21,34 +31,34 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
   DateTime startDate = DateTime.parse("${DateTime.now().year}-01-01");
   DateTime endDate = DateTime.parse("${DateTime.now().year}-12-31");
   DateTime selectedDate = DateTime.now();
-  User user;
+  User? user;
   DateTime startOfWeek = PunchDateUtils.getStartOfCurrentWeek(DateTime.now());
   Map<String, List<Punch>> selectedPunches = {};
-  RefreshController _refreshController;
-  List<Project> projects;
-  List<ScheduleTask> tasks;
+  late RefreshController _refreshController;
+  List<Project> projects = [];
+  List<ScheduleTask> tasks = [];
 
   @override
   void initState() {
     super.initState();
-    user = context.read<UserModel>().user;
-    if(user.punches==null || user.punches.isEmpty){
+    user = context.read<UserProvider>().user;
+    if(user?.punches == null || user!.punches.isEmpty){
       _refreshController = RefreshController(initialRefresh: true);
     }else{
       _refreshController = RefreshController(initialRefresh: false);
-      selectedPunches = user.getPunchesGroupOfWeek(startOfWeek);
+      selectedPunches = user!.getPunchesGroupOfWeek(startOfWeek);
     }
   }
 
   onSelect(date) {
-    List<Punch> punchesOfDate = user.getPunchesOfDate(date);
+    List<Punch> punchesOfDate = user!.getPunchesOfDate(date);
     selectedPunches = {'${date.toString()}':punchesOfDate};
     setState(() { selectedDate = date;});
   }
 
   onWeekSelect(date) {
-    selectedPunches = user.getPunchesGroupOfWeek(date);
     setState(() { startOfWeek = date;});
+    _refreshController.requestRefresh();
   }
 
   dateTileBuilder(date, selectedDate, rowIndex, dayName, isDateMarked, isDateOutOfRange) {
@@ -68,7 +78,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
           margin: EdgeInsets.symmetric(vertical: 4),
           child: Text(date.day.toString(), style: normalStyle, maxLines: 1,)
       ),
-      Text("${user.getHoursOfDate(date).toStringAsFixed(2)}",style: TextStyle(fontSize: 12),),
+      Text("${PunchDateUtils.convertHoursToString(user!.calculateHoursOfDate(date))}", style: TextStyle(fontSize: 12),),
     ];
     return AnimatedContainer(
       duration: Duration(milliseconds: 150),
@@ -82,76 +92,105 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 
   Widget monthNameWidget(String weekNumber, String monthName){
     return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(monthName,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
-          SizedBox(height: 4,),
-          Text(weekNumber)
+          Text(monthName, style: TextStyle(fontWeight: FontWeight.bold,),),
+          Text(weekNumber, style: TextStyle(fontWeight: FontWeight.bold,),)
         ],
       ),
     );
   }
 
 
-  String punchName(Punch p){
-    if(p.punch=='Lunch'){
-      return "${S.of(context).lunchBreakFrom} ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))} ${S.of(context).to} ${PunchDateUtils.getTimeString(DateTime.parse(p.updatedAt))}";
-    }
-    return "${S.of(context).punch} ${p.punch} ${S.of(context).at} ${PunchDateUtils.getTimeString(DateTime.parse(p.createdAt))}";
-  }
-
-  String workName(WorkHistory w){
-    return '${w.projectName??''} - ${w.taskName??''}: ${(w.workHour().toStringAsFixed(2))} h';
-  }
-
   List<Widget> employeeLogs(){
     TextStyle logStyle = TextStyle(fontSize: 14);
     List<Widget> logs = [];
-    selectedPunches.forEach((key, punches) {
+    selectedPunches.forEach((date, punches) {
       if(punches.isNotEmpty){
-        List<Widget> log = [];
-        for(int i=0; i<punches.length; i++){
-          log.add(
+        List<Widget> punchDetail = [];
+        for(var punchIn in punches){
+          punchDetail.add(
               InkWell(
                 onTap: (){
-                  showPunchRevisionDialog(punches[i]);
+                  if(punchIn.isSent()){
+                    Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
+                  }else{
+                    _showPunchRevisionDialog(punchIn);
+                  }
                 },
                 child: Container(
                     padding: EdgeInsets.symmetric(vertical: 6),
                     width: MediaQuery.of(context).size.width,
                     child: Text(
-                      punchName(punches[i]),
+                      punchIn.title(context),
                       style: logStyle,
                     )
                 ),
               )
           );
-          if(punches[i].punch=='In'){
-            final works = user.worksOfPunch(punches[i], (i+1)>=punches.length?null:punches[i+1]);
-            works.forEach((work) {
-              log.add(InkWell(
-                onTap: ()=>showWorkRevisionDialog(work),
-                child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
-                    width: MediaQuery.of(context).size.width,
-                    child: Text(
-                      workName(work),
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    )
-                ),
-              ));
-            });
+          final works = user!.worksOfPunch(punchIn);
+          works.forEach((work) {
+            punchDetail.add(InkWell(
+              onTap: (){
+                if(work.isEnd())_showWorkRevisionDialog(work);
+              },
+              child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
+                  width: MediaQuery.of(context).size.width,
+                  child: Text(
+                    work.title(),
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  )
+              ),
+            ));
+          });
+          final breaks = user!.breaksOfPunch(punchIn);
+          breaks.forEach((b) {
+            punchDetail.add(InkWell(
+              onTap: (){_showBreakRevisionDialog(b);},
+              child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 6,horizontal: 6),
+                  width: MediaQuery.of(context).size.width,
+                  child: Text(
+                    b.getTitle(context),
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  )
+              ),
+            ));
+          });
+
+          Punch? punchOut = user!.getPunchOut(punchIn);
+          if(punchOut != null){
+            punchDetail.add(
+                InkWell(
+                  onTap: (){
+                    if(punchIn.isSent() || punchOut.isSent()){
+                      Tools.showErrorMessage(context, S.of(context).thisPunchHasBeenSentAlready);
+                    }else{
+                      _showPunchRevisionDialog(punchOut);
+                    }
+                  },
+                  child: Container(
+                      padding: EdgeInsets.symmetric(vertical: 6),
+                      width: MediaQuery.of(context).size.width,
+                      child: Text(
+                        punchOut.title(context),
+                        style: logStyle,
+                      )
+                  ),
+                )
+            );
           }
         }
-        if(punches.length>1){
-          log.add(
-              Text(
-                "${S.of(context).total} ${user.getHoursOfDate(DateTime.parse(key)).toStringAsFixed(1)} ${S.of(context).hours} - ${user.getLunchBreakTime(DateTime.parse(key)).toStringAsFixed(1)} ${S.of(context).hoursForLunch} = ${(user.getHoursOfDate(DateTime.parse(key))- user.getLunchBreakTime(DateTime.parse(key))).toStringAsFixed(1)} ${S.of(context).hours}",
-                style: TextStyle(color: Color(primaryColor),fontWeight: FontWeight.bold,fontSize: 16),
-              )
-          );
-        }
+
+        punchDetail.add(
+            Text(
+              "${S.of(context).total}: ${PunchDateUtils.convertHoursToString(user!.getHoursOfDate(DateTime.parse(date)))} - ${PunchDateUtils.convertHoursToString(user!.getBreakTime(DateTime.parse(date)))} (${S.of(context).breaks}) = ${PunchDateUtils.convertHoursToString(user!.calculateHoursOfDate(DateTime.parse(date)))}",
+              style: TextStyle(color: Color(primaryColor), fontWeight: FontWeight.bold, fontSize: 16),
+            )
+        );
         logs.add(
             Container(
               decoration: BoxDecoration(
@@ -162,13 +201,13 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                 children: [
                   Expanded(
                       flex: 1,
-                      child: Text("${PunchDateUtils.getDateString(DateTime.parse(key))}",style: TextStyle(fontWeight: FontWeight.bold),)
+                      child: Text("${PunchDateUtils.getDateString(date)}",style: TextStyle(fontWeight: FontWeight.bold),)
                   ),
                   Expanded(
                       flex: 3,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: log.reversed.toList(),
+                        children: punchDetail.reversed.toList(),
                       )
                   ),
                 ],
@@ -180,110 +219,212 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
     return logs.reversed.toList();
   }
 
-  showPunchRevisionDialog(Punch punch){
-    String correctTime = punch.punch=="Lunch"?punch.updatedAt:punch.createdAt;
+  _showPunchRevisionDialog(Punch punch){
+    if(punch.createdAt == null) return;
+    String? correctTime = punch.createdAt;
+    String description = '';
+    String? errorMessage;
     bool _isSending = false;
+
     showDialog(
       context: context,
       builder:(_)=> WillPopScope(
         onWillPop: ()async{
           return !_isSending;
         },
-        child: AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.zero,
-          content: StatefulBuilder(
-              builder: (BuildContext _context, StateSetter _setState){
-                return Container(
+        child: StatefulBuilder(
+            builder: (BuildContext _context, StateSetter _setState){
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
                   width: MediaQuery.of(context).size.width-50,
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
-                      SizedBox(height: 8,),
-                      Row(
-                        children: [
-                          Text(punch.punch=="Lunch"?"${S.of(context).incorrectLunchTime}: ":"${S.of(context).incorrectPunchTime}: "),
-                          Text("${PunchDateUtils.getTimeString(DateTime.parse(punch.punch=="Lunch"?punch.updatedAt:punch.createdAt))}",style: TextStyle(fontWeight: FontWeight.bold),),
-                        ],
-                      ),
-                      SizedBox(height: 8,),
-                      Row(
-                        children: [
-                          Text(punch.punch=="Lunch"?"${S.of(context).correctLunchTime}: ":"${S.of(context).correctPunchTime}: "),
-                          Text("${PunchDateUtils.getTimeString(DateTime.parse(correctTime))}",style: TextStyle(fontWeight: FontWeight.bold),),
-                          FlatButton(
-                              onPressed: ()async{
-                                DateTime pickedTime = await _selectTime(correctTime);
-                                if(pickedTime!=null){
-                                  _setState(() { correctTime = pickedTime.toString();});
-                                }
-                              },
-                              shape: CircleBorder(),
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(Icons.edit,color: Color(primaryColor),),
-                              )
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8,),
-                      MaterialButton(
-                        onPressed: ()async{
-                          if(!_isSending){
-                            _setState(() { _isSending=true; });
-                            await sendPunchRevisionRequest(punch.id, correctTime, punch.punch=="Lunch"?punch.updatedAt:punch.createdAt);
-                            Navigator.pop(_context);
-                          }
+                      Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),),
+                      SizedBox(height: 16,),
+                      TimeEditor(
+                        label: S.of(context).correctPunchTime,
+                        initTime: punch.createdAt,
+                        onChanged: (v){
+                          _setState(() { correctTime = v;});
                         },
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        color: Colors.black87,
-                        minWidth: MediaQuery.of(context).size.width*0.6,
-                        height: 40,
-                        splashColor: Color(primaryColor),
-                        child: _isSending?SizedBox(height: 25,width: 25,child: CircularProgressIndicator()):Text(S.of(context).submit,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: Colors.white),),
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: S.of(context).description,
+                            alignLabelWithHint: true,
+                            errorText: errorMessage
+                        ),
+                        minLines: 3,
+                        maxLines: null,
+                        onChanged: (v){
+                          _setState(() {description = v;});
+                        },
                       ),
                     ],
                   ),
-                );
-              }
-          ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: ()async{
+                      if(!_isSending && correctTime != null){
+                        if(description.isNotEmpty){
+                          _setState(() { _isSending=true; });
+                          await _sendPunchRevisionRequest(punch.id, correctTime!, punch.createdAt, description);
+                          Navigator.pop(_context);
+                        }else{
+                          _setState(() {
+                            errorMessage = S.of(context).youMustWriteDescription;
+                          });
+                        }
+                      }
+                    },
+                    child: _isSending
+                        ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
+                        :Text(S.of(context).submit,style: TextStyle(color: Colors.red ),),
+                  )
+                ],
+              );
+            }
         ),
       )
     );
   }
 
-  showWorkRevisionDialog(WorkHistory work){
+  _showBreakRevisionDialog(EmployeeBreak employeeBreak){
+    EmployeeBreak newBreak = EmployeeBreak.fromJson(employeeBreak.toJson());
+    String description = '';
+    String? errorMessage;
     bool _isSending = false;
-    Project project;
-    ScheduleTask task;
-    projects.forEach((p) {
-      if(p.id==work.projectId){
-        project = p;
-      }
-    });
-    tasks.forEach((t) {
-      if(t.id==work.taskId){
-        task = t;
-      }
-    });
-    String startTime = work.getStartTime().toString();
-    String endTime = work.getEndTime().toString();
+    TextEditingController _length = TextEditingController(text: newBreak.length.toString());
+
     showDialog(
         context: context,
         builder:(_)=> WillPopScope(
           onWillPop: ()async{
             return !_isSending;
           },
-          child: AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            insetPadding: EdgeInsets.zero,
-            content: StatefulBuilder(
-                builder: (BuildContext _context, StateSetter _setState){
-                  return Container(
+          child: StatefulBuilder(
+            builder: (_context, StateSetter _setState) {
+              return AlertDialog(
+                contentPadding: EdgeInsets.zero,
+                insetPadding: EdgeInsets.zero,
+                scrollable: true,
+                content: Container(
+                  width: MediaQuery.of(context).size.width-50,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(S.of(context).hourRevisionRequest, style: TextStyle(color: Colors.black87,fontWeight: FontWeight.bold,fontSize: 18),),
+                      SizedBox(height: 12,),
+                      TimeEditor(
+                        label: S.of(context).correctBreakTime,
+                        initTime: employeeBreak.start,
+                        onChanged: (v){
+                          _setState(() { newBreak.start = v;});
+                        },
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        key: Key('break_length_input_${newBreak.id}'),
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: "${S.of(context).length} (m)",
+                            alignLabelWithHint: true
+                        ),
+                        keyboardType: TextInputType.number,
+                        controller: _length,
+                        onChanged: (v){
+                          _setState(() {
+                            try{
+                              newBreak.length = int.parse(v);
+                              errorMessage = null;
+                            }catch(e){
+                              errorMessage = S.of(context).invalidBreakLength;
+                              newBreak.length = 0;
+                            }
+                          });
+                        },
+                      ),
+                      SizedBox(height: 8,),
+                      TextField(
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            isDense: true,
+                            labelText: S.of(context).description,
+                            alignLabelWithHint: true,
+                            errorText: errorMessage
+                        ),
+                        minLines: 3,
+                        maxLines: null,
+                        onChanged: (v){
+                          _setState(() { description = v;});
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: ()async{
+                      if(!_isSending && newBreak.start != null){
+                        if(description.isEmpty){
+                          _setState(() {
+                            errorMessage = S.of(context).youMustWriteDescription;
+                          });
+                          return;
+                        }
+                        if(newBreak.length == 0){
+                          _setState(() {
+                            errorMessage = S.of(context).breakLengthCanNotBeZero;
+                          });
+                          return;
+                        }
+                        _setState(() { _isSending=true; });
+                        await _sendBreakRevisionRequest(employeeBreak, newBreak, description);
+                        Navigator.pop(_context);
+                      }
+                    },
+                    child: _isSending
+                        ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
+                        :Text(S.of(context).submit,style: TextStyle(color: Colors.red),),
+                  ),
+                ],
+              );
+            }
+          ),
+        )
+    );
+  }
+
+  _showWorkRevisionDialog(WorkHistory work){
+    bool _isSending = false;
+    WorkHistory newWork = WorkHistory.fromJson(work.toJson());
+    String description = '';
+    String? errorMessage;
+
+    showDialog(
+        context: context,
+        builder:(_)=> WillPopScope(
+          onWillPop: ()async{
+            return !_isSending;
+          },
+          child: StatefulBuilder(
+              builder: (BuildContext _context, StateSetter _setState){
+                return AlertDialog(
+                  contentPadding: EdgeInsets.zero,
+                  insetPadding: EdgeInsets.zero,
+                  scrollable: true,
+                  content: Container(
                     width: MediaQuery.of(context).size.width-50,
                     padding: EdgeInsets.all(8),
                     child: Column(
@@ -291,174 +432,159 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Center(child: Text(S.of(context).hourRevisionRequest,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),)),
-                        SizedBox(height: 8,),
-                        Text(S.of(context).project,style: TextStyle(fontSize: 12),),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black54),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                          clipBehavior: Clip.hardEdge,
-                          margin: EdgeInsets.only(top: 4),
-                          child: DropdownButton<Project>(
-                            items: projects.map((Project value) {
-                              return DropdownMenuItem<Project>(
-                                value: value,
-                                child: Text(value.name,style: TextStyle(fontSize: 18),),
-                              );
-                            }).toList(),
-                            value: project,
-                            isExpanded: true,
-                            isDense: true,
-                            underline: SizedBox(),
-                            onChanged: (v) {
-                              _setState((){
-                                project = v;
-                              });
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 8,),
-                        Text(S.of(context).activity,style: TextStyle(fontSize: 12),),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black54),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 16.0,vertical: 4),
-                          clipBehavior: Clip.hardEdge,
-                          margin: EdgeInsets.only(top: 4),
-                          child: DropdownButton<ScheduleTask>(
-                            items:tasks.map((ScheduleTask value) {
-                              return DropdownMenuItem<ScheduleTask>(
-                                value: value,
-                                child: Text(value.name,style: TextStyle(fontSize: 18),),
-                              );
-                            }).toList(),
-                            value: task,
-                            isExpanded: true,
-                            isDense: true,
-                            underline: SizedBox(),
-                            onChanged: (v) {
-                              _setState((){task = v;});
-                            },
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(S.of(context).startTime+' : ',style: TextStyle(fontSize: 12),),
-                            Text("${PunchDateUtils.getTimeString(DateTime.parse(startTime))}"),
-                            FlatButton(
-                                onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(startTime);
-                                  if(pickedTime!=null){
-                                    _setState(() { startTime = pickedTime.toString();});
-                                  }
+                        if(work.projectId != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 8,),
+                              Text(S.of(context).project,style: TextStyle(fontSize: 12),),
+                              ProjectPicker(
+                                projects: projects,
+                                projectId: newWork.projectId,
+                                onSelected: (v) {
+                                  _setState((){
+                                    newWork.projectId = v?.id;
+                                    newWork.projectName = v?.name;
+                                  });
                                 },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.zero,
-                                child: Icon(Icons.edit,color: Color(primaryColor))
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(S.of(context).endTime+' : ',style: TextStyle(fontSize: 12),),
-                            Text("${PunchDateUtils.getTimeString(DateTime.parse(endTime))}"),
-                            FlatButton(
-                                onPressed: ()async{
-                                  DateTime pickedTime = await _selectTime(endTime);
-                                  if(pickedTime!=null){
-                                    _setState(() { endTime = pickedTime.toString();});
-                                  }
-                                },
-                                shape: CircleBorder(),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: EdgeInsets.zero,
-                                child: Icon(Icons.edit,color: Color(primaryColor))
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20,),
-                        Center(
-                          child: MaterialButton(
-                            onPressed: task==null?null:()async{
-                              if(!_isSending){
-                                _setState(() { _isSending=true; });
-                                await sendWorkRevisionRequest(work, WorkHistory(
-                                    userId: work.userId,
-                                    taskId: task?.id,
-                                    projectId: project.id,
-                                    end: PunchDateUtils.getTimeSecondString(DateTime.parse(endTime)),
-                                    start: PunchDateUtils.getTimeSecondString(DateTime.parse(startTime)),
-                                    projectName: project.name,
-                                    taskName: task.name
-                                  )
-                                );
-                                Navigator.pop(_context);
-                              }
-                            },
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            color: Colors.black87,
-                            height: 40,
-                            minWidth: MediaQuery.of(context).size.width*0.6,
-                            child: _isSending
-                                ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator())
-                                :Text(S.of(context).submit.toUpperCase(),style: TextStyle(fontSize: 20,color: Colors.white),),
+                              ),
+                            ],
                           ),
-                        )
+                        if(work.taskId != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 6,),
+                              Text(S.of(context).task, style: TextStyle(fontSize: 12),),
+                              TaskPicker(
+                                tasks: tasks,
+                                taskId: newWork.taskId,
+                                onSelected: (v) {
+                                  _setState((){
+                                    newWork.taskId = v?.id;
+                                    newWork.taskName = v?.name;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        SizedBox(height: 12,),
+                        TimeEditor(
+                          label: S.of(context).startTime,
+                          initTime: work.start,
+                          onChanged: (v){
+                            _setState(() { newWork.start = v; });
+                          },
+                        ),
+                        SizedBox(height: 12,),
+                        TimeEditor(
+                          label: S.of(context).endTime,
+                          initTime: work.end,
+                          onChanged: (v){
+                            _setState(() { newWork.end = v; });
+                          },
+                        ),
+                        SizedBox(height: 8,),
+                        TextField(
+                          decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                              labelText: S.of(context).description,
+                              alignLabelWithHint: true,
+                              errorText: errorMessage
+                          ),
+                          minLines: 3,
+                          maxLines: null,
+                          onChanged: (v){
+                            _setState(() {description = v;});
+                          },
+                        ),
                       ],
                     ),
-                  );
-                }
-            ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: ()async{
+                        if(!_isSending && newWork.start != null && newWork.end != null){
+                          if(description.isNotEmpty){
+                            _setState(() { _isSending=true; });
+                            await _sendWorkRevisionRequest(work, newWork, description);
+                            Navigator.pop(_context);
+                          }else{
+                            _setState(() { errorMessage = S.of(context).youMustWriteDescription; });
+                          }
+                        }
+                      },
+                      child: _isSending
+                          ?SizedBox(height: 25,width: 25,child: CircularProgressIndicator(strokeWidth: 2,))
+                          :Text(S.of(context).submit,style: TextStyle(color: Colors.red),),
+                    )
+                  ],
+                );
+              }
           ),
         )
     );
   }
 
-  Future<DateTime> _selectTime(String createdAt)async{
-    DateTime createdDate = DateTime.parse(createdAt);
-    final TimeOfDay picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: createdDate.hour,minute: createdDate.minute),
+  _sendPunchRevisionRequest(int? punchId, String newValue, String? oldValue, String description)async{
+    String? result = await context.read<RevisionProvider>().sendPunchRevisionRequest(
+        punchId: punchId,
+        newValue: newValue,
+        oldValue:oldValue,
+        description: description
     );
-    if(picked!=null){
-      return DateTime(createdDate.year,createdDate.month,createdDate.day,picked.hour,picked.minute,createdDate.second);
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
     }
-    return null;
   }
 
-  sendPunchRevisionRequest(int punchId, String newValue, String oldValue)async{
-    String result = await context.read<RevisionModel>().sendPunchRevisionRequest(punchId: punchId,newValue: newValue, oldValue:oldValue);
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(result)));
+  _sendBreakRevisionRequest(EmployeeBreak oldBreak, EmployeeBreak newBreak, String description)async{
+    String? result = await context.read<RevisionProvider>().sendBreakRevisionRequest(
+        oldBreak: oldBreak,
+        newBreak:newBreak,
+        description: description
+    );
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
+    }
   }
 
-  sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork)async{
-    String result = await context.read<RevisionModel>().sendWorkRevisionRequest(newWork: newWork, oldWork: oldWork);
-    Scaffold.of(context).showSnackBar(SnackBar(content: Text(result)));
+  _sendWorkRevisionRequest(WorkHistory oldWork, WorkHistory newWork, String description)async{
+    String? result = await context.read<RevisionProvider>().sendWorkRevisionRequest(
+        newWork: newWork,
+        oldWork: oldWork,
+        description: description
+    );
+    if(result != null){
+      Tools.showErrorMessage(context, result);
+    }else{
+      Tools.showSuccessMessage(context, S.of(context).revisionHasBeenSent);
+    }
   }
 
   void _onRefresh() async{
-    await context.read<UserModel>().getUserPunches();
-    await context.read<UserModel>().getUserWorkHistory();
-    selectedPunches = user.getPunchesGroupOfWeek(startOfWeek);
-    _refreshController.refreshCompleted();
-    if(mounted)setState(() {});
+    try{
+      await context.read<UserProvider>().getUserTimeSheetData(startOfWeek);
+      selectedPunches = user!.getPunchesGroupOfWeek(startOfWeek);
+      _refreshController.refreshCompleted();
+      if(mounted)setState(() {});
+    }catch(e){
+      Tools.consoleLog('[EmployeeTimeSheet._onRefresh]$e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
-    Punch currentPunch = user.getTodayPunch();
-    projects = context.watch<WorkModel>().projects;
-    tasks = context.watch<WorkModel>().tasks;
+    Punch? currentPunch = user!.getTodayPunch();
+    projects = context.watch<WorkProvider>().projects;
+    tasks = context.watch<WorkProvider>().tasks;
 
     return Container(
       child: Column(
@@ -499,7 +625,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     child: Center(
                       child: ClipOval(
                         child: CachedNetworkImage(
-                          imageUrl: "${AppConst.domainURL}images/user_avatars/${user.avatar}",
+                          imageUrl: '${user!.avatarUrl}',
                           height: 150,
                           width: 150,
                           alignment: Alignment.center,
@@ -537,8 +663,12 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfLastWeek())}H"),
-                            Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now().subtract(Duration(days: 7)))}"),
+                            Text("${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfLastWeek())}",
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            Text("${S.of(context).week} ${PunchDateUtils.calculateCurrentWeekNumber(DateTime.now().subtract(Duration(days: 7)))}",
+                                style: TextStyle(fontSize: 12)
+                            ),
                           ],
                         ),
                       ),
@@ -554,10 +684,10 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: currentPunch!=null?Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${currentPunch.createdAt.substring(11,16)}"),
-                            Text("${currentPunch.punch} ${S.of(context).time}"),
+                            Text("${currentPunch.getTime()}",style: TextStyle(fontSize: 12, color: Colors.white)),
+                            Text("${currentPunch.punch} ${S.of(context).time}",style: TextStyle(fontSize: 12, color: Colors.white)),
                           ],
-                        ):Text(S.of(context).noPunch),
+                        ):Text(S.of(context).noPunch, style: TextStyle(fontSize: 12, color: Colors.white), textAlign: TextAlign.center,),
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -572,8 +702,8 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("${PunchDateUtils.convertHoursToString(user.getTotalHoursOfYear())}H"),
-                            Text(S.of(context).total),
+                            Text("${PunchDateUtils.convertHoursToString(context.watch<UserProvider>().yearTotalHours)}", style: TextStyle(fontSize: 12)),
+                            Text(S.of(context).total,style: TextStyle(fontSize: 12)),
                           ],
                         ),
                       ),
@@ -587,23 +717,50 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Expanded(
+                          child: Text(
+                            "${user!.getFullName()}",
+                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white),
+                          )
+                      ),
+                      Row(
                         children: [
-                          Text("${user.getFullName()}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30,color: Colors.white),),
-                          Text("${user.function??''}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18,color: Colors.white),),
+                          if(user!.isManager())
+                            InkWell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Image.asset('assets/images/ic_dashboard.png', color: Colors.white, width: 25, height: 25,)
+                                ),
+                                onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>EmployeeList()))
+                            ),
+                          if(user!.isManager())
+                            InkWell(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: Icon(Icons.settings, color: Colors.white,size: 30,),
+                                ),
+                                onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AdminSetting()))
+                            ),
+                          if(user!.isManager())
+                            InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: Icon(Icons.bug_report, color: Colors.white, size: 30,),
+                              ),
+                              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>BugReportPage()))
+                            ),
+                          InkWell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Icon(Icons.logout, color: Colors.white, size: 30,),
+                            ),
+                            onTap: ()async{
+                              await context.read<UserProvider>().logOut();
+                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                            }
+                          )
                         ],
                       ),
-                      IconButton(
-                          icon: Icon(Icons.logout),
-                          splashColor: Colors.white,
-                          padding: EdgeInsets.zero,
-                          iconSize: 35,
-                          onPressed: ()async{
-                            await context.read<UserModel>().logOut();
-                            await Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
-                          }
-                      )
                     ],
                   ),
                 ),
@@ -634,7 +791,9 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
                     weekStartsOnSunday: true,
                     selectedDate: selectedDate,
                   ),
-                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user.getTotalHoursOfWeek(startOfWeek))}H",style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text("${S.of(context).totalHours}: ${PunchDateUtils.convertHoursToString(user!.getTotalHoursOfWeek(startOfWeek))}",
+                    style: TextStyle(fontWeight: FontWeight.w500),
+                  ),
                 ],
               ),
             ),
@@ -677,7 +836,7 @@ class _EmployeeTimeSheetState extends State<EmployeeTimeSheet> {
 class TopBackgroundClipper extends CustomClipper<Rect> {
   final double width;
   final double height;
-  TopBackgroundClipper({this.width,this.height});
+  TopBackgroundClipper({required this.width ,required this.height});
   @override
   getClip(Size size) {
     var path = Rect.fromCircle(center: Offset(width/2,height) ,radius: width);

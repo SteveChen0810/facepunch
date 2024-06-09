@@ -1,12 +1,17 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/screens/home_page.dart';
-import '../models/company_model.dart';
-import '../models/user_model.dart';
-import '../screens/admin/admin_home.dart';
-import '../screens/employee/employee_home.dart';
-import '../models/app_const.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '/lang/l10n.dart';
+import '/screens/home_page.dart';
+import '/models/user_model.dart';
+import '/screens/admin/admin_home.dart';
+import '/screens/employee/employee_home.dart';
+import '/config/app_const.dart';
+import '/widgets/utils.dart';
+import '/providers/app_provider.dart';
+import '/providers/company_provider.dart';
+import '/providers/user_provider.dart';
 
 class SplashScreen extends StatefulWidget {
 
@@ -20,14 +25,24 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 2)).whenComplete(()async{
-      User user  = await context.read<UserModel>().getUserFromLocal();
-      if(user==null){
+    _init();
+  }
+
+  _init()async{
+    try{
+      final appVersions = await context.read<AppProvider>().getAppVersions();
+      if(appVersions != null){
+        if(appVersions[Platform.isAndroid?'android':'ios'] > AppConst.currentVersion){
+          await Tools.checkAppVersionDialog(context, appVersions['force']);
+        }
+      }
+      User? user  = await context.read<UserProvider>().getUserFromLocal();
+      if(user == null){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
       }else{
-        bool result = await context.read<CompanyModel>().getMyCompany(user.companyId);
+        bool result = await context.read<CompanyProvider>().getMyCompany(user.companyId);
         if(result){
-          if(user.role=="admin"){
+          if(user.isAdmin()){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>AdminHomePage()));
           }else{
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EmployeeHomePage()));
@@ -36,7 +51,10 @@ class _SplashScreenState extends State<SplashScreen> {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
         }
       }
-    });
+    }catch(e){
+      Tools.consoleLog("[SplashScreen._init.err]$e");
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+    }
   }
 
   @override
@@ -58,9 +76,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset("assets/images/logo.png",width: width/3,),
+                    Image.asset("assets/images/logo.png",width: width/3, color: Colors.white,),
                     SizedBox(width: 10,),
-                    Text("FACE\nPUNCH",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 50),)
+                    Text("FACE\nPUNCH",style: TextStyle(fontWeight: FontWeight.w500, fontSize: 50, color: Colors.white),)
                   ],
                 ),
               ),
@@ -69,7 +87,11 @@ class _SplashScreenState extends State<SplashScreen> {
                 left: 0,
                 right: 0,
                 child: Center(
-                    child: Text(S.of(context).timeSheetSystemForEmployee,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),)
+                    child: Text(
+                      S.of(context).timeSheetSystemForEmployee,
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.w500, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    )
                 ),
               )
             ],

@@ -1,17 +1,18 @@
-import 'package:facepunch/lang/l10n.dart';
+import '/lang/l10n.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'model/select_status_model.dart' as StatusModel;
 
 class SelectState extends StatefulWidget {
-  final ValueChanged<String> onCountryChanged;
-  final ValueChanged<String> onStateChanged;
-  final ValueChanged<String> onCityChanged;
-  final String initCountry;
-  final String initState;
-  final String initCity;
-  const SelectState({Key key, this.initCountry,this.initState,this.initCity, this.onCountryChanged, this.onStateChanged, this.onCityChanged}): super(key:key);
+  final ValueChanged<String?>? onCountryChanged;
+  final ValueChanged<String?>? onStateChanged;
+  final ValueChanged<String?>? onCityChanged;
+  final String? initCountry;
+  final String? initState;
+  final String? initCity;
+  final bool readOnly;
+  const SelectState({Key? key, this.initCountry, this.initState,this.initCity, this.readOnly = false, this.onCountryChanged, this.onStateChanged, this.onCityChanged}): super(key:key);
 
   @override
   _SelectStateState createState() => _SelectStateState();
@@ -21,9 +22,9 @@ class _SelectStateState extends State<SelectState> {
   List<String> _cities = [];
   List<String> _country = [];
   List<String> _flags = [];
-  String _selectedCity;
-  String _selectedCountry;
-  String _selectedState;
+  String? _selectedCity;
+  String? _selectedCountry;
+  String? _selectedState;
   List<String> _states = [];
   var responses;
 
@@ -32,11 +33,11 @@ class _SelectStateState extends State<SelectState> {
     getCounty().whenComplete((){
       setState(() {
         if(widget.initCountry!=null && _country.contains(widget.initCountry)){
-          _onSelectedCountry(widget.initCountry).whenComplete((){
+          _onSelectedCountry(widget.initCountry!).whenComplete((){
             if(widget.initState!=null && _states.contains(widget.initState)){
-              _onSelectedState(widget.initState).whenComplete((){
+              _onSelectedState(widget.initState!).whenComplete((){
                 if(widget.initCity!=null && _cities.contains(widget.initCity)){
-                  _onSelectedCity(widget.initCity);
+                  _onSelectedCity(widget.initCity!);
                 }
               });
             }
@@ -61,11 +62,12 @@ class _SelectStateState extends State<SelectState> {
      var model = StatusModel.StatusModel();
      model.name = data['name'];
      model.emoji = data['emoji'];
-      setState(() {
-      _country.add(model.name);
-      _flags.add(model.emoji);
-      // _country..addAll(takecountry2);
-    });
+     if(model.name != null && model.emoji != null){
+       setState(() {
+         _country.add(model.name!);
+         _flags.add(model.emoji!);
+       });
+     }
    });
    
     return _country;
@@ -114,33 +116,31 @@ class _SelectStateState extends State<SelectState> {
     return _cities;
   }
 
-  Future _onSelectedCountry(String value) async{
+  Future _onSelectedCountry(String? value) async{
     setState(() {
       _selectedState = null;
       _states = [];
       _selectedCountry = value;
-      this.widget.onCountryChanged(value);
+      this.widget.onCountryChanged!(value);
     });
     await getState();
   }
 
-  Future _onSelectedState(String value) async{
+  Future _onSelectedState(String? value) async{
     setState(() {
       _selectedCity = null;
       _cities = [];
       _selectedState = value;
-       this.widget.onStateChanged(value);
+       this.widget.onStateChanged!(value);
     });
     await getCity();
-    print(_selectedState);
   }
 
-  void _onSelectedCity(String value) {
+  void _onSelectedCity(String? value) {
     setState(() {
       _selectedCity = value;
-       this.widget.onCityChanged(value);
+       this.widget.onCityChanged!(value);
     });
-    print(_selectedCity);
   }
 
   @override
@@ -164,9 +164,10 @@ class _SelectStateState extends State<SelectState> {
                     );
                   }).toList(),
                   underline: Container(color: Colors.black,width: double.infinity,height: 1,),
-                  onChanged: (value) => _onSelectedCountry(value),
+                  onChanged: widget.readOnly ? null : (value) => _onSelectedCountry(value),
                   hint: Text(S.of(context).country),
                   value: _selectedCountry,
+                  disabledHint: Text('$_selectedCountry'),
                 ),
               ),
               Flexible(
@@ -180,8 +181,9 @@ class _SelectStateState extends State<SelectState> {
                   }).toList(),
                   underline: Container(color: Colors.black,width: double.infinity,height: 1,),
                   hint: Text(S.of(context).state),
-                  onChanged: (value) => _onSelectedState(value),
+                  onChanged: widget.readOnly? null : (value) => _onSelectedState(value),
                   value: _selectedState,
+                  disabledHint: _selectedState != null ? Text('$_selectedState'):null,
                 ),
               ),
             ],
@@ -196,8 +198,9 @@ class _SelectStateState extends State<SelectState> {
           }).toList(),
           hint: Text(S.of(context).city),
           underline: Container(color: Colors.black,width: double.infinity,height: 1,),
-          onChanged: (value) => _onSelectedCity(value),
+          onChanged: widget.readOnly? null : (value) => _onSelectedCity(value),
           value: _selectedCity,
+          disabledHint: _selectedCity != null ? Text('$_selectedCity'):null,
         ),
       ],
     );

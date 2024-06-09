@@ -1,10 +1,10 @@
-import 'package:facepunch/lang/l10n.dart';
-import 'package:facepunch/models/app_const.dart';
-
-import '../../../models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '/providers/user_provider.dart';
+import '/lang/l10n.dart';
+import '/config/app_const.dart';
+import '/widgets/utils.dart';
 
 class RecoveryPasswordScreen extends StatefulWidget{
 
@@ -14,8 +14,6 @@ class RecoveryPasswordScreen extends StatefulWidget{
 
 class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
 
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TextEditingController controller = TextEditingController(text: "");
   bool isLoading = false;
 
@@ -24,20 +22,20 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
       FocusScope.of(context).requestFocus(FocusNode());
       if(controller.text.contains("@") & controller.text.contains(".")){
         setState(() { isLoading = true;});
-        String result = await context.read<UserModel>().recoverPassword(controller.text);
+        String? result = await context.read<UserProvider>().recoverPassword(controller.text);
         setState(() { isLoading = false;});
-        if(result!=null){showMessage(result);}
+        if(result != null){showMessage(result);}
       }else{
         showMessage("Email is invalid.");
       }
     }catch(e){
-      print("[RecoveryPasswordScreen.recoveryPassword]");
+      Tools.consoleLog("[RecoveryPasswordScreen.recoveryPassword.err]$e");
     }
   }
 
   showMessage(String message){
-    _scaffoldKey.currentState.hideCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
@@ -48,7 +46,6 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(S.of(context).facePunch,style: TextStyle(color: Colors.black87,fontSize: 30,fontWeight: FontWeight.bold),),
         backgroundColor: Color(primaryColor),
@@ -109,21 +106,19 @@ class _RecoveryPasswordScreenState extends State<RecoveryPasswordScreen> {
                 ),
               ),
               SizedBox(height: 20,),
-              ButtonTheme(
+              MaterialButton(
                 minWidth: MediaQuery.of(context).size.width-60,
                 padding: EdgeInsets.all(8),
-                child: RaisedButton(
-                  child: isLoading?SizedBox(
-                      height: 28,
-                      width: 28,
-                      child: CircularProgressIndicator(backgroundColor: Colors.white,)
-                  ):Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(S.of(context).done.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
-                  ),
-                  onPressed: recoveryPassword,
-                  color: Colors.red,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                color: Colors.red,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                onPressed: recoveryPassword,
+                child: isLoading?SizedBox(
+                    height: 28,
+                    width: 28,
+                    child: CircularProgressIndicator(backgroundColor: Colors.white,)
+                ):Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Text(S.of(context).done.toUpperCase(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: Colors.white),),
                 ),
               ),
               SizedBox(height: 10,),
